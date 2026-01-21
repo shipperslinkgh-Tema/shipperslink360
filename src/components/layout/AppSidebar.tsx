@@ -57,7 +57,7 @@ const navigation: NavItem[] = [
     children: [
       { title: "ICUMS Declarations", href: "/customs/icums" },
       { title: "GPHA Status", href: "/customs/gpha" },
-      { title: "Delivery Orders", href: "/customs/delivery-orders" },
+      { title: "Shipping Lines", href: "/shipping-lines" },
     ],
   },
   { title: "Warehousing", icon: Warehouse, href: "/warehouse" },

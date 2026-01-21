@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Shipments from "./pages/Shipments";
 import ICUMSDeclarations from "./pages/ICUMSDeclarations";
+import ShippingLineStatus from "./pages/ShippingLineStatus";
 import { AppLayout } from "./components/layout/AppLayout";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,14 @@ const App = () => (
             element={
               <WithLayout>
                 <ICUMSDeclarations />
+              </WithLayout>
+            }
+          />
+          <Route
+            path="/shipping-lines"
+            element={
+              <WithLayout>
+                <ShippingLineStatus />
               </WithLayout>
             }
           />
