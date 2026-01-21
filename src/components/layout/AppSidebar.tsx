@@ -1,0 +1,229 @@
+import { useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Ship,
+  Plane,
+  Truck,
+  Package,
+  Warehouse,
+  FileText,
+  DollarSign,
+  Settings,
+  Bell,
+  Users,
+  ChevronDown,
+  ChevronRight,
+  Container,
+  FileCheck,
+  Anchor,
+  Globe,
+  BarChart3,
+  Menu,
+  X,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface NavItem {
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  href?: string;
+  children?: { title: string; href: string }[];
+}
+
+const navigation: NavItem[] = [
+  { title: "Dashboard", icon: LayoutDashboard, href: "/" },
+  {
+    title: "Shipments",
+    icon: Package,
+    children: [
+      { title: "All Shipments", href: "/shipments" },
+      { title: "Sea Freight", href: "/shipments/sea" },
+      { title: "Air Freight", href: "/shipments/air" },
+      { title: "Road Transport", href: "/shipments/road" },
+    ],
+  },
+  {
+    title: "Consolidation",
+    icon: Container,
+    children: [
+      { title: "LCL Consolidation", href: "/consolidation/lcl" },
+      { title: "Air Consolidation", href: "/consolidation/air" },
+    ],
+  },
+  {
+    title: "Customs & Ports",
+    icon: FileCheck,
+    children: [
+      { title: "ICUMS Declarations", href: "/customs/icums" },
+      { title: "GPHA Status", href: "/customs/gpha" },
+      { title: "Delivery Orders", href: "/customs/delivery-orders" },
+    ],
+  },
+  { title: "Warehousing", icon: Warehouse, href: "/warehouse" },
+  { title: "Trucking", icon: Truck, href: "/trucking" },
+  {
+    title: "Finance",
+    icon: DollarSign,
+    children: [
+      { title: "Invoices", href: "/finance/invoices" },
+      { title: "Payments", href: "/finance/payments" },
+      { title: "P&L Reports", href: "/finance/reports" },
+    ],
+  },
+  { title: "Reports", icon: BarChart3, href: "/reports" },
+  { title: "Customers", icon: Users, href: "/customers" },
+];
+
+const bottomNav: NavItem[] = [
+  { title: "Notifications", icon: Bell, href: "/notifications" },
+  { title: "Settings", icon: Settings, href: "/settings" },
+];
+
+export function AppSidebar() {
+  const location = useLocation();
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Shipments", "Customs & Ports"]);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const toggleExpand = (title: string) => {
+    setExpandedItems((prev) =>
+      prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]
+    );
+  };
+
+  const isActive = (href: string) => location.pathname === href;
+  const isChildActive = (children: { href: string }[]) =>
+    children.some((child) => location.pathname === child.href);
+
+  return (
+    <aside
+      className={cn(
+        "fixed left-0 top-0 z-40 h-screen bg-sidebar transition-all duration-300 flex flex-col",
+        isCollapsed ? "w-16" : "w-64"
+      )}
+    >
+      {/* Header */}
+      <div className="flex h-16 items-center justify-between px-4 border-b border-sidebar-border">
+        {!isCollapsed && (
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary">
+              <Ship className="h-5 w-5 text-sidebar-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="text-sm font-semibold text-sidebar-foreground">SLAC</h1>
+              <p className="text-xs text-sidebar-muted">Operations</p>
+            </div>
+          </div>
+        )}
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="p-2 rounded-lg hover:bg-sidebar-accent text-sidebar-muted hover:text-sidebar-foreground transition-colors"
+        >
+          {isCollapsed ? <Menu className="h-5 w-5" /> : <X className="h-5 w-5" />}
+        </button>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto py-4 px-3">
+        <ul className="space-y-1">
+          {navigation.map((item) => (
+            <li key={item.title}>
+              {item.href ? (
+                <NavLink
+                  to={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
+                    isActive(item.href)
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                      : "text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  )}
+                >
+                  <item.icon className="h-5 w-5 flex-shrink-0" />
+                  {!isCollapsed && <span>{item.title}</span>}
+                </NavLink>
+              ) : (
+                <>
+                  <button
+                    onClick={() => toggleExpand(item.title)}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
+                      item.children && isChildActive(item.children)
+                        ? "bg-sidebar-accent text-sidebar-foreground"
+                        : "text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                    )}
+                  >
+                    <item.icon className="h-5 w-5 flex-shrink-0" />
+                    {!isCollapsed && (
+                      <>
+                        <span className="flex-1 text-left">{item.title}</span>
+                        {expandedItems.includes(item.title) ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
+                      </>
+                    )}
+                  </button>
+                  {!isCollapsed && expandedItems.includes(item.title) && item.children && (
+                    <ul className="mt-1 space-y-1 pl-10">
+                      {item.children.map((child) => (
+                        <li key={child.href}>
+                          <NavLink
+                            to={child.href}
+                            className={cn(
+                              "block rounded-lg px-3 py-2 text-sm transition-all",
+                              isActive(child.href)
+                                ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                                : "text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                            )}
+                          >
+                            {child.title}
+                          </NavLink>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      {/* Bottom navigation */}
+      <div className="border-t border-sidebar-border p-3">
+        <ul className="space-y-1">
+          {bottomNav.map((item) => (
+            <li key={item.title}>
+              <NavLink
+                to={item.href!}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
+                  isActive(item.href!)
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                    : "text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                )}
+              >
+                <item.icon className="h-5 w-5 flex-shrink-0" />
+                {!isCollapsed && <span>{item.title}</span>}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+
+        {/* User */}
+        {!isCollapsed && (
+          <div className="mt-4 flex items-center gap-3 rounded-lg bg-sidebar-accent p-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground font-semibold text-sm">
+              AK
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-sidebar-foreground truncate">Akua Mensah</p>
+              <p className="text-xs text-sidebar-muted truncate">Operations Lead</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </aside>
+  );
+}
