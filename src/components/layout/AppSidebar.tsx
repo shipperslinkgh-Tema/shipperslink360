@@ -34,21 +34,13 @@ interface NavItem {
 const navigation: NavItem[] = [
   { title: "Dashboard", icon: LayoutDashboard, href: "/" },
   {
-    title: "Shipments",
+    title: "Operations",
     icon: Package,
     children: [
       { title: "All Shipments", href: "/shipments" },
       { title: "Sea Freight", href: "/shipments/sea" },
       { title: "Air Freight", href: "/shipments/air" },
-      { title: "Road Transport", href: "/shipments/road" },
-    ],
-  },
-  {
-    title: "Consolidation",
-    icon: Container,
-    children: [
-      { title: "LCL Consolidation", href: "/consolidation/lcl" },
-      { title: "Air Consolidation", href: "/consolidation/air" },
+      { title: "Consolidation", href: "/consolidation" },
     ],
   },
   {
@@ -56,12 +48,18 @@ const navigation: NavItem[] = [
     icon: FileCheck,
     children: [
       { title: "ICUMS Declarations", href: "/customs/icums" },
-      { title: "GPHA Status", href: "/customs/gpha" },
-      { title: "Shipping Lines", href: "/shipping-lines" },
+      { title: "Shipping Lines / DO", href: "/shipping-lines" },
+      { title: "GPHA Port Status", href: "/customs/gpha" },
     ],
   },
-  { title: "Warehousing", icon: Warehouse, href: "/warehouse" },
-  { title: "Trucking", icon: Truck, href: "/trucking" },
+  {
+    title: "Fleet & Logistics",
+    icon: Truck,
+    children: [
+      { title: "Trucking", href: "/trucking" },
+      { title: "Warehousing", href: "/warehouse" },
+    ],
+  },
   {
     title: "Finance",
     icon: DollarSign,
@@ -71,8 +69,8 @@ const navigation: NavItem[] = [
       { title: "P&L Reports", href: "/finance/reports" },
     ],
   },
-  { title: "Reports", icon: BarChart3, href: "/reports" },
   { title: "Customers", icon: Users, href: "/customers" },
+  { title: "Reports", icon: BarChart3, href: "/reports" },
 ];
 
 const bottomNav: NavItem[] = [
@@ -82,7 +80,7 @@ const bottomNav: NavItem[] = [
 
 export function AppSidebar() {
   const location = useLocation();
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Shipments", "Customs & Ports"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Operations", "Customs & Ports"]);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const toggleExpand = (title: string) => {
