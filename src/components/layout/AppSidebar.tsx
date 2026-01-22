@@ -213,10 +213,10 @@ export function AppSidebar() {
         {!isCollapsed && (
           <div className="mt-4 flex items-center gap-3 rounded-lg bg-sidebar-accent p-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground font-semibold text-sm">
-              AK
+              NAS
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-sidebar-foreground truncate">Akua Mensah</p>
+              <p className="text-sm font-medium text-sidebar-foreground truncate">Nana Akuoko Sarpong</p>
               <p className="text-xs text-sidebar-muted truncate">Operations Lead</p>
             </div>
           </div>
