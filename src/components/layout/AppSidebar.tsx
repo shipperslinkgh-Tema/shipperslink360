@@ -21,7 +21,18 @@ import {
   BarChart3,
   Menu,
   X,
+  User,
+  LogOut,
+  Sliders,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -210,17 +221,41 @@ export function AppSidebar() {
         </ul>
 
         {/* User */}
-        {!isCollapsed && (
-          <div className="mt-4 flex items-center gap-3 rounded-lg bg-sidebar-accent p-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground font-semibold text-sm">
-              NAS
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-sidebar-foreground truncate">Nana Akuoko Sarpong</p>
-              <p className="text-xs text-sidebar-muted truncate">Operations Lead</p>
-            </div>
-          </div>
-        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className={cn(
+              "mt-4 flex items-center gap-3 rounded-lg bg-sidebar-accent p-3 w-full hover:bg-sidebar-accent/80 transition-colors text-left",
+              isCollapsed && "justify-center"
+            )}>
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground font-semibold text-sm flex-shrink-0">
+                NAS
+              </div>
+              {!isCollapsed && (
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-sidebar-foreground truncate">Nana Akuoko Sarpong</p>
+                  <p className="text-xs text-sidebar-muted truncate">Operations Lead</p>
+                </div>
+              )}
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="start" className="w-56 bg-popover">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="cursor-pointer">
+              <User className="mr-2 h-4 w-4" />
+              Profile Settings
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer">
+              <Sliders className="mr-2 h-4 w-4" />
+              Preferences
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </aside>
   );
