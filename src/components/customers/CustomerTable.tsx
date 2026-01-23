@@ -43,6 +43,7 @@ export function CustomerTable({ customers, onViewCustomer }: CustomerTableProps)
       <TableHeader>
         <TableRow>
           <TableHead>Company</TableHead>
+          <TableHead>TIN Number</TableHead>
           <TableHead>Contact</TableHead>
           <TableHead>Type</TableHead>
           <TableHead>Shipments</TableHead>
@@ -67,6 +68,9 @@ export function CustomerTable({ customers, onViewCustomer }: CustomerTableProps)
                   <p className="text-xs text-muted-foreground">{customer.city}, {customer.country}</p>
                 </div>
               </div>
+            </TableCell>
+            <TableCell>
+              <span className="font-mono text-sm">{customer.tinNumber}</span>
             </TableCell>
             <TableCell>
               <div className="space-y-1">
