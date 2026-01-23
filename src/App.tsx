@@ -10,6 +10,7 @@ import ICUMSDeclarations from "./pages/ICUMSDeclarations";
 import ShippingLineStatus from "./pages/ShippingLineStatus";
 import Trucking from "./pages/Trucking";
 import Customers from "./pages/Customers";
+import Finance from "./pages/Finance";
 import { AppLayout } from "./components/layout/AppLayout";
 
 const queryClient = new QueryClient();
@@ -72,6 +73,14 @@ const App = () => (
             element={
               <WithLayout>
                 <Customers />
+              </WithLayout>
+            }
+          />
+          <Route
+            path="/finance/*"
+            element={
+              <WithLayout>
+                <Finance />
               </WithLayout>
             }
           />
