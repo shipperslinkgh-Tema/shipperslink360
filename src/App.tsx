@@ -9,6 +9,7 @@ import Shipments from "./pages/Shipments";
 import ICUMSDeclarations from "./pages/ICUMSDeclarations";
 import ShippingLineStatus from "./pages/ShippingLineStatus";
 import Trucking from "./pages/Trucking";
+import Customers from "./pages/Customers";
 import { AppLayout } from "./components/layout/AppLayout";
 
 const queryClient = new QueryClient();
@@ -63,6 +64,14 @@ const App = () => (
             element={
               <WithLayout>
                 <Trucking />
+              </WithLayout>
+            }
+          />
+          <Route
+            path="/customers"
+            element={
+              <WithLayout>
+                <Customers />
               </WithLayout>
             }
           />
