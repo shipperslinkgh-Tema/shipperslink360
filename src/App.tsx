@@ -11,6 +11,7 @@ import ShippingLineStatus from "./pages/ShippingLineStatus";
 import Trucking from "./pages/Trucking";
 import Customers from "./pages/Customers";
 import Finance from "./pages/Finance";
+import Presentation from "./pages/Presentation";
 import { AppLayout } from "./components/layout/AppLayout";
 
 const queryClient = new QueryClient();
@@ -84,6 +85,7 @@ const App = () => (
               </WithLayout>
             }
           />
+          <Route path="/presentation" element={<Presentation />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
