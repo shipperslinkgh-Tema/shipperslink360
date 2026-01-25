@@ -24,6 +24,7 @@ import {
   User,
   LogOut,
   Sliders,
+  BookOpen,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -85,6 +86,7 @@ const navigation: NavItem[] = [
 ];
 
 const bottomNav: NavItem[] = [
+  { title: "Software Guide", icon: BookOpen, href: "/presentation" },
   { title: "Notifications", icon: Bell, href: "/notifications" },
   { title: "Settings", icon: Settings, href: "/settings" },
 ];
