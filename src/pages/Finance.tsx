@@ -10,70 +10,82 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FinanceStats } from "@/components/finance/FinanceStats";
+import { FinanceDashboard } from "@/components/finance/FinanceDashboard";
+import { EnhancedInvoicesTable } from "@/components/finance/EnhancedInvoicesTable";
+import { JobCostingTable } from "@/components/finance/JobCostingTable";
+import { PayablesTable } from "@/components/finance/PayablesTable";
+import { ReceivablesTable } from "@/components/finance/ReceivablesTable";
+import { CreditControlTable } from "@/components/finance/CreditControlTable";
 import { AccountsTable } from "@/components/finance/AccountsTable";
-import { ExpensesTable } from "@/components/finance/ExpensesTable";
 import { TaxFilingTable } from "@/components/finance/TaxFilingTable";
-import { InvoicesTable } from "@/components/finance/InvoicesTable";
-import { invoices, payments, officeAccounts, officeExpenses, taxFilings } from "@/data/financeData";
-import { Plus, Search, Download, Filter, Wallet, FileText, Receipt, Calculator } from "lucide-react";
+import {
+  invoices,
+  payments,
+  officeAccounts,
+  taxFilings,
+  jobProfitability,
+  payables,
+  receivables,
+  agingSummary,
+  customerCredits,
+  dashboardMetrics,
+} from "@/data/financeData";
+import {
+  Plus,
+  Search,
+  Download,
+  Filter,
+  LayoutDashboard,
+  FileText,
+  Receipt,
+  Wallet,
+  CreditCard,
+  TrendingUp,
+  Calculator,
+  Users,
+} from "lucide-react";
 
 const Finance = () => {
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
-  const [expenseStatusFilter, setExpenseStatusFilter] = useState<string>("all");
+  const [invoiceTypeFilter, setInvoiceTypeFilter] = useState<string>("all");
   const [invoiceStatusFilter, setInvoiceStatusFilter] = useState<string>("all");
-
-  const stats = useMemo(() => {
-    const totalRevenue = payments
-      .filter((p) => p.type === "incoming" && p.status === "completed")
-      .reduce((acc, p) => acc + p.amount, 0);
-
-    const totalExpenses = payments
-      .filter((p) => p.type === "outgoing" && p.status === "completed")
-      .reduce((acc, p) => acc + p.amount, 0);
-
-    const pendingInvoices = invoices
-      .filter((i) => i.status === "sent" || i.status === "overdue")
-      .reduce((acc, i) => acc + i.totalAmount, 0);
-
-    const pendingTaxes = taxFilings
-      .filter((t) => t.status === "pending" || t.status === "overdue")
-      .reduce((acc, t) => acc + t.amount, 0);
-
-    return { totalRevenue, totalExpenses, pendingInvoices, pendingTaxes };
-  }, []);
-
-  const filteredExpenses = useMemo(() => {
-    return officeExpenses.filter((expense) => {
-      const matchesSearch = expense.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        expense.expenseRef.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = expenseStatusFilter === "all" || expense.status === expenseStatusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [searchTerm, expenseStatusFilter]);
+  const [payableStatusFilter, setPayableStatusFilter] = useState<string>("all");
 
   const filteredInvoices = useMemo(() => {
     return invoices.filter((invoice) => {
-      const matchesSearch = invoice.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = invoiceStatusFilter === "all" || invoice.status === invoiceStatusFilter;
+      const matchesSearch =
+        invoice.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (invoice.jobRef?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
+      const matchesType =
+        invoiceTypeFilter === "all" || invoice.invoiceType === invoiceTypeFilter;
+      const matchesStatus =
+        invoiceStatusFilter === "all" || invoice.status === invoiceStatusFilter;
+      return matchesSearch && matchesType && matchesStatus;
+    });
+  }, [searchTerm, invoiceTypeFilter, invoiceStatusFilter]);
+
+  const filteredPayables = useMemo(() => {
+    return payables.filter((payable) => {
+      const matchesSearch =
+        payable.vendor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        payable.payableRef.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus =
+        payableStatusFilter === "all" || payable.status === payableStatusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [searchTerm, invoiceStatusFilter]);
-
-  const totalAccountBalance = useMemo(() => {
-    return officeAccounts
-      .filter((a) => a.currency === "GHS" && a.status === "active")
-      .reduce((acc, a) => acc + a.balance, 0);
-  }, []);
+  }, [searchTerm, payableStatusFilter]);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Finance</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Finance & Accounting
+          </h1>
           <p className="text-muted-foreground">
-            Manage invoices, payments, accounts, and tax compliance
+            Integrated financial management for logistics operations
           </p>
         </div>
         <div className="flex gap-2">
@@ -83,71 +95,82 @@ const Finance = () => {
           </Button>
           <Button>
             <Plus className="h-4 w-4 mr-2" />
-            New Transaction
+            New Invoice
           </Button>
         </div>
       </div>
 
-      <FinanceStats {...stats} />
-
-      <Tabs defaultValue="accounts" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="flex flex-wrap h-auto gap-1 bg-muted p-1">
+          <TabsTrigger value="dashboard" className="gap-2">
+            <LayoutDashboard className="h-4 w-4" />
+            <span className="hidden sm:inline">Dashboard</span>
+          </TabsTrigger>
+          <TabsTrigger value="invoices" className="gap-2">
+            <FileText className="h-4 w-4" />
+            <span className="hidden sm:inline">Invoicing</span>
+          </TabsTrigger>
+          <TabsTrigger value="job-costing" className="gap-2">
+            <TrendingUp className="h-4 w-4" />
+            <span className="hidden sm:inline">Job P&L</span>
+          </TabsTrigger>
+          <TabsTrigger value="payables" className="gap-2">
+            <Receipt className="h-4 w-4" />
+            <span className="hidden sm:inline">Payables</span>
+          </TabsTrigger>
+          <TabsTrigger value="receivables" className="gap-2">
+            <CreditCard className="h-4 w-4" />
+            <span className="hidden sm:inline">Receivables</span>
+          </TabsTrigger>
+          <TabsTrigger value="credit" className="gap-2">
+            <Users className="h-4 w-4" />
+            <span className="hidden sm:inline">Credit Control</span>
+          </TabsTrigger>
           <TabsTrigger value="accounts" className="gap-2">
             <Wallet className="h-4 w-4" />
             <span className="hidden sm:inline">Accounts</span>
           </TabsTrigger>
-          <TabsTrigger value="invoices" className="gap-2">
-            <FileText className="h-4 w-4" />
-            <span className="hidden sm:inline">Invoices</span>
-          </TabsTrigger>
-          <TabsTrigger value="expenses" className="gap-2">
-            <Receipt className="h-4 w-4" />
-            <span className="hidden sm:inline">Expenses</span>
-          </TabsTrigger>
           <TabsTrigger value="taxes" className="gap-2">
             <Calculator className="h-4 w-4" />
-            <span className="hidden sm:inline">Tax Filings</span>
+            <span className="hidden sm:inline">Taxes</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="accounts">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Office Accounts</CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Total GHS Balance: <span className="font-semibold text-foreground">
-                    GH₵ {totalAccountBalance.toLocaleString()}
-                  </span>
-                </p>
-              </div>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Account
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <AccountsTable accounts={officeAccounts} />
-            </CardContent>
-          </Card>
+        <TabsContent value="dashboard">
+          <FinanceDashboard metrics={dashboardMetrics} agingSummary={agingSummary} />
         </TabsContent>
 
         <TabsContent value="invoices">
           <Card>
             <CardHeader>
-              <CardTitle>Invoices</CardTitle>
+              <CardTitle>Invoicing</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Manage proforma, commercial invoices, and credit/debit notes
+              </p>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col sm:flex-row gap-4 mb-6">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search by invoice number or customer..."
+                    placeholder="Search by invoice, customer, or job..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-9"
                   />
                 </div>
+                <Select value={invoiceTypeFilter} onValueChange={setInvoiceTypeFilter}>
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="proforma">Proforma</SelectItem>
+                    <SelectItem value="commercial">Commercial</SelectItem>
+                    <SelectItem value="credit_note">Credit Note</SelectItem>
+                    <SelectItem value="debit_note">Debit Note</SelectItem>
+                  </SelectContent>
+                </Select>
                 <Select value={invoiceStatusFilter} onValueChange={setInvoiceStatusFilter}>
                   <SelectTrigger className="w-[150px]">
                     <Filter className="h-4 w-4 mr-2" />
@@ -161,33 +184,46 @@ const Finance = () => {
                     <SelectItem value="overdue">Overdue</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Invoice
-                </Button>
               </div>
-              <InvoicesTable invoices={filteredInvoices} />
+              <EnhancedInvoicesTable invoices={filteredInvoices} />
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="expenses">
+        <TabsContent value="job-costing">
           <Card>
             <CardHeader>
-              <CardTitle>Office Expenses</CardTitle>
+              <CardTitle>Job Profitability & Costing</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Track revenue, costs, and margins per shipment or consolidation
+              </p>
+            </CardHeader>
+            <CardContent>
+              <JobCostingTable jobs={jobProfitability} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="payables">
+          <Card>
+            <CardHeader>
+              <CardTitle>Accounts Payable</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Manage vendor payments for shipping lines, customs, GPHA, and transport
+              </p>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col sm:flex-row gap-4 mb-6">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search expenses..."
+                    placeholder="Search vendors..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-9"
                   />
                 </div>
-                <Select value={expenseStatusFilter} onValueChange={setExpenseStatusFilter}>
+                <Select value={payableStatusFilter} onValueChange={setPayableStatusFilter}>
                   <SelectTrigger className="w-[150px]">
                     <Filter className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Status" />
@@ -197,32 +233,61 @@ const Finance = () => {
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="approved">Approved</SelectItem>
                     <SelectItem value="paid">Paid</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
-                  New Expense
+                  Add Payable
                 </Button>
               </div>
-              <ExpensesTable expenses={filteredExpenses} />
+              <PayablesTable payables={filteredPayables} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="receivables">
+          <Card>
+            <CardHeader>
+              <CardTitle>Accounts Receivable & Aging</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Track outstanding invoices and aging analysis
+              </p>
+            </CardHeader>
+            <CardContent>
+              <ReceivablesTable receivables={receivables} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="credit">
+          <Card>
+            <CardHeader>
+              <CardTitle>Credit Control</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Manage customer credit limits and payment history
+              </p>
+            </CardHeader>
+            <CardContent>
+              <CreditControlTable credits={customerCredits} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="accounts">
+          <Card>
+            <CardHeader>
+              <CardTitle>Office Accounts</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AccountsTable accounts={officeAccounts} />
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="taxes">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Tax Filings & Compliance</CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Track VAT, PAYE, corporate taxes, and customs duties
-                </p>
-              </div>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                New Filing
-              </Button>
+            <CardHeader>
+              <CardTitle>Tax Filings & Compliance</CardTitle>
             </CardHeader>
             <CardContent>
               <TaxFilingTable filings={taxFilings} />
