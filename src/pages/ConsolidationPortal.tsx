@@ -7,7 +7,6 @@ import { ConsolidationStats } from "@/components/consolidation/ConsolidationStat
 import { ConsolidationTable } from "@/components/consolidation/ConsolidationTable";
 import { ConsolidationDetailPanel } from "@/components/consolidation/ConsolidationDetailPanel";
 import { NewConsolidationForm } from "@/components/consolidation/NewConsolidationForm";
-import { InternalChatBox } from "@/components/chat/InternalChatBox";
 import { consolidations, shippers, demurrageRecords, operationalMetrics } from "@/data/consolidationData";
 import { Consolidation } from "@/types/consolidation";
 
@@ -17,7 +16,6 @@ export default function ConsolidationPortal() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedConsolidation, setSelectedConsolidation] = useState<Consolidation | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
 
   const filteredConsolidations = consolidations.filter((c) => {
     const matchesSearch = c.consolidationRef.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -127,9 +125,6 @@ export default function ConsolidationPortal() {
 
       {/* New Consolidation Form */}
       <NewConsolidationForm open={showNewForm} onOpenChange={setShowNewForm} />
-
-      {/* Internal Chat */}
-      <InternalChatBox isOpen={chatOpen} onToggle={() => setChatOpen(!chatOpen)} />
     </div>
   );
 }
