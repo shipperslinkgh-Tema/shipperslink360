@@ -121,8 +121,8 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
             <Circle className="absolute -top-0.5 -right-0.5 h-2 w-2 fill-success text-success" />
           </div>
           <div>
-            <h3 className="font-semibold text-sm">Internal Chat</h3>
-            <p className="text-xs text-muted-foreground">SLAC Operations Team</p>
+            <h3 className="font-semibold text-sm">SLAC Messenger</h3>
+            <p className="text-xs text-muted-foreground">Operations Team</p>
           </div>
         </div>
         <Button variant="ghost" size="icon" onClick={onToggle} className="h-8 w-8">
