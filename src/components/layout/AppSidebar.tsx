@@ -45,43 +45,15 @@ interface NavItem {
 
 const navigation: NavItem[] = [
   { title: "Dashboard", icon: LayoutDashboard, href: "/" },
-  {
-    title: "Operations",
-    icon: Package,
-    children: [
-      { title: "All Shipments", href: "/shipments" },
-      { title: "Sea Freight", href: "/shipments/sea" },
-      { title: "Air Freight", href: "/shipments/air" },
-      { title: "Consolidation", href: "/consolidation" },
-    ],
-  },
-  {
-    title: "Customs & Ports",
-    icon: FileCheck,
-    children: [
-      { title: "ICUMS Declarations", href: "/customs/icums" },
-      { title: "Shipping Lines / DO", href: "/shipping-lines" },
-      { title: "GPHA Port Status", href: "/customs/gpha" },
-    ],
-  },
-  {
-    title: "Fleet & Logistics",
-    icon: Truck,
-    children: [
-      { title: "Trucking", href: "/trucking" },
-      { title: "Warehousing", href: "/warehouse" },
-    ],
-  },
-  {
-    title: "Finance",
-    icon: DollarSign,
-    children: [
-      { title: "Invoices", href: "/finance/invoices" },
-      { title: "Payments", href: "/finance/payments" },
-      { title: "P&L Reports", href: "/finance/reports" },
-    ],
-  },
-  { title: "Customers", icon: Users, href: "/customers" },
+  { title: "Shipments", icon: Ship, href: "/shipments" },
+  { title: "Consolidation", icon: Container, href: "/consolidation" },
+  { title: "Clients", icon: Users, href: "/customers" },
+  { title: "Customs & Ports", icon: FileCheck, href: "/customs/icums" },
+  { title: "Shipping Lines", icon: Anchor, href: "/shipping-lines" },
+  { title: "Documents", icon: FileText, href: "/documents" },
+  { title: "Port Operations", icon: Warehouse, href: "/port-operations" },
+  { title: "Trucking", icon: Truck, href: "/trucking" },
+  { title: "Finance", icon: DollarSign, href: "/finance" },
   { title: "Reports", icon: BarChart3, href: "/reports" },
 ];
 
@@ -118,11 +90,11 @@ export function AppSidebar() {
         {!isCollapsed && (
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary">
-              <Ship className="h-5 w-5 text-sidebar-primary-foreground" />
+              <Globe className="h-5 w-5 text-sidebar-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-sidebar-foreground">SLAC</h1>
-              <p className="text-xs text-sidebar-muted">Operations</p>
+              <h1 className="text-sm font-semibold text-sidebar-foreground">ShippersLink 360</h1>
+              <p className="text-xs text-sidebar-muted">Logistics Management</p>
             </div>
           </div>
         )}
