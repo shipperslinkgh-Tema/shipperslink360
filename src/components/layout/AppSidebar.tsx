@@ -45,15 +45,43 @@ interface NavItem {
 
 const navigation: NavItem[] = [
   { title: "Dashboard", icon: LayoutDashboard, href: "/" },
-  { title: "Shipments", icon: Ship, href: "/shipments" },
-  { title: "Consolidation", icon: Container, href: "/consolidation" },
-  { title: "Clients", icon: Users, href: "/customers" },
-  { title: "Customs & Ports", icon: FileCheck, href: "/customs/icums" },
-  { title: "Shipping Lines", icon: Anchor, href: "/shipping-lines" },
-  { title: "Documents", icon: FileText, href: "/documents" },
-  { title: "Port Operations", icon: Warehouse, href: "/port-operations" },
-  { title: "Trucking", icon: Truck, href: "/trucking" },
-  { title: "Finance", icon: DollarSign, href: "/finance" },
+  {
+    title: "Operations",
+    icon: Package,
+    children: [
+      { title: "All Shipments", href: "/shipments" },
+      { title: "Sea Freight", href: "/shipments/sea" },
+      { title: "Air Freight", href: "/shipments/air" },
+      { title: "Consolidation", href: "/consolidation" },
+    ],
+  },
+  {
+    title: "Customs & Ports",
+    icon: FileCheck,
+    children: [
+      { title: "ICUMS Declarations", href: "/customs/icums" },
+      { title: "Shipping Lines / DO", href: "/shipping-lines" },
+      { title: "GPHA Port Status", href: "/customs/gpha" },
+    ],
+  },
+  {
+    title: "Fleet & Logistics",
+    icon: Truck,
+    children: [
+      { title: "Trucking", href: "/trucking" },
+      { title: "Warehousing", href: "/warehouse" },
+    ],
+  },
+  {
+    title: "Finance",
+    icon: DollarSign,
+    children: [
+      { title: "Invoices", href: "/finance/invoices" },
+      { title: "Payments", href: "/finance/payments" },
+      { title: "P&L Reports", href: "/finance/reports" },
+    ],
+  },
+  { title: "Customers", icon: Users, href: "/customers" },
   { title: "Reports", icon: BarChart3, href: "/reports" },
 ];
 
