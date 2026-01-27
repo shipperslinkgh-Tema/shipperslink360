@@ -8,9 +8,12 @@ import NotFound from "./pages/NotFound";
 import Shipments from "./pages/Shipments";
 import ICUMSDeclarations from "./pages/ICUMSDeclarations";
 import ShippingLineStatus from "./pages/ShippingLineStatus";
+import GPHAPortStatus from "./pages/GPHAPortStatus";
 import Trucking from "./pages/Trucking";
 import Customers from "./pages/Customers";
 import Finance from "./pages/Finance";
+import Invoicing from "./pages/Invoicing";
+import Payments from "./pages/Payments";
 import Presentation from "./pages/Presentation";
 import ConsolidationPortal from "./pages/ConsolidationPortal";
 import { AppLayout } from "./components/layout/AppLayout";
@@ -79,10 +82,42 @@ const App = () => (
             }
           />
           <Route
-            path="/finance/*"
+            path="/finance"
             element={
               <WithLayout>
                 <Finance />
+              </WithLayout>
+            }
+          />
+          <Route
+            path="/finance/invoices"
+            element={
+              <WithLayout>
+                <Invoicing />
+              </WithLayout>
+            }
+          />
+          <Route
+            path="/finance/payments"
+            element={
+              <WithLayout>
+                <Payments />
+              </WithLayout>
+            }
+          />
+          <Route
+            path="/finance/reports"
+            element={
+              <WithLayout>
+                <Finance />
+              </WithLayout>
+            }
+          />
+          <Route
+            path="/customs/gpha"
+            element={
+              <WithLayout>
+                <GPHAPortStatus />
               </WithLayout>
             }
           />
