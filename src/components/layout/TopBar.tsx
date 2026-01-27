@@ -6,9 +6,14 @@ import { Badge } from "@/components/ui/badge";
 export function TopBar() {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card/80 backdrop-blur-sm px-6">
-      {/* Search */}
-      <div className="flex items-center gap-4 flex-1 max-w-xl">
-        <div className="relative flex-1">
+      {/* Software Name & Search */}
+      <div className="flex items-center gap-6 flex-1">
+        {/* Prominent Software Name */}
+        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20">
+          <span className="text-lg font-bold text-primary tracking-tight">ShippersLink 360</span>
+        </div>
+        
+        <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search shipments, BL numbers, customers..."
