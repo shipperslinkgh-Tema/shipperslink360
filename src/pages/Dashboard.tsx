@@ -30,7 +30,7 @@ export default function Dashboard() {
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold text-foreground">Operations Dashboard</h1>
         <p className="text-muted-foreground">
-          Welcome back, Akua. Here's your operations overview for today.
+          Welcome back, Nana. Here's your operations overview for today.
         </p>
       </div>
 
