@@ -284,6 +284,36 @@ export interface TaxFiling {
   auditTrail: AuditEntry[];
 }
 
+// Directors Tax Reminders
+export interface DirectorTaxReminder {
+  id: string;
+  directorName: string;
+  taxType: "Income Tax" | "Capital Gains" | "Dividend Tax" | "Personal Relief";
+  description: string;
+  dueDate: string;
+  filingDate?: string;
+  amount: number;
+  currency: Currency;
+  status: "pending" | "filed" | "paid" | "overdue";
+  referenceNumber?: string;
+  notes?: string;
+}
+
+// Registrar Renewals
+export interface RegistrarRenewal {
+  id: string;
+  registrationType: "Annual Returns" | "Business Registration" | "Tax Clearance" | "SSNIT Certificate" | "Fire Certificate" | "EPA Permit" | "Operating License";
+  registrarName: string;
+  description: string;
+  expiryDate: string;
+  renewalDate?: string;
+  renewalFee: number;
+  currency: Currency;
+  status: "active" | "expiring_soon" | "expired" | "renewed";
+  certificateNumber?: string;
+  notes?: string;
+}
+
 // Payments (enhanced)
 export interface Payment {
   id: string;

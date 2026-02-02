@@ -18,11 +18,15 @@ import { ReceivablesTable } from "@/components/finance/ReceivablesTable";
 import { CreditControlTable } from "@/components/finance/CreditControlTable";
 import { AccountsTable } from "@/components/finance/AccountsTable";
 import { TaxFilingTable } from "@/components/finance/TaxFilingTable";
+import { DirectorTaxTable } from "@/components/finance/DirectorTaxTable";
+import { RegistrarRenewalTable } from "@/components/finance/RegistrarRenewalTable";
 import {
   invoices,
   payments,
   officeAccounts,
   taxFilings,
+  directorTaxReminders,
+  registrarRenewals,
   jobProfitability,
   payables,
   receivables,
@@ -43,6 +47,8 @@ import {
   TrendingUp,
   Calculator,
   Users,
+  UserCheck,
+  ClipboardList,
 } from "lucide-react";
 
 const Finance = () => {
@@ -132,7 +138,15 @@ const Finance = () => {
           </TabsTrigger>
           <TabsTrigger value="taxes" className="gap-2">
             <Calculator className="h-4 w-4" />
-            <span className="hidden sm:inline">Taxes</span>
+            <span className="hidden sm:inline">Tax Filings</span>
+          </TabsTrigger>
+          <TabsTrigger value="directors" className="gap-2">
+            <UserCheck className="h-4 w-4" />
+            <span className="hidden sm:inline">Directors Tax</span>
+          </TabsTrigger>
+          <TabsTrigger value="registrar" className="gap-2">
+            <ClipboardList className="h-4 w-4" />
+            <span className="hidden sm:inline">Registrar</span>
           </TabsTrigger>
         </TabsList>
 
@@ -288,9 +302,40 @@ const Finance = () => {
           <Card>
             <CardHeader>
               <CardTitle>Tax Filings & Compliance</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                GRA tax filings including VAT, PAYE, Corporate, and Withholding taxes
+              </p>
             </CardHeader>
             <CardContent>
               <TaxFilingTable filings={taxFilings} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="directors">
+          <Card>
+            <CardHeader>
+              <CardTitle>Directors Tax Reminders</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Personal tax obligations and reminders for company directors
+              </p>
+            </CardHeader>
+            <CardContent>
+              <DirectorTaxTable reminders={directorTaxReminders} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="registrar">
+          <Card>
+            <CardHeader>
+              <CardTitle>Registrar Renewals</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Track and manage business registrations, licenses, and compliance certificates
+              </p>
+            </CardHeader>
+            <CardContent>
+              <RegistrarRenewalTable renewals={registrarRenewals} />
             </CardContent>
           </Card>
         </TabsContent>
