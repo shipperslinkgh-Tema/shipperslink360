@@ -33,6 +33,7 @@ import {
   agingSummary,
   customerCredits,
   dashboardMetrics,
+  exchangeRates,
 } from "@/data/financeData";
 import {
   Plus,
@@ -91,7 +92,7 @@ const Finance = () => {
             Finance & Accounting
           </h1>
           <p className="text-muted-foreground">
-            Integrated financial management for logistics operations
+            Integrated financial management with multi-currency support
           </p>
         </div>
         <div className="flex gap-2">
@@ -138,7 +139,7 @@ const Finance = () => {
           </TabsTrigger>
           <TabsTrigger value="taxes" className="gap-2">
             <Calculator className="h-4 w-4" />
-            <span className="hidden sm:inline">Tax Filings</span>
+            <span className="hidden sm:inline">Taxes</span>
           </TabsTrigger>
           <TabsTrigger value="directors" className="gap-2">
             <UserCheck className="h-4 w-4" />
@@ -151,7 +152,11 @@ const Finance = () => {
         </TabsList>
 
         <TabsContent value="dashboard">
-          <FinanceDashboard metrics={dashboardMetrics} agingSummary={agingSummary} />
+          <FinanceDashboard 
+            metrics={dashboardMetrics} 
+            agingSummary={agingSummary}
+            exchangeRates={exchangeRates}
+          />
         </TabsContent>
 
         <TabsContent value="invoices">

@@ -28,6 +28,9 @@ import {
   CheckCircle,
   XCircle,
   Edit,
+  History,
+  Clock,
+  UserCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -94,6 +97,7 @@ export function EnhancedInvoicesTable({
           <TableHead className="text-right">Amount</TableHead>
           <TableHead className="text-right">Paid</TableHead>
           <TableHead>Due Date</TableHead>
+          <TableHead>Approval</TableHead>
           <TableHead>Status</TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
@@ -138,11 +142,18 @@ export function EnhancedInvoicesTable({
                 </div>
               </TableCell>
               <TableCell>
-                {invoice.jobRef ? (
-                  <span className="font-mono text-xs">{invoice.jobRef}</span>
-                ) : (
-                  <span className="text-muted-foreground">-</span>
-                )}
+                <div className="space-y-0.5">
+                  {invoice.jobRef ? (
+                    <span className="font-mono text-xs">{invoice.jobRef}</span>
+                  ) : (
+                    <span className="text-muted-foreground">-</span>
+                  )}
+                  {invoice.consolidationRef && (
+                    <p className="text-xs text-muted-foreground font-mono">
+                      {invoice.consolidationRef}
+                    </p>
+                  )}
+                </div>
               </TableCell>
               <TableCell className="text-right">
                 <div>
@@ -157,6 +168,11 @@ export function EnhancedInvoicesTable({
                   {invoice.currency !== "GHS" && (
                     <p className="text-xs text-muted-foreground">
                       ≈ {formatCurrency(invoice.ghsEquivalent)}
+                    </p>
+                  )}
+                  {invoice.lineItems && invoice.lineItems.length > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {invoice.lineItems.length} line items
                     </p>
                   )}
                 </div>
@@ -183,6 +199,31 @@ export function EnhancedInvoicesTable({
                 </span>
               </TableCell>
               <TableCell>
+                <div className="space-y-1">
+                  {invoice.approvedBy ? (
+                    <>
+                      <div className="flex items-center gap-1">
+                        <UserCheck className="h-3 w-3 text-green-600" />
+                        <span className="text-xs text-green-600 font-medium">Approved</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        by {invoice.approvedBy}
+                      </p>
+                      {invoice.approvalDate && (
+                        <p className="text-xs text-muted-foreground">
+                          {invoice.approvalDate}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3 w-3 text-amber-600" />
+                      <span className="text-xs text-amber-600">Pending</span>
+                    </div>
+                  )}
+                </div>
+              </TableCell>
+              <TableCell>
                 <Badge
                   className={
                     statusColors[isOverdue ? "overdue" : invoice.status]
@@ -206,6 +247,10 @@ export function EnhancedInvoicesTable({
                     <DropdownMenuItem onClick={() => onView?.(invoice)}>
                       <Eye className="h-4 w-4 mr-2" />
                       View Details
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <History className="h-4 w-4 mr-2" />
+                      View Audit Trail
                     </DropdownMenuItem>
                     {invoice.status === "draft" && (
                       <>

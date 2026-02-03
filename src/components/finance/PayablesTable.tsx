@@ -26,6 +26,8 @@ import {
   Truck,
   Building2,
   FileText,
+  Clock,
+  History as HistoryIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -85,6 +87,7 @@ export function PayablesTable({ payables, onApprove, onPay }: PayablesTableProps
           <TableHead>Description</TableHead>
           <TableHead className="text-right">Amount</TableHead>
           <TableHead>Due Date</TableHead>
+          <TableHead>Approval</TableHead>
           <TableHead>Status</TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
@@ -131,6 +134,16 @@ export function PayablesTable({ payables, onApprove, onPay }: PayablesTableProps
                       {payable.consolidationRef}
                     </p>
                   )}
+                  {payable.icumsRef && (
+                    <p className="text-xs text-muted-foreground font-mono">
+                      ICUMS: {payable.icumsRef}
+                    </p>
+                  )}
+                  {payable.gphaRef && (
+                    <p className="text-xs text-muted-foreground font-mono">
+                      GPHA: {payable.gphaRef}
+                    </p>
+                  )}
                 </div>
               </TableCell>
               <TableCell className="max-w-[200px]">
@@ -167,6 +180,32 @@ export function PayablesTable({ payables, onApprove, onPay }: PayablesTableProps
                 </span>
               </TableCell>
               <TableCell>
+                <div className="space-y-1">
+                  <Badge 
+                    className={cn(
+                      payable.approvalStatus === "approved" && "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+                      payable.approvalStatus === "pending" && "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+                      payable.approvalStatus === "rejected" && "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                    )}
+                  >
+                    {payable.approvalStatus === "approved" && <CheckCircle className="h-3 w-3 mr-1" />}
+                    {payable.approvalStatus === "pending" && <Clock className="h-3 w-3 mr-1" />}
+                    {payable.approvalStatus === "rejected" && <XCircle className="h-3 w-3 mr-1" />}
+                    {payable.approvalStatus.charAt(0).toUpperCase() + payable.approvalStatus.slice(1)}
+                  </Badge>
+                  {payable.approvedBy && (
+                    <p className="text-xs text-muted-foreground">
+                      by {payable.approvedBy}
+                    </p>
+                  )}
+                  {payable.approvalDate && (
+                    <p className="text-xs text-muted-foreground">
+                      {payable.approvalDate}
+                    </p>
+                  )}
+                </div>
+              </TableCell>
+              <TableCell>
                 <Badge className={statusColors[isOverdue && payable.status !== "paid" ? "overdue" : payable.status]}>
                   {isOverdue && payable.status !== "paid"
                     ? "Overdue"
@@ -184,6 +223,10 @@ export function PayablesTable({ payables, onApprove, onPay }: PayablesTableProps
                     <DropdownMenuItem>
                       <Eye className="h-4 w-4 mr-2" />
                       View Details
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <HistoryIcon className="h-4 w-4 mr-2" />
+                      View Audit Trail
                     </DropdownMenuItem>
                     {payable.approvalStatus === "pending" && (
                       <>

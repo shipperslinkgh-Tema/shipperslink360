@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import {
   TrendingUp,
   TrendingDown,
@@ -12,21 +12,43 @@ import {
   PieChart,
   ArrowUpRight,
   ArrowDownRight,
+  RefreshCw,
+  Banknote,
+  AlertCircle,
+  Calendar,
+  Receipt,
 } from "lucide-react";
-import { FinanceDashboardMetrics, AgingSummary } from "@/types/finance";
+import { FinanceDashboardMetrics, AgingSummary, ExchangeRate } from "@/types/finance";
 import { cn } from "@/lib/utils";
 
 interface FinanceDashboardProps {
   metrics: FinanceDashboardMetrics;
   agingSummary: AgingSummary;
+  exchangeRates?: ExchangeRate[];
+  alerts?: FinancialAlert[];
 }
 
-export function FinanceDashboard({ metrics, agingSummary }: FinanceDashboardProps) {
-  const formatCurrency = (amount: number, compact = false) => {
+interface FinancialAlert {
+  id: string;
+  type: "overdue_invoice" | "overdue_payable" | "tax_due" | "renewal_expiring" | "credit_limit" | "low_balance";
+  title: string;
+  description: string;
+  amount?: number;
+  dueDate?: string;
+  severity: "critical" | "warning" | "info";
+}
+
+export function FinanceDashboard({ 
+  metrics, 
+  agingSummary, 
+  exchangeRates = [],
+  alerts = []
+}: FinanceDashboardProps) {
+  const formatCurrency = (amount: number, compact = false, currency = "GHS") => {
     if (compact && Math.abs(amount) >= 1000) {
       return new Intl.NumberFormat("en-GH", {
         style: "currency",
-        currency: "GHS",
+        currency: currency,
         notation: "compact",
         minimumFractionDigits: 0,
         maximumFractionDigits: 1,
@@ -34,7 +56,7 @@ export function FinanceDashboard({ metrics, agingSummary }: FinanceDashboardProp
     }
     return new Intl.NumberFormat("en-GH", {
       style: "currency",
-      currency: "GHS",
+      currency: currency,
       minimumFractionDigits: 0,
     }).format(amount);
   };
@@ -96,6 +118,65 @@ export function FinanceDashboard({ metrics, agingSummary }: FinanceDashboardProp
 
   const totalAging = agingSummary.total || 1;
 
+  // Default alerts based on metrics
+  const defaultAlerts: FinancialAlert[] = [
+    ...(metrics.overdueInvoices > 0
+      ? [
+          {
+            id: "overdue-inv",
+            type: "overdue_invoice" as const,
+            title: "Overdue Invoices",
+            description: `${formatCurrency(metrics.overdueInvoices)} past due date`,
+            amount: metrics.overdueInvoices,
+            severity: "critical" as const,
+          },
+        ]
+      : []),
+    ...(metrics.pendingPayables > 0
+      ? [
+          {
+            id: "pending-pay",
+            type: "overdue_payable" as const,
+            title: "Pending Payables",
+            description: `${formatCurrency(metrics.pendingPayables)} awaiting payment`,
+            amount: metrics.pendingPayables,
+            severity: "warning" as const,
+          },
+        ]
+      : []),
+    {
+      id: "dpo",
+      type: "tax_due" as const,
+      title: "Days Payables Outstanding",
+      description: `${metrics.dpo} days average payment cycle`,
+      severity: "info" as const,
+    },
+  ];
+
+  const displayAlerts = alerts.length > 0 ? alerts : defaultAlerts;
+
+  const getSeverityStyles = (severity: string) => {
+    switch (severity) {
+      case "critical":
+        return "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800";
+      case "warning":
+        return "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800";
+      default:
+        return "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800";
+    }
+  };
+
+  const getSeverityIcon = (severity: string) => {
+    switch (severity) {
+      case "critical":
+        return <AlertCircle className="h-4 w-4 text-red-600" />;
+      case "warning":
+        return <AlertTriangle className="h-4 w-4 text-amber-600" />;
+      default:
+        return <PieChart className="h-4 w-4 text-blue-600" />;
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* KPI Cards */}
@@ -134,54 +215,198 @@ export function FinanceDashboard({ metrics, agingSummary }: FinanceDashboardProp
         ))}
       </div>
 
-      {/* Second Row - Alerts and Aging */}
+      {/* Second Row - Exchange Rates and YTD Summary */}
+      <div className="grid gap-4 md:grid-cols-3">
+        {/* Exchange Rates Card */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-medium flex items-center gap-2">
+                <RefreshCw className="h-4 w-4 text-muted-foreground" />
+                Exchange Rates
+              </CardTitle>
+              <Badge variant="outline" className="text-xs">
+                Live
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {exchangeRates.length > 0 ? (
+              exchangeRates
+                .filter((rate) => rate.from !== "GHS")
+                .map((rate) => (
+                  <div
+                    key={`${rate.from}-${rate.to}`}
+                    className="flex items-center justify-between py-2 border-b border-border last:border-0"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Banknote className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">{rate.from}/GHS</span>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">{rate.rate.toFixed(2)}</p>
+                      <p className="text-xs text-muted-foreground">{rate.date}</p>
+                    </div>
+                  </div>
+                ))
+            ) : (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between py-2 border-b border-border">
+                  <div className="flex items-center gap-2">
+                    <Banknote className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">USD/GHS</span>
+                  </div>
+                  <p className="font-semibold">15.50</p>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-border">
+                  <div className="flex items-center gap-2">
+                    <Banknote className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">EUR/GHS</span>
+                  </div>
+                  <p className="font-semibold">16.80</p>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-border">
+                  <div className="flex items-center gap-2">
+                    <Banknote className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">GBP/GHS</span>
+                  </div>
+                  <p className="font-semibold">19.50</p>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2">
+                    <Banknote className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">CNY/GHS</span>
+                  </div>
+                  <p className="font-semibold">2.15</p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* YTD Summary */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-medium flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              Year-to-Date Summary
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">YTD Revenue</p>
+                <p className="text-lg font-bold text-green-600">
+                  {formatCurrency(metrics.ytdRevenue, true)}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">YTD Costs</p>
+                <p className="text-lg font-bold text-red-600">
+                  {formatCurrency(metrics.ytdCosts, true)}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">YTD Profit</p>
+                <p className="text-lg font-bold text-blue-600">
+                  {formatCurrency(metrics.ytdProfit, true)}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">YTD Margin</p>
+                <p className="text-lg font-bold">{metrics.ytdMargin.toFixed(1)}%</p>
+              </div>
+            </div>
+            <div className="pt-2 border-t border-border">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Pending Invoices</span>
+                <span className="font-medium text-amber-600">
+                  {formatCurrency(metrics.pendingInvoices)}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Payables Summary */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-medium flex items-center gap-2">
+              <Receipt className="h-4 w-4 text-muted-foreground" />
+              Payables Overview
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Pending</p>
+                <p className="text-lg font-bold text-amber-600">
+                  {formatCurrency(metrics.pendingPayables, true)}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Overdue</p>
+                <p className="text-lg font-bold text-red-600">
+                  {formatCurrency(metrics.overduePayables, true)}
+                </p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Days Payables Outstanding</span>
+                <Badge variant="outline">{metrics.dpo} days</Badge>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Days Sales Outstanding</span>
+                <Badge variant="outline">{metrics.dso} days</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Third Row - Alerts and Aging */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* Alerts Card */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-medium flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
-              Financial Alerts
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {metrics.overdueInvoices > 0 && (
-              <div className="flex items-center justify-between p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-red-600" />
-                  <span className="text-sm font-medium text-red-700 dark:text-red-400">
-                    Overdue Invoices
-                  </span>
-                </div>
-                <Badge variant="destructive">
-                  {formatCurrency(metrics.overdueInvoices)}
-                </Badge>
-              </div>
-            )}
-            {metrics.pendingPayables > 0 && (
-              <div className="flex items-center justify-between p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-                <div className="flex items-center gap-2">
-                  <TrendingDown className="h-4 w-4 text-amber-600" />
-                  <span className="text-sm font-medium text-amber-700 dark:text-amber-400">
-                    Pending Payables
-                  </span>
-                </div>
-                <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
-                  {formatCurrency(metrics.pendingPayables)}
-                </Badge>
-              </div>
-            )}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-              <div className="flex items-center gap-2">
-                <PieChart className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
-                  Days Payables Outstanding
-                </span>
-              </div>
-              <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                {metrics.dpo} days
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-medium flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                Financial Alerts
+              </CardTitle>
+              <Badge variant="secondary" className="text-xs">
+                {displayAlerts.length} active
               </Badge>
             </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {displayAlerts.map((alert) => (
+              <div
+                key={alert.id}
+                className={cn(
+                  "flex items-center justify-between p-3 rounded-lg border",
+                  getSeverityStyles(alert.severity)
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  {getSeverityIcon(alert.severity)}
+                  <div>
+                    <p className="text-sm font-medium">{alert.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {alert.description}
+                    </p>
+                  </div>
+                </div>
+                {alert.amount && (
+                  <Badge
+                    variant={alert.severity === "critical" ? "destructive" : "secondary"}
+                  >
+                    {formatCurrency(alert.amount)}
+                  </Badge>
+                )}
+              </div>
+            ))}
           </CardContent>
         </Card>
 
@@ -190,11 +415,11 @@ export function FinanceDashboard({ metrics, agingSummary }: FinanceDashboardProp
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-medium flex items-center gap-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
-              Receivables Aging
+              Receivables Aging Analysis
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex h-3 rounded-full overflow-hidden bg-muted">
+            <div className="flex h-4 rounded-full overflow-hidden bg-muted">
               {agingBuckets.map((bucket) => {
                 const width = (bucket.value / totalAging) * 100;
                 return width > 0 ? (
@@ -211,16 +436,21 @@ export function FinanceDashboard({ metrics, agingSummary }: FinanceDashboardProp
               {agingBuckets.map((bucket) => (
                 <div key={bucket.label} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className={cn("w-2 h-2 rounded-full", bucket.color)} />
+                    <div className={cn("w-3 h-3 rounded-full", bucket.color)} />
                     <span className="text-muted-foreground">{bucket.label}</span>
                   </div>
                   <span className="font-medium">{formatCurrency(bucket.value)}</span>
                 </div>
               ))}
             </div>
-            <div className="pt-2 border-t border-border flex justify-between items-center">
-              <span className="text-sm font-medium">Total Outstanding</span>
-              <span className="text-lg font-bold">{formatCurrency(agingSummary.total)}</span>
+            <div className="pt-3 border-t border-border flex justify-between items-center">
+              <div>
+                <span className="text-sm font-medium">Total Outstanding</span>
+                <p className="text-xs text-muted-foreground">
+                  {agingSummary.customerCount} customers
+                </p>
+              </div>
+              <span className="text-xl font-bold">{formatCurrency(agingSummary.total)}</span>
             </div>
           </CardContent>
         </Card>
