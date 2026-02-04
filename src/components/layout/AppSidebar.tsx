@@ -111,7 +111,7 @@ export function AppSidebar() {
               <Globe className="h-5 w-5 text-sidebar-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-warning bg-secondary">ShippersLink 360</h1>
+              <h1 className="text-sm font-semibold text-primary-foreground bg-primary px-2 py-0.5 rounded">ShippersLink 360</h1>
               <p className="text-xs text-sidebar-muted">Logistics Management</p>
             </div>
           </div>}
