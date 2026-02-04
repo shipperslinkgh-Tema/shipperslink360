@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { PayablesTable } from "@/components/finance/PayablesTable";
 import { ReceivablesTable } from "@/components/finance/ReceivablesTable";
+import { ShippingLinePaymentVoucherForm } from "@/components/finance/ShippingLinePaymentVoucherForm";
 import { payables, receivables, agingSummary } from "@/data/financeData";
 import {
   Plus,
@@ -67,6 +68,7 @@ const Payments = () => {
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
+          <ShippingLinePaymentVoucherForm />
           <Button>
             <Plus className="h-4 w-4 mr-2" />
             Record Payment
