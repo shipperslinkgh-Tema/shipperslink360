@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Ship, Plane, Truck, Package, Warehouse, FileText, DollarSign, Settings, Bell, Users, ChevronDown, ChevronRight, Container, FileCheck, Anchor, Globe, BarChart3, Menu, X, User, LogOut, Sliders, BookOpen } from "lucide-react";
+import { LayoutDashboard, Ship, Plane, Truck, Package, Warehouse, FileText, DollarSign, Settings, Bell, Users, ChevronDown, ChevronRight, Container, FileCheck, Anchor, BarChart3, Menu, X, User, LogOut, Sliders, BookOpen } from "lucide-react";
+import logo from "@/assets/logo.png";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 interface NavItem {
@@ -107,9 +108,7 @@ export function AppSidebar() {
       {/* Header */}
       <div className="flex h-16 items-center justify-between px-4 border-b border-sidebar-border">
         {!isCollapsed && <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary">
-              <Globe className="h-5 w-5 text-sidebar-primary-foreground" />
-            </div>
+            <img src={logo} alt="SLAC Logo" className="h-10 w-10 object-contain" />
             <div>
               <h1 className="text-sm font-semibold text-primary-foreground bg-primary px-2 py-0.5 rounded">ShippersLink 360</h1>
               <p className="text-xs text-sidebar-muted">Logistics Management</p>
