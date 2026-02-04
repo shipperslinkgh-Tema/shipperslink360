@@ -99,7 +99,7 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
     return (
       <Button
         onClick={onToggle}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-accent hover:bg-accent/90 z-50"
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90 z-50"
       >
         <MessageCircle className="h-6 w-6" />
         {totalUnread > 0 && (
@@ -114,18 +114,18 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
   return (
     <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-card border border-border rounded-xl shadow-2xl z-50 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border bg-muted/30">
+      <div className="flex items-center justify-between p-4 border-b border-primary/20 bg-primary text-primary-foreground">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <MessageCircle className="h-5 w-5 text-accent" />
+            <MessageCircle className="h-5 w-5 text-primary-foreground" />
             <Circle className="absolute -top-0.5 -right-0.5 h-2 w-2 fill-success text-success" />
           </div>
           <div>
-            <h3 className="font-semibold text-sm">SLAC Messenger</h3>
-            <p className="text-xs text-muted-foreground">Operations Team</p>
+            <h3 className="font-semibold text-sm text-primary-foreground">SLAC Messenger</h3>
+            <p className="text-xs text-primary-foreground/70">Operations Team</p>
           </div>
         </div>
-        <Button variant="ghost" size="icon" onClick={onToggle} className="h-8 w-8">
+        <Button variant="ghost" size="icon" onClick={onToggle} className="h-8 w-8 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
           <X className="h-4 w-4" />
         </Button>
       </div>
@@ -241,7 +241,7 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
           <Button 
             type="submit" 
             size="icon" 
-            className="h-9 w-9 flex-shrink-0 bg-accent hover:bg-accent/90"
+            className="h-9 w-9 flex-shrink-0 bg-primary hover:bg-primary/90"
             disabled={!message.trim()}
           >
             <Send className="h-4 w-4" />
