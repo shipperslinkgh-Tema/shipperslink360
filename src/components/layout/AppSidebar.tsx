@@ -59,7 +59,7 @@ const navigation: NavItem[] = [{
     href: "/warehouse"
   }]
 }, {
-  title: "Finance",
+  title: "Accounting",
   icon: DollarSign,
   children: [{
     title: "Invoices",
