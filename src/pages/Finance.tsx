@@ -132,7 +132,7 @@ const Finance = () => {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold tracking-tight">
-              Finance & Accounting
+              Accounting
             </h1>
             <Badge variant="outline" className="text-xs">
               Shippers Link Agencies
