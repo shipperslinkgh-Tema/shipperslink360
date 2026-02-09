@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { FinanceDashboard } from "@/components/finance/FinanceDashboard";
 import { FinanceQuickActions } from "@/components/finance/FinanceQuickActions";
-import { FinancialReports } from "@/components/finance/FinancialReports";
+import { PLDashboard } from "@/components/finance/PLDashboard";
 import { EnhancedInvoicesTable } from "@/components/finance/EnhancedInvoicesTable";
 import { JobCostingTable } from "@/components/finance/JobCostingTable";
 import { PayablesTable } from "@/components/finance/PayablesTable";
@@ -391,7 +391,7 @@ const Finance = () => {
         </TabsContent>
 
         <TabsContent value="reports">
-          <FinancialReports 
+          <PLDashboard 
             metrics={dashboardMetrics}
             agingSummary={agingSummary}
           />
