@@ -14,16 +14,175 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: string | null
+          resource_id: string | null
+          resource_type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      login_history: {
+        Row: {
+          id: string
+          ip_address: string | null
+          login_at: string
+          success: boolean
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          ip_address?: string | null
+          login_at?: string
+          success?: boolean
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          ip_address?: string | null
+          login_at?: string
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          department: Database["public"]["Enums"]["department"]
+          email: string
+          failed_login_attempts: number
+          full_name: string
+          id: string
+          is_active: boolean
+          is_locked: boolean
+          last_login_at: string | null
+          locked_at: string | null
+          must_change_password: boolean
+          phone: string | null
+          staff_id: string
+          updated_at: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          department: Database["public"]["Enums"]["department"]
+          email: string
+          failed_login_attempts?: number
+          full_name: string
+          id?: string
+          is_active?: boolean
+          is_locked?: boolean
+          last_login_at?: string | null
+          locked_at?: string | null
+          must_change_password?: boolean
+          phone?: string | null
+          staff_id: string
+          updated_at?: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          department?: Database["public"]["Enums"]["department"]
+          email?: string
+          failed_login_attempts?: number
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          is_locked?: boolean
+          last_login_at?: string | null
+          locked_at?: string | null
+          must_change_password?: boolean
+          phone?: string | null
+          staff_id?: string
+          updated_at?: string
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_department: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["department"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      increment_failed_login: { Args: { _user_id: string }; Returns: undefined }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
+      reset_failed_login: { Args: { _user_id: string }; Returns: undefined }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "super_admin" | "admin" | "manager" | "staff"
+      department:
+        | "operations"
+        | "documentation"
+        | "accounts"
+        | "marketing"
+        | "customer_service"
+        | "warehouse"
+        | "management"
+        | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +309,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["super_admin", "admin", "manager", "staff"],
+      department: [
+        "operations",
+        "documentation",
+        "accounts",
+        "marketing",
+        "customer_service",
+        "warehouse",
+        "management",
+        "super_admin",
+      ],
+    },
   },
 } as const
