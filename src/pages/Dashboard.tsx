@@ -15,6 +15,7 @@ import { RecentShipmentsTable } from "@/components/dashboard/RecentShipmentsTabl
 import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { ClearanceStatusWidget } from "@/components/dashboard/ClearanceStatusWidget";
+import { useAuth } from "@/contexts/AuthContext";
 
 const integrations = [
   { name: "ICUMS (Ghana Customs)", status: "connected" as const, lastSync: "2 min ago", details: "Real-time sync active" },
@@ -24,13 +25,16 @@ const integrations = [
 ];
 
 export default function Dashboard() {
+  const { profile } = useAuth();
+  const firstName = profile?.full_name?.split(" ")[0] || "there";
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold text-foreground">Operations Dashboard</h1>
         <p className="text-muted-foreground">
-          Welcome back, Nana. Here's your operations overview for today.
+          Welcome back, {firstName}. Here's your operations overview for today.
         </p>
       </div>
 

@@ -11,8 +11,26 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
+
+const DEPT_LABELS: Record<string, string> = {
+  operations: "Operations",
+  documentation: "Documentation",
+  accounts: "Accounts",
+  marketing: "Marketing",
+  customer_service: "Customer Service",
+  warehouse: "Warehouse",
+  management: "Management",
+  super_admin: "Super Admin",
+};
 
 export function TopBar() {
+  const { profile, signOut } = useAuth();
+
+  const initials = profile?.full_name
+    ? profile.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+    : "??";
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card/80 backdrop-blur-sm px-6">
       {/* Search */}
@@ -65,15 +83,18 @@ export function TopBar() {
             <Button variant="ghost" className="relative h-9 w-9 rounded-full">
               <Avatar className="h-9 w-9">
                 <AvatarImage src="/placeholder.svg" alt="User" />
-                <AvatarFallback className="bg-primary/10 text-primary font-semibold">JD</AvatarFallback>
+                <AvatarFallback className="bg-primary/10 text-primary font-semibold">{initials}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56 bg-card border border-border shadow-lg z-50" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">John Doe</p>
-                <p className="text-xs leading-none text-muted-foreground">john.doe@shipperslink.com</p>
+                <p className="text-sm font-medium leading-none">{profile?.full_name || "User"}</p>
+                <p className="text-xs leading-none text-muted-foreground">{profile?.email}</p>
+                <Badge variant="secondary" className="text-[10px] capitalize w-fit mt-1">
+                  {DEPT_LABELS[profile?.department || ""] || "Staff"}
+                </Badge>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -86,7 +107,7 @@ export function TopBar() {
               <span>Account Settings</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">
+            <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive" onClick={() => signOut()}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
             </DropdownMenuItem>
