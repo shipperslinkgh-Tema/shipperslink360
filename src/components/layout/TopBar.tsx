@@ -1,4 +1,4 @@
-import { Bell, Search, HelpCircle, RefreshCw, User, Settings, LogOut } from "lucide-react";
+import { Bell, Search, HelpCircle, RefreshCw, User, Settings, LogOut, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,35 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAuth } from "@/contexts/AuthContext";
+
+const integrationDetails = [
+  {
+    name: "ICUMS",
+    fullName: "Ghana Customs (ICUMS)",
+    status: "connected" as const,
+    lastSync: "2 min ago",
+    uptime: "99.8%",
+    details: "Real-time declaration sync active. Processing 12 declarations today.",
+  },
+  {
+    name: "GPHA",
+    fullName: "Ghana Ports & Harbours Authority",
+    status: "connected" as const,
+    lastSync: "5 min ago",
+    uptime: "99.5%",
+    details: "Tema & Takoradi port systems connected. 46 containers tracked.",
+  },
+  {
+    name: "ODeX",
+    fullName: "ODeX Shipping Portal",
+    status: "connected" as const,
+    lastSync: "1 min ago",
+    uptime: "98.9%",
+    details: "DO processing active. 3 pending delivery orders.",
+  },
+];
 
 const DEPT_LABELS: Record<string, string> = {
   operations: "Operations",
@@ -48,18 +76,35 @@ export function TopBar() {
       <div className="flex items-center gap-2">
         {/* Integration Status */}
         <div className="flex items-center gap-3 px-4 py-1.5 rounded-lg bg-muted/50 mr-2">
-          <div className="flex items-center gap-2">
-            <span className="integration-dot integration-connected" />
-            <span className="text-xs font-medium text-muted-foreground">ICUMS</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="integration-dot integration-connected" />
-            <span className="text-xs font-medium text-muted-foreground">GPHA</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="integration-dot integration-connected" />
-            <span className="text-xs font-medium text-muted-foreground">ODeX</span>
-          </div>
+          {integrationDetails.map((integration) => (
+            <Popover key={integration.name}>
+              <PopoverTrigger asChild>
+                <button className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
+                  <span className="integration-dot integration-connected" />
+                  <span className="text-xs font-medium text-muted-foreground">{integration.name}</span>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 p-0" align="center" sideOffset={8}>
+                <div className="p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold text-foreground">{integration.fullName}</h4>
+                    <CheckCircle2 className="h-4 w-4 text-success" />
+                  </div>
+                  <p className="text-xs text-muted-foreground">{integration.details}</p>
+                  <div className="grid grid-cols-2 gap-2 pt-1 border-t border-border">
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Last Sync</p>
+                      <p className="text-xs font-medium text-foreground">{integration.lastSync}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Uptime</p>
+                      <p className="text-xs font-medium text-foreground">{integration.uptime}</p>
+                    </div>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          ))}
         </div>
 
         <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
