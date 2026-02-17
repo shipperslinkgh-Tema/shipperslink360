@@ -70,6 +70,9 @@ const navigation: NavItem[] = [{
   }, {
     title: "P&L Reports",
     href: "/finance/reports"
+  }, {
+    title: "Bank Integration",
+    href: "/finance/banking"
   }]
 }, {
   title: "Customers",
