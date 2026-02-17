@@ -27,19 +27,22 @@ serve(async (req: Request) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const { data: { user: caller } } = await callerClient.auth.getUser();
-    if (!caller) {
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await callerClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    const callerId = claimsData.claims.sub;
+
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
     const { data: callerRoles } = await adminClient
       .from("user_roles")
       .select("role")
-      .eq("user_id", caller.id);
+      .eq("user_id", callerId);
 
     const isAdmin = callerRoles?.some(r => r.role === "super_admin" || r.role === "admin");
     if (!isAdmin) {
@@ -85,7 +88,7 @@ serve(async (req: Request) => {
 
     // Audit log
     await adminClient.from("audit_logs").insert({
-      user_id: caller.id,
+      user_id: callerId,
       action: "create_client",
       resource_type: "client",
       resource_id: newUser.user.id,
