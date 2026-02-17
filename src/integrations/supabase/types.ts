@@ -47,6 +47,253 @@ export type Database = {
         }
         Relationships: []
       }
+      client_documents: {
+        Row: {
+          created_at: string
+          customer_id: string
+          document_name: string
+          document_type: string
+          file_size: string | null
+          file_url: string | null
+          id: string
+          notes: string | null
+          shipment_id: string | null
+          status: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          document_name: string
+          document_type: string
+          file_size?: string | null
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          shipment_id?: string | null
+          status?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          document_name?: string
+          document_type?: string
+          file_size?: string | null
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          shipment_id?: string | null
+          status?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_documents_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "client_shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_invoices: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_id: string
+          description: string | null
+          due_date: string
+          id: string
+          invoice_number: string
+          paid_amount: number | null
+          paid_date: string | null
+          shipment_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_id: string
+          description?: string | null
+          due_date: string
+          id?: string
+          invoice_number: string
+          paid_amount?: number | null
+          paid_date?: string | null
+          shipment_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_id?: string
+          description?: string | null
+          due_date?: string
+          id?: string
+          invoice_number?: string
+          paid_amount?: number | null
+          paid_date?: string | null
+          shipment_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_invoices_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "client_shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_messages: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          is_read: boolean
+          message: string
+          sender_id: string
+          sender_type: string
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          is_read?: boolean
+          message: string
+          sender_id: string
+          sender_type: string
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          sender_id?: string
+          sender_type?: string
+          subject?: string | null
+        }
+        Relationships: []
+      }
+      client_profiles: {
+        Row: {
+          company_name: string
+          contact_name: string
+          created_at: string
+          customer_id: string
+          email: string
+          id: string
+          is_active: boolean
+          last_login_at: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_name: string
+          contact_name: string
+          created_at?: string
+          customer_id: string
+          email: string
+          id?: string
+          is_active?: boolean
+          last_login_at?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_name?: string
+          contact_name?: string
+          created_at?: string
+          customer_id?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+          last_login_at?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      client_shipments: {
+        Row: {
+          ata: string | null
+          bl_number: string
+          cargo_description: string | null
+          container_number: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          destination: string
+          eta: string | null
+          id: string
+          notes: string | null
+          origin: string
+          status: string
+          updated_at: string
+          vessel_name: string | null
+          voyage_number: string | null
+          weight_kg: number | null
+        }
+        Insert: {
+          ata?: string | null
+          bl_number: string
+          cargo_description?: string | null
+          container_number?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          destination: string
+          eta?: string | null
+          id?: string
+          notes?: string | null
+          origin: string
+          status?: string
+          updated_at?: string
+          vessel_name?: string | null
+          voyage_number?: string | null
+          weight_kg?: number | null
+        }
+        Update: {
+          ata?: string | null
+          bl_number?: string
+          cargo_description?: string | null
+          container_number?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          destination?: string
+          eta?: string | null
+          id?: string
+          notes?: string | null
+          origin?: string
+          status?: string
+          updated_at?: string
+          vessel_name?: string | null
+          voyage_number?: string | null
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
       login_history: {
         Row: {
           id: string
@@ -157,6 +404,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_client_customer_id: { Args: { _user_id: string }; Returns: string }
       get_user_department: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["department"]
@@ -170,6 +418,7 @@ export type Database = {
       }
       increment_failed_login: { Args: { _user_id: string }; Returns: undefined }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_client: { Args: { _user_id: string }; Returns: boolean }
       reset_failed_login: { Args: { _user_id: string }; Returns: undefined }
     }
     Enums: {
