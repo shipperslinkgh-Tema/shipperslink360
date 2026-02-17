@@ -94,7 +94,7 @@ const DEPT_LABELS: Record<string, string> = {
 
 export function AppSidebar() {
   const location = useLocation();
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Operations", "Customs & Ports"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Operations", "Customs & Ports", "Fleet & Logistics", "Accounting"]);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { profile, roles, signOut, isAdmin, department } = useAuth();
 
