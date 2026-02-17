@@ -195,12 +195,12 @@ export function AppSidebar() {
       </nav>
 
       {/* Bottom navigation */}
-      <div className="border-t border-sidebar-border p-3">
-        <ul className="space-y-1">
+      <div className="border-t border-sidebar-border p-2">
+        <ul className="space-y-0.5">
           {bottomNav.map(item => (
             <li key={item.title}>
-              <NavLink to={item.href!} className={cn("flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all", isActive(item.href!) ? "bg-sidebar-primary text-sidebar-primary-foreground" : "text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground")}>
-                <item.icon className="h-5 w-5 flex-shrink-0" />
+              <NavLink to={item.href!} className={cn("flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all", isActive(item.href!) ? "bg-sidebar-primary text-sidebar-primary-foreground" : "text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground")}>
+                <item.icon className="h-4 w-4 flex-shrink-0" />
                 {!isCollapsed && <span>{item.title}</span>}
               </NavLink>
             </li>
