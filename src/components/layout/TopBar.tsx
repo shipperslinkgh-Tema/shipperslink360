@@ -57,7 +57,7 @@ export function TopBar() {
             <span className="text-xs font-medium text-muted-foreground">GPHA</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="integration-dot integration-pending" />
+            <span className="integration-dot integration-connected" />
             <span className="text-xs font-medium text-muted-foreground">ODeX</span>
           </div>
         </div>
