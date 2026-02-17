@@ -17,6 +17,7 @@ import Customers from "./pages/Customers";
 import Finance from "./pages/Finance";
 import Invoicing from "./pages/Invoicing";
 import Payments from "./pages/Payments";
+import BankIntegration from "./pages/BankIntegration";
 import Presentation from "./pages/Presentation";
 import ConsolidationPortal from "./pages/ConsolidationPortal";
 import AdminUsers from "./pages/AdminUsers";
@@ -123,6 +124,7 @@ const App = () => (
                 <Route path="/finance/invoices" element={<ProtectedRoute><WithLayout><Invoicing /></WithLayout></ProtectedRoute>} />
                 <Route path="/finance/payments" element={<ProtectedRoute><WithLayout><Payments /></WithLayout></ProtectedRoute>} />
                 <Route path="/finance/reports" element={<ProtectedRoute><WithLayout><Finance /></WithLayout></ProtectedRoute>} />
+                <Route path="/finance/banking" element={<ProtectedRoute><WithLayout><BankIntegration /></WithLayout></ProtectedRoute>} />
                 <Route path="/customs/gpha" element={<ProtectedRoute><WithLayout><GPHAPortStatus /></WithLayout></ProtectedRoute>} />
                 <Route path="/consolidation" element={<ProtectedRoute><WithLayout><ConsolidationPortal /></WithLayout></ProtectedRoute>} />
                 <Route path="/admin/users" element={<ProtectedRoute><WithLayout><AdminUsers /></WithLayout></ProtectedRoute>} />

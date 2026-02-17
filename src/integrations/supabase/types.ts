@@ -47,6 +47,292 @@ export type Database = {
         }
         Relationships: []
       }
+      bank_alerts: {
+        Row: {
+          alert_type: string
+          amount: number | null
+          bank_connection_id: string
+          created_at: string
+          currency: string | null
+          id: string
+          is_dismissed: boolean
+          is_read: boolean
+          message: string
+          priority: string
+          read_at: string | null
+          read_by: string | null
+          title: string
+          transaction_id: string | null
+        }
+        Insert: {
+          alert_type: string
+          amount?: number | null
+          bank_connection_id: string
+          created_at?: string
+          currency?: string | null
+          id?: string
+          is_dismissed?: boolean
+          is_read?: boolean
+          message: string
+          priority?: string
+          read_at?: string | null
+          read_by?: string | null
+          title: string
+          transaction_id?: string | null
+        }
+        Update: {
+          alert_type?: string
+          amount?: number | null
+          bank_connection_id?: string
+          created_at?: string
+          currency?: string | null
+          id?: string
+          is_dismissed?: boolean
+          is_read?: boolean
+          message?: string
+          priority?: string
+          read_at?: string | null
+          read_by?: string | null
+          title?: string
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_alerts_bank_connection_id_fkey"
+            columns: ["bank_connection_id"]
+            isOneToOne: false
+            referencedRelation: "bank_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_alerts_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "bank_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bank_connections: {
+        Row: {
+          account_name: string
+          account_number: string
+          account_type: string
+          api_endpoint: string | null
+          available_balance: number | null
+          balance: number | null
+          bank_display_name: string
+          bank_name: string
+          created_at: string
+          currency: string
+          error_message: string | null
+          id: string
+          is_active: boolean
+          last_sync_at: string | null
+          sync_status: string
+          updated_at: string
+        }
+        Insert: {
+          account_name: string
+          account_number: string
+          account_type?: string
+          api_endpoint?: string | null
+          available_balance?: number | null
+          balance?: number | null
+          bank_display_name: string
+          bank_name: string
+          created_at?: string
+          currency?: string
+          error_message?: string | null
+          id?: string
+          is_active?: boolean
+          last_sync_at?: string | null
+          sync_status?: string
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string
+          account_number?: string
+          account_type?: string
+          api_endpoint?: string | null
+          available_balance?: number | null
+          balance?: number | null
+          bank_display_name?: string
+          bank_name?: string
+          created_at?: string
+          currency?: string
+          error_message?: string | null
+          id?: string
+          is_active?: boolean
+          last_sync_at?: string | null
+          sync_status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bank_reconciliations: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          bank_closing_balance: number
+          bank_connection_id: string
+          bank_opening_balance: number
+          book_closing_balance: number
+          book_opening_balance: number
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          discrepancy_amount: number
+          id: string
+          matched_count: number
+          notes: string | null
+          period_end: string
+          period_start: string
+          status: string
+          total_credits: number
+          total_debits: number
+          unmatched_count: number
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          bank_closing_balance?: number
+          bank_connection_id: string
+          bank_opening_balance?: number
+          book_closing_balance?: number
+          book_opening_balance?: number
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          discrepancy_amount?: number
+          id?: string
+          matched_count?: number
+          notes?: string | null
+          period_end: string
+          period_start: string
+          status?: string
+          total_credits?: number
+          total_debits?: number
+          unmatched_count?: number
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          bank_closing_balance?: number
+          bank_connection_id?: string
+          bank_opening_balance?: number
+          book_closing_balance?: number
+          book_opening_balance?: number
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          discrepancy_amount?: number
+          id?: string
+          matched_count?: number
+          notes?: string | null
+          period_end?: string
+          period_start?: string
+          status?: string
+          total_credits?: number
+          total_debits?: number
+          unmatched_count?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_reconciliations_bank_connection_id_fkey"
+            columns: ["bank_connection_id"]
+            isOneToOne: false
+            referencedRelation: "bank_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bank_transactions: {
+        Row: {
+          amount: number
+          balance_after: number | null
+          bank_connection_id: string
+          counterparty_account: string | null
+          counterparty_name: string | null
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          is_reconciled: boolean
+          match_confidence: number | null
+          match_status: string
+          matched_invoice_id: string | null
+          matched_receivable_id: string | null
+          notes: string | null
+          raw_data: Json | null
+          reconciled_at: string | null
+          reconciled_by: string | null
+          transaction_date: string
+          transaction_ref: string
+          transaction_type: string
+          value_date: string | null
+        }
+        Insert: {
+          amount: number
+          balance_after?: number | null
+          bank_connection_id: string
+          counterparty_account?: string | null
+          counterparty_name?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_reconciled?: boolean
+          match_confidence?: number | null
+          match_status?: string
+          matched_invoice_id?: string | null
+          matched_receivable_id?: string | null
+          notes?: string | null
+          raw_data?: Json | null
+          reconciled_at?: string | null
+          reconciled_by?: string | null
+          transaction_date: string
+          transaction_ref: string
+          transaction_type: string
+          value_date?: string | null
+        }
+        Update: {
+          amount?: number
+          balance_after?: number | null
+          bank_connection_id?: string
+          counterparty_account?: string | null
+          counterparty_name?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_reconciled?: boolean
+          match_confidence?: number | null
+          match_status?: string
+          matched_invoice_id?: string | null
+          matched_receivable_id?: string | null
+          notes?: string | null
+          raw_data?: Json | null
+          reconciled_at?: string | null
+          reconciled_by?: string | null
+          transaction_date?: string
+          transaction_ref?: string
+          transaction_type?: string
+          value_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_transactions_bank_connection_id_fkey"
+            columns: ["bank_connection_id"]
+            isOneToOne: false
+            referencedRelation: "bank_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_documents: {
         Row: {
           created_at: string
