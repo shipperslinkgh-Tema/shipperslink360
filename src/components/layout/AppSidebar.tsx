@@ -110,7 +110,10 @@ export function AppSidebar() {
   // Build bottom nav dynamically
   const bottomNav: NavItem[] = [
     { title: "Software Guide", icon: BookOpen, href: "/presentation" },
-    ...(isAdmin ? [{ title: "User Management", icon: Shield, href: "/admin/users" }] : []),
+    ...(isAdmin ? [
+      { title: "User Management", icon: Shield, href: "/admin/users" },
+      { title: "Client Documents", icon: FileText, href: "/admin/client-documents" },
+    ] : []),
     { title: "Notifications", icon: Bell, href: "/notifications" },
     { title: "Settings", icon: Settings, href: "/settings" },
   ];
