@@ -21,6 +21,7 @@ import Presentation from "./pages/Presentation";
 import ConsolidationPortal from "./pages/ConsolidationPortal";
 import AdminUsers from "./pages/AdminUsers";
 import ClientDocumentManagement from "./pages/ClientDocumentManagement";
+import ClientDataManagement from "./pages/ClientDataManagement";
 import Index from "./pages/Index";
 import { AppLayout } from "./components/layout/AppLayout";
 import ClientLogin from "./pages/client/ClientLogin";
@@ -126,6 +127,7 @@ const App = () => (
                 <Route path="/consolidation" element={<ProtectedRoute><WithLayout><ConsolidationPortal /></WithLayout></ProtectedRoute>} />
                 <Route path="/admin/users" element={<ProtectedRoute><WithLayout><AdminUsers /></WithLayout></ProtectedRoute>} />
                 <Route path="/admin/client-documents" element={<ProtectedRoute><WithLayout><ClientDocumentManagement /></WithLayout></ProtectedRoute>} />
+                <Route path="/admin/client-data" element={<ProtectedRoute><WithLayout><ClientDataManagement /></WithLayout></ProtectedRoute>} />
                 <Route path="/presentation" element={<Presentation />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
