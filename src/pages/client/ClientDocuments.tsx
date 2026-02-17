@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FileText, Search, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const TYPE_LABELS: Record<string, string> = {
   sop: "SOP",
@@ -90,11 +91,15 @@ export default function ClientDocuments() {
                     <TableCell className="text-sm text-muted-foreground">{d.file_size || "—"}</TableCell>
                     <TableCell className="text-sm">{new Date(d.created_at).toLocaleDateString()}</TableCell>
                     <TableCell>
-                      {d.file_url && (
-                        <Button variant="ghost" size="sm" asChild>
-                          <a href={d.file_url} target="_blank" rel="noopener noreferrer">
-                            <Download className="h-4 w-4" />
-                          </a>
+                    {d.file_url && (
+                        <Button variant="ghost" size="sm" onClick={async () => {
+                          const { data, error } = await supabase.storage
+                            .from("client-documents")
+                            .createSignedUrl(d.file_url, 60);
+                          if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+                          else toast.error("Failed to download");
+                        }}>
+                          <Download className="h-4 w-4" />
                         </Button>
                       )}
                     </TableCell>
