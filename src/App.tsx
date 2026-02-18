@@ -28,6 +28,7 @@ import ClientDataManagement from "./pages/ClientDataManagement";
 import Index from "./pages/Index";
 import Warehouse from "./pages/Warehouse";
 import AIAssistant from "./pages/AIAssistant";
+import Notifications from "./pages/Notifications";
 import { AppLayout } from "./components/layout/AppLayout";
 import ClientLogin from "./pages/client/ClientLogin";
 import ClientDashboard from "./pages/client/ClientDashboard";
@@ -134,6 +135,7 @@ const App = () => (
                 <Route path="/warehouse" element={<ProtectedRoute><WithLayout><Warehouse /></WithLayout></ProtectedRoute>} />
                 <Route path="/reports" element={<ProtectedRoute><WithLayout><Reports /></WithLayout></ProtectedRoute>} />
                 <Route path="/ai-assistant" element={<ProtectedRoute><WithLayout><AIAssistant /></WithLayout></ProtectedRoute>} />
+                <Route path="/notifications" element={<ProtectedRoute><WithLayout><Notifications /></WithLayout></ProtectedRoute>} />
                 <Route path="/admin/users" element={<ProtectedRoute><WithLayout><AdminUsers /></WithLayout></ProtectedRoute>} />
                 <Route path="/admin/client-documents" element={<ProtectedRoute><WithLayout><ClientDocumentManagement /></WithLayout></ProtectedRoute>} />
                 <Route path="/admin/client-data" element={<ProtectedRoute><WithLayout><ClientDataManagement /></WithLayout></ProtectedRoute>} />

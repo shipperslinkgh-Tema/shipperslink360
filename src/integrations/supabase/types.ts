@@ -874,6 +874,72 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          action_url: string | null
+          category: string
+          created_at: string
+          id: string
+          is_read: boolean
+          is_resolved: boolean
+          message: string
+          metadata: Json | null
+          priority: string
+          read_at: string | null
+          recipient_department: string | null
+          recipient_id: string | null
+          reference_id: string | null
+          reference_type: string | null
+          resolved_at: string | null
+          sender_id: string | null
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          action_url?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          is_resolved?: boolean
+          message: string
+          metadata?: Json | null
+          priority?: string
+          read_at?: string | null
+          recipient_department?: string | null
+          recipient_id?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          resolved_at?: string | null
+          sender_id?: string | null
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          action_url?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          is_resolved?: boolean
+          message?: string
+          metadata?: Json | null
+          priority?: string
+          read_at?: string | null
+          recipient_department?: string | null
+          recipient_id?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          resolved_at?: string | null
+          sender_id?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
