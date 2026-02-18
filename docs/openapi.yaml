@@ -1,0 +1,1543 @@
+openapi: 3.0.3
+info:
+  title: SLAC FreightLink 360 API
+  description: |
+    REST API specification for the Laravel 11 backend of SLAC FreightLink 360.
+    All endpoints are versioned under /api/v1.
+    Authentication uses Laravel Sanctum (Bearer tokens).
+    Two guards exist: staff (default) and client (prefix /client).
+  version: 1.0.0
+  contact:
+    name: Shippers Link Agencies Co., Ltd
+
+servers:
+  - url: https://api.shipperslink.com/api/v1
+    description: Production
+  - url: https://staging-api.shipperslink.com/api/v1
+    description: Staging
+  - url: http://localhost:8000/api/v1
+    description: Local development
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+    PerPageParam:
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+    SearchParam:
+      name: search
+      in: query
+      schema:
+        type: string
+
+  schemas:
+    # ── Shared ──────────────────────────────────────────────
+    Pagination:
+      type: object
+      properties:
+        current_page: { type: integer }
+        last_page: { type: integer }
+        per_page: { type: integer }
+        total: { type: integer }
+
+    Error:
+      type: object
+      properties:
+        message: { type: string }
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items: { type: string }
+
+    # ── Auth ─────────────────────────────────────────────────
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+
+    AuthResponse:
+      type: object
+      properties:
+        token: { type: string }
+        user:
+          $ref: '#/components/schemas/Profile'
+
+    # ── Profile ──────────────────────────────────────────────
+    Profile:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        user_id: { type: integer }
+        full_name: { type: string }
+        staff_id: { type: string }
+        username: { type: string }
+        email: { type: string }
+        phone: { type: string, nullable: true }
+        department:
+          type: string
+          enum: [operations, documentation, accounts, marketing, customer_service, warehouse, management, super_admin]
+        avatar_url: { type: string, nullable: true }
+        is_active: { type: boolean }
+        is_locked: { type: boolean }
+        must_change_password: { type: boolean }
+        last_login_at: { type: string, format: date-time, nullable: true }
+        role:
+          type: string
+          enum: [super_admin, admin, manager, staff]
+
+    # ── Client ───────────────────────────────────────────────
+    ClientProfile:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        user_id: { type: integer }
+        customer_id: { type: string }
+        company_name: { type: string }
+        contact_name: { type: string }
+        email: { type: string }
+        phone: { type: string, nullable: true }
+        is_active: { type: boolean }
+        last_login_at: { type: string, format: date-time, nullable: true }
+
+    ClientShipment:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        customer_id: { type: string }
+        bl_number: { type: string }
+        container_number: { type: string, nullable: true }
+        vessel_name: { type: string, nullable: true }
+        voyage_number: { type: string, nullable: true }
+        origin: { type: string }
+        destination: { type: string }
+        cargo_description: { type: string, nullable: true }
+        weight_kg: { type: number, nullable: true }
+        status:
+          type: string
+          enum: [pending, in_transit, arrived, customs, cleared, delivered]
+        eta: { type: string, format: date-time, nullable: true }
+        ata: { type: string, format: date-time, nullable: true }
+        notes: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    ClientInvoice:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        customer_id: { type: string }
+        shipment_id: { type: string, format: uuid, nullable: true }
+        invoice_number: { type: string }
+        amount: { type: number }
+        currency: { type: string }
+        status:
+          type: string
+          enum: [pending, partially_paid, paid, overdue, cancelled]
+        description: { type: string, nullable: true }
+        due_date: { type: string, format: date }
+        paid_date: { type: string, format: date, nullable: true }
+        paid_amount: { type: number }
+        created_at: { type: string, format: date-time }
+
+    ClientDocument:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        customer_id: { type: string }
+        shipment_id: { type: string, format: uuid, nullable: true }
+        document_name: { type: string }
+        document_type: { type: string }
+        file_url: { type: string, nullable: true }
+        file_size: { type: string, nullable: true }
+        status: { type: string }
+        notes: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    ClientMessage:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        customer_id: { type: string }
+        sender_id: { type: integer }
+        sender_type:
+          type: string
+          enum: [client, staff]
+        subject: { type: string, nullable: true }
+        message: { type: string }
+        is_read: { type: boolean }
+        created_at: { type: string, format: date-time }
+
+    # ── Finance ───────────────────────────────────────────────
+    FinanceInvoice:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        invoice_number: { type: string }
+        invoice_type:
+          type: string
+          enum: [proforma, commercial, credit-note, debit-note]
+        customer: { type: string }
+        customer_id: { type: string }
+        service_type: { type: string }
+        currency: { type: string }
+        exchange_rate: { type: number }
+        subtotal: { type: number }
+        tax_amount: { type: number }
+        total_amount: { type: number }
+        ghs_equivalent: { type: number }
+        status:
+          type: string
+          enum: [draft, sent, partially_paid, paid, overdue, cancelled, disputed]
+        issue_date: { type: string, format: date }
+        due_date: { type: string, format: date }
+        paid_date: { type: string, format: date, nullable: true }
+        paid_amount: { type: number }
+        payment_method: { type: string, nullable: true }
+        shipment_ref: { type: string, nullable: true }
+        job_ref: { type: string, nullable: true }
+        consolidation_ref: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        created_by: { type: string }
+        approved_by: { type: string, nullable: true }
+        approval_date: { type: string, format: date, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    JobCost:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        job_ref: { type: string }
+        job_type:
+          type: string
+          enum: [shipment, consolidation, trucking, warehouse, other]
+        customer: { type: string }
+        customer_id: { type: string }
+        description: { type: string }
+        vendor: { type: string, nullable: true }
+        cost_category: { type: string }
+        currency: { type: string }
+        exchange_rate: { type: number }
+        amount: { type: number }
+        ghs_equivalent: { type: number }
+        payment_status:
+          type: string
+          enum: [unpaid, partial, paid]
+        paid_amount: { type: number }
+        paid_date: { type: string, format: date, nullable: true }
+        due_date: { type: string, format: date, nullable: true }
+        is_reimbursable: { type: boolean }
+        approval_status:
+          type: string
+          enum: [pending, approved, rejected]
+        approved_by: { type: string, nullable: true }
+        shipment_ref: { type: string, nullable: true }
+        consolidation_ref: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    Expense:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        expense_ref: { type: string }
+        description: { type: string }
+        category: { type: string }
+        currency: { type: string }
+        exchange_rate: { type: number }
+        amount: { type: number }
+        ghs_equivalent: { type: number }
+        status:
+          type: string
+          enum: [pending, approved, rejected, paid]
+        expense_date: { type: string, format: date }
+        paid_date: { type: string, format: date, nullable: true }
+        requested_by: { type: string }
+        approved_by: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    # ── Banking ───────────────────────────────────────────────
+    BankConnection:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        bank_name: { type: string }
+        bank_display_name: { type: string }
+        account_name: { type: string }
+        account_number: { type: string }
+        account_type: { type: string }
+        currency: { type: string }
+        balance: { type: number }
+        available_balance: { type: number }
+        is_active: { type: boolean }
+        sync_status:
+          type: string
+          enum: [pending, syncing, synced, error]
+        error_message: { type: string, nullable: true }
+        last_sync_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    BankTransaction:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        bank_connection_id: { type: string, format: uuid }
+        transaction_ref: { type: string }
+        transaction_type:
+          type: string
+          enum: [credit, debit]
+        amount: { type: number }
+        currency: { type: string }
+        description: { type: string, nullable: true }
+        counterparty_name: { type: string, nullable: true }
+        counterparty_account: { type: string, nullable: true }
+        transaction_date: { type: string, format: date-time }
+        value_date: { type: string, format: date-time, nullable: true }
+        balance_after: { type: number, nullable: true }
+        match_status:
+          type: string
+          enum: [unmatched, matched, partial, manual]
+        match_confidence: { type: number, nullable: true }
+        matched_invoice_id: { type: string, nullable: true }
+        is_reconciled: { type: boolean }
+        notes: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    BankAlert:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        bank_connection_id: { type: string, format: uuid }
+        transaction_id: { type: string, format: uuid, nullable: true }
+        title: { type: string }
+        message: { type: string }
+        alert_type: { type: string }
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+        amount: { type: number, nullable: true }
+        currency: { type: string, nullable: true }
+        is_read: { type: boolean }
+        is_dismissed: { type: boolean }
+        read_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    Notification:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        recipient_id: { type: integer, nullable: true }
+        recipient_department: { type: string, nullable: true }
+        sender_id: { type: integer, nullable: true }
+        title: { type: string }
+        message: { type: string }
+        type: { type: string }
+        category: { type: string }
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+        is_read: { type: boolean }
+        is_resolved: { type: boolean }
+        reference_type: { type: string, nullable: true }
+        reference_id: { type: string, nullable: true }
+        action_url: { type: string, nullable: true }
+        metadata: { type: object, nullable: true }
+        read_at: { type: string, format: date-time, nullable: true }
+        resolved_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+
+paths:
+  # ═══════════════════════════════════════════════════════════
+  # STAFF AUTH
+  # ═══════════════════════════════════════════════════════════
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Staff login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Account locked
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Staff logout
+      responses:
+        '200':
+          description: Logged out
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current staff user
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Profile' }
+
+  /auth/change-password:
+    post:
+      tags: [Auth]
+      summary: Change password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [current_password, new_password, new_password_confirmation]
+              properties:
+                current_password: { type: string }
+                new_password: { type: string, minLength: 8 }
+                new_password_confirmation: { type: string }
+      responses:
+        '200': { description: Password changed }
+        '422': { description: Validation error }
+
+  # ═══════════════════════════════════════════════════════════
+  # CLIENT AUTH
+  # ═══════════════════════════════════════════════════════════
+  /client/auth/login:
+    post:
+      tags: [Client Auth]
+      summary: Client portal login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+                  client: { $ref: '#/components/schemas/ClientProfile' }
+        '401': { description: Invalid credentials }
+        '403': { description: Not a client account }
+
+  /client/auth/logout:
+    post:
+      tags: [Client Auth]
+      summary: Client logout
+      responses:
+        '200': { description: Logged out }
+
+  /client/auth/me:
+    get:
+      tags: [Client Auth]
+      summary: Get current client profile
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClientProfile' }
+
+  # ═══════════════════════════════════════════════════════════
+  # ADMIN — USER MANAGEMENT
+  # ═══════════════════════════════════════════════════════════
+  /admin/users:
+    get:
+      tags: [Admin]
+      summary: List all staff users (admin only)
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - name: department
+          in: query
+          schema: { type: string }
+        - name: role
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Profile' }
+                  meta: { $ref: '#/components/schemas/Pagination' }
+
+    post:
+      tags: [Admin]
+      summary: Create staff user (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [full_name, staff_id, username, email, password, department, role]
+              properties:
+                full_name: { type: string }
+                staff_id: { type: string }
+                username: { type: string }
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+                department: { type: string }
+                role: { type: string }
+                phone: { type: string }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Profile' }
+        '422': { description: Validation error }
+
+  /admin/users/{id}/lock:
+    patch:
+      tags: [Admin]
+      summary: Lock a staff account
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Account locked }
+
+  /admin/users/{id}/unlock:
+    patch:
+      tags: [Admin]
+      summary: Unlock a staff account
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Account unlocked }
+
+  /admin/clients:
+    get:
+      tags: [Admin]
+      summary: List client portal accounts
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ClientProfile' }
+                  meta: { $ref: '#/components/schemas/Pagination' }
+
+    post:
+      tags: [Admin]
+      summary: Create client portal account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [customer_id, company_name, contact_name, email, password]
+              properties:
+                customer_id: { type: string }
+                company_name: { type: string }
+                contact_name: { type: string }
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+                phone: { type: string }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClientProfile' }
+
+  # ═══════════════════════════════════════════════════════════
+  # CLIENT PORTAL — SHIPMENTS
+  # ═══════════════════════════════════════════════════════════
+  /client/shipments:
+    get:
+      tags: [Client Portal]
+      summary: List client's own shipments
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - name: status
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ClientShipment' }
+                  meta: { $ref: '#/components/schemas/Pagination' }
+
+  /client/shipments/{id}:
+    get:
+      tags: [Client Portal]
+      summary: Get a single shipment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClientShipment' }
+        '404': { description: Not found }
+
+  # ═══════════════════════════════════════════════════════════
+  # CLIENT PORTAL — INVOICES
+  # ═══════════════════════════════════════════════════════════
+  /client/invoices:
+    get:
+      tags: [Client Portal]
+      summary: List client's own invoices
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - name: status
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ClientInvoice' }
+                  meta: { $ref: '#/components/schemas/Pagination' }
+
+  # ═══════════════════════════════════════════════════════════
+  # CLIENT PORTAL — DOCUMENTS
+  # ═══════════════════════════════════════════════════════════
+  /client/documents:
+    get:
+      tags: [Client Portal]
+      summary: List client's documents
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - name: shipment_id
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ClientDocument' }
+
+  /client/documents/{id}/download:
+    get:
+      tags: [Client Portal]
+      summary: Get signed download URL for a document
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url: { type: string }
+                  expires_at: { type: string, format: date-time }
+
+  # ═══════════════════════════════════════════════════════════
+  # CLIENT PORTAL — MESSAGES
+  # ═══════════════════════════════════════════════════════════
+  /client/messages:
+    get:
+      tags: [Client Portal]
+      summary: List client's messages
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ClientMessage' }
+    post:
+      tags: [Client Portal]
+      summary: Send a message to SLAC staff
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                subject: { type: string }
+                message: { type: string }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClientMessage' }
+
+  # ═══════════════════════════════════════════════════════════
+  # STAFF — CLIENT SHIPMENTS MANAGEMENT
+  # ═══════════════════════════════════════════════════════════
+  /shipments:
+    get:
+      tags: [Shipments]
+      summary: List all shipments (staff)
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - name: customer_id
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ClientShipment' }
+                  meta: { $ref: '#/components/schemas/Pagination' }
+
+    post:
+      tags: [Shipments]
+      summary: Create a shipment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [customer_id, bl_number, origin, destination]
+              properties:
+                customer_id: { type: string }
+                bl_number: { type: string }
+                container_number: { type: string }
+                vessel_name: { type: string }
+                voyage_number: { type: string }
+                origin: { type: string }
+                destination: { type: string }
+                cargo_description: { type: string }
+                weight_kg: { type: number }
+                status: { type: string }
+                eta: { type: string, format: date-time }
+                notes: { type: string }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClientShipment' }
+
+  /shipments/{id}:
+    get:
+      tags: [Shipments]
+      summary: Get shipment detail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClientShipment' }
+
+    put:
+      tags: [Shipments]
+      summary: Update a shipment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ClientShipment' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClientShipment' }
+
+    delete:
+      tags: [Shipments]
+      summary: Delete a shipment (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204': { description: Deleted }
+
+  /shipments/{id}/status:
+    patch:
+      tags: [Shipments]
+      summary: Update shipment status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string }
+                notes: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClientShipment' }
+
+  # ═══════════════════════════════════════════════════════════
+  # FINANCE — INVOICES
+  # ═══════════════════════════════════════════════════════════
+  /finance/invoices:
+    get:
+      tags: [Finance]
+      summary: List finance invoices
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: customer_id
+          in: query
+          schema: { type: string }
+        - name: date_from
+          in: query
+          schema: { type: string, format: date }
+        - name: date_to
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/FinanceInvoice' }
+                  meta: { $ref: '#/components/schemas/Pagination' }
+
+    post:
+      tags: [Finance]
+      summary: Create a finance invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FinanceInvoice' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FinanceInvoice' }
+
+  /finance/invoices/{id}:
+    get:
+      tags: [Finance]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FinanceInvoice' }
+
+    put:
+      tags: [Finance]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FinanceInvoice' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FinanceInvoice' }
+
+    delete:
+      tags: [Finance]
+      summary: Delete invoice (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204': { description: Deleted }
+
+  /finance/invoices/{id}/approve:
+    patch:
+      tags: [Finance]
+      summary: Approve an invoice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FinanceInvoice' }
+
+  /finance/invoices/{id}/mark-paid:
+    patch:
+      tags: [Finance]
+      summary: Mark invoice as paid
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [paid_amount, paid_date, payment_method]
+              properties:
+                paid_amount: { type: number }
+                paid_date: { type: string, format: date }
+                payment_method: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FinanceInvoice' }
+
+  # ═══════════════════════════════════════════════════════════
+  # FINANCE — JOB COSTS
+  # ═══════════════════════════════════════════════════════════
+  /finance/job-costs:
+    get:
+      tags: [Finance]
+      summary: List job costs
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - name: payment_status
+          in: query
+          schema: { type: string }
+        - name: approval_status
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/JobCost' }
+                  meta: { $ref: '#/components/schemas/Pagination' }
+
+    post:
+      tags: [Finance]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/JobCost' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobCost' }
+
+  /finance/job-costs/{id}/approve:
+    patch:
+      tags: [Finance]
+      summary: Approve a job cost
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobCost' }
+
+  # ═══════════════════════════════════════════════════════════
+  # FINANCE — EXPENSES
+  # ═══════════════════════════════════════════════════════════
+  /finance/expenses:
+    get:
+      tags: [Finance]
+      summary: List expenses
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Expense' }
+                  meta: { $ref: '#/components/schemas/Pagination' }
+
+    post:
+      tags: [Finance]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Expense' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Expense' }
+
+  /finance/expenses/{id}/approve:
+    patch:
+      tags: [Finance]
+      summary: Approve an expense
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Expense' }
+
+  # ═══════════════════════════════════════════════════════════
+  # BANKING
+  # ═══════════════════════════════════════════════════════════
+  /banking/connections:
+    get:
+      tags: [Banking]
+      summary: List bank connections
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/BankConnection' }
+
+    post:
+      tags: [Banking]
+      summary: Add a bank connection (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BankConnection' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BankConnection' }
+
+  /banking/connections/{id}/sync:
+    post:
+      tags: [Banking]
+      summary: Trigger balance sync for a connection
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BankConnection' }
+
+  /banking/transactions:
+    get:
+      tags: [Banking]
+      summary: List bank transactions
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - name: bank_connection_id
+          in: query
+          schema: { type: string, format: uuid }
+        - name: match_status
+          in: query
+          schema: { type: string }
+        - name: date_from
+          in: query
+          schema: { type: string, format: date }
+        - name: date_to
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/BankTransaction' }
+                  meta: { $ref: '#/components/schemas/Pagination' }
+
+  /banking/transactions/{id}/reconcile:
+    patch:
+      tags: [Banking]
+      summary: Mark transaction as reconciled
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                matched_invoice_id: { type: string }
+                notes: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BankTransaction' }
+
+  /banking/alerts:
+    get:
+      tags: [Banking]
+      summary: List bank alerts
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - name: is_dismissed
+          in: query
+          schema: { type: boolean }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/BankAlert' }
+
+  /banking/alerts/{id}/read:
+    patch:
+      tags: [Banking]
+      summary: Mark alert as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Marked read }
+
+  /banking/alerts/{id}/dismiss:
+    patch:
+      tags: [Banking]
+      summary: Dismiss a bank alert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Dismissed }
+
+  # ═══════════════════════════════════════════════════════════
+  # NOTIFICATIONS
+  # ═══════════════════════════════════════════════════════════
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: List notifications for current user
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - name: is_read
+          in: query
+          schema: { type: boolean }
+        - name: is_resolved
+          in: query
+          schema: { type: boolean }
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: priority
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Notification' }
+                  meta: { $ref: '#/components/schemas/Pagination' }
+
+    post:
+      tags: [Notifications]
+      summary: Create a notification (staff only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Notification' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Notification' }
+
+  /notifications/{id}/read:
+    patch:
+      tags: [Notifications]
+      summary: Mark notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Marked read }
+
+  /notifications/{id}/resolve:
+    patch:
+      tags: [Notifications]
+      summary: Mark notification as resolved
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Resolved }
+
+  /notifications/{id}:
+    delete:
+      tags: [Notifications]
+      summary: Delete a notification (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204': { description: Deleted }
+
+  /notifications/mark-all-read:
+    post:
+      tags: [Notifications]
+      summary: Mark all user's notifications as read
+      responses:
+        '200': { description: All marked read }
+
+  # ═══════════════════════════════════════════════════════════
+  # MESSAGES — STAFF SIDE
+  # ═══════════════════════════════════════════════════════════
+  /messages:
+    get:
+      tags: [Messages]
+      summary: List all client messages (staff view)
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - name: customer_id
+          in: query
+          schema: { type: string }
+        - name: is_read
+          in: query
+          schema: { type: boolean }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ClientMessage' }
+                  meta: { $ref: '#/components/schemas/Pagination' }
+
+    post:
+      tags: [Messages]
+      summary: Send a message to a client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [customer_id, message]
+              properties:
+                customer_id: { type: string }
+                subject: { type: string }
+                message: { type: string }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClientMessage' }
+
+  /messages/{id}/read:
+    patch:
+      tags: [Messages]
+      summary: Mark a message as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Marked read }
+
+  # ═══════════════════════════════════════════════════════════
+  # AI ASSISTANT
+  # ═══════════════════════════════════════════════════════════
+  /ai/chat:
+    post:
+      tags: [AI]
+      summary: Send a message to the AI assistant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [messages, module]
+              properties:
+                messages:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      role:
+                        type: string
+                        enum: [user, assistant]
+                      content: { type: string }
+                module: { type: string }
+      responses:
+        '200':
+          description: AI response (streamed SSE or JSON)
+          content:
+            text/event-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response: { type: string }
+                  tokens_used: { type: integer }
+
+  # ═══════════════════════════════════════════════════════════
+  # REPORTS
+  # ═══════════════════════════════════════════════════════════
+  /reports/finance-summary:
+    get:
+      tags: [Reports]
+      summary: Finance dashboard metrics
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [mtd, ytd, custom]
+        - name: date_from
+          in: query
+          schema: { type: string, format: date }
+        - name: date_to
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_invoiced: { type: number }
+                  total_collected: { type: number }
+                  total_outstanding: { type: number }
+                  total_expenses: { type: number }
+                  net_profit: { type: number }
+                  currency: { type: string }
+
+  /reports/audit-logs:
+    get:
+      tags: [Reports]
+      summary: Audit log report (admin only)
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - name: user_id
+          in: query
+          schema: { type: integer }
+        - name: action
+          in: query
+          schema: { type: string }
+        - name: date_from
+          in: query
+          schema: { type: string, format: date }
+        - name: date_to
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        user_id: { type: integer }
+                        action: { type: string }
+                        resource_type: { type: string }
+                        resource_id: { type: string }
+                        details: { type: object }
+                        ip_address: { type: string }
+                        created_at: { type: string, format: date-time }
+                  meta: { $ref: '#/components/schemas/Pagination' }
+
+tags:
+  - name: Auth
+    description: Staff authentication
+  - name: Client Auth
+    description: Client portal authentication
+  - name: Admin
+    description: Admin-only user management
+  - name: Client Portal
+    description: Client-facing read/send endpoints
+  - name: Shipments
+    description: Shipment management (staff)
+  - name: Finance
+    description: Invoices, job costs, expenses
+  - name: Banking
+    description: Bank connections, transactions, reconciliation
+  - name: Notifications
+    description: In-app notification management
+  - name: Messages
+    description: Staff ↔ client messaging
+  - name: AI
+    description: AI assistant integration
+  - name: Reports
+    description: Aggregated reporting endpoints
