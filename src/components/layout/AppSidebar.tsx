@@ -123,7 +123,7 @@ export function AppSidebar() {
       { title: "Client Documents", icon: FileText, href: "/admin/client-documents" },
     ] : []),
     { title: "Notifications", icon: Bell, href: "/notifications" },
-    { title: "Settings", icon: Settings, href: "/settings" },
+    ...(isAdmin ? [{ title: "Settings", icon: Settings, href: "/settings" }] : [{ title: "Settings", icon: Settings, href: "/settings" }]),
   ];
 
   const initials = profile?.full_name
