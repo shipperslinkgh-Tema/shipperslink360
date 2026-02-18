@@ -21,6 +21,7 @@ import BankIntegration from "./pages/BankIntegration";
 import Presentation from "./pages/Presentation";
 import ConsolidationPortal from "./pages/ConsolidationPortal";
 import AdminUsers from "./pages/AdminUsers";
+import SettingsPage from "./pages/Settings";
 import ClientDocumentManagement from "./pages/ClientDocumentManagement";
 import ClientDataManagement from "./pages/ClientDataManagement";
 import Index from "./pages/Index";
@@ -134,6 +135,7 @@ const App = () => (
                 <Route path="/admin/users" element={<ProtectedRoute><WithLayout><AdminUsers /></WithLayout></ProtectedRoute>} />
                 <Route path="/admin/client-documents" element={<ProtectedRoute><WithLayout><ClientDocumentManagement /></WithLayout></ProtectedRoute>} />
                 <Route path="/admin/client-data" element={<ProtectedRoute><WithLayout><ClientDataManagement /></WithLayout></ProtectedRoute>} />
+                <Route path="/settings" element={<ProtectedRoute><WithLayout><SettingsPage /></WithLayout></ProtectedRoute>} />
                 <Route path="/presentation" element={<Presentation />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
