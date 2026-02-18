@@ -580,6 +580,237 @@ export type Database = {
         }
         Relationships: []
       }
+      finance_expenses: {
+        Row: {
+          amount: number
+          approved_by: string | null
+          category: string
+          created_at: string
+          currency: string
+          description: string
+          exchange_rate: number
+          expense_date: string
+          expense_ref: string
+          ghs_equivalent: number
+          id: string
+          notes: string | null
+          paid_date: string | null
+          requested_by: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          approved_by?: string | null
+          category?: string
+          created_at?: string
+          currency?: string
+          description: string
+          exchange_rate?: number
+          expense_date?: string
+          expense_ref: string
+          ghs_equivalent?: number
+          id?: string
+          notes?: string | null
+          paid_date?: string | null
+          requested_by?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          approved_by?: string | null
+          category?: string
+          created_at?: string
+          currency?: string
+          description?: string
+          exchange_rate?: number
+          expense_date?: string
+          expense_ref?: string
+          ghs_equivalent?: number
+          id?: string
+          notes?: string | null
+          paid_date?: string | null
+          requested_by?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      finance_invoices: {
+        Row: {
+          approval_date: string | null
+          approved_by: string | null
+          consolidation_ref: string | null
+          created_at: string
+          created_by: string
+          currency: string
+          customer: string
+          customer_id: string
+          description: string | null
+          due_date: string
+          exchange_rate: number
+          ghs_equivalent: number
+          id: string
+          invoice_number: string
+          invoice_type: string
+          issue_date: string
+          job_ref: string | null
+          notes: string | null
+          paid_amount: number
+          paid_date: string | null
+          payment_method: string | null
+          service_type: string
+          shipment_ref: string | null
+          status: string
+          subtotal: number
+          tax_amount: number
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          approval_date?: string | null
+          approved_by?: string | null
+          consolidation_ref?: string | null
+          created_at?: string
+          created_by?: string
+          currency?: string
+          customer: string
+          customer_id: string
+          description?: string | null
+          due_date: string
+          exchange_rate?: number
+          ghs_equivalent?: number
+          id?: string
+          invoice_number: string
+          invoice_type?: string
+          issue_date?: string
+          job_ref?: string | null
+          notes?: string | null
+          paid_amount?: number
+          paid_date?: string | null
+          payment_method?: string | null
+          service_type?: string
+          shipment_ref?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          approval_date?: string | null
+          approved_by?: string | null
+          consolidation_ref?: string | null
+          created_at?: string
+          created_by?: string
+          currency?: string
+          customer?: string
+          customer_id?: string
+          description?: string | null
+          due_date?: string
+          exchange_rate?: number
+          ghs_equivalent?: number
+          id?: string
+          invoice_number?: string
+          invoice_type?: string
+          issue_date?: string
+          job_ref?: string | null
+          notes?: string | null
+          paid_amount?: number
+          paid_date?: string | null
+          payment_method?: string | null
+          service_type?: string
+          shipment_ref?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      finance_job_costs: {
+        Row: {
+          amount: number
+          approval_status: string
+          approved_by: string | null
+          consolidation_ref: string | null
+          cost_category: string
+          created_at: string
+          created_by: string
+          currency: string
+          customer: string
+          customer_id: string
+          description: string
+          due_date: string | null
+          exchange_rate: number
+          ghs_equivalent: number
+          id: string
+          is_reimbursable: boolean
+          job_ref: string
+          job_type: string
+          paid_amount: number
+          paid_date: string | null
+          payment_status: string
+          shipment_ref: string | null
+          updated_at: string
+          vendor: string | null
+        }
+        Insert: {
+          amount?: number
+          approval_status?: string
+          approved_by?: string | null
+          consolidation_ref?: string | null
+          cost_category?: string
+          created_at?: string
+          created_by?: string
+          currency?: string
+          customer: string
+          customer_id: string
+          description: string
+          due_date?: string | null
+          exchange_rate?: number
+          ghs_equivalent?: number
+          id?: string
+          is_reimbursable?: boolean
+          job_ref: string
+          job_type?: string
+          paid_amount?: number
+          paid_date?: string | null
+          payment_status?: string
+          shipment_ref?: string | null
+          updated_at?: string
+          vendor?: string | null
+        }
+        Update: {
+          amount?: number
+          approval_status?: string
+          approved_by?: string | null
+          consolidation_ref?: string | null
+          cost_category?: string
+          created_at?: string
+          created_by?: string
+          currency?: string
+          customer?: string
+          customer_id?: string
+          description?: string
+          due_date?: string | null
+          exchange_rate?: number
+          ghs_equivalent?: number
+          id?: string
+          is_reimbursable?: boolean
+          job_ref?: string
+          job_type?: string
+          paid_amount?: number
+          paid_date?: string | null
+          payment_status?: string
+          shipment_ref?: string | null
+          updated_at?: string
+          vendor?: string | null
+        }
+        Relationships: []
+      }
       login_history: {
         Row: {
           id: string
