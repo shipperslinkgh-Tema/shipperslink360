@@ -52,6 +52,9 @@ const slides: Slide[] = [
         "Fleet and driver management with trip scheduling",
         "Complete financial management with GHS currency support",
         "Customer relationship management with document tracking",
+        "Centralized notification & alert system for all departments",
+        "Comprehensive reports & analytics with role-based access",
+        "Secure client self-service portal for shipment & invoice visibility",
       ],
     },
   },
@@ -170,6 +173,8 @@ const slides: Slide[] = [
         "Expense tracking with approval workflows",
         "Tax filing management: VAT, PAYE, Corporate Tax",
         "Outstanding balance and receivables tracking",
+        "Job costing and profit & loss dashboard",
+        "Bank integration with automated reconciliation",
       ],
       useCases: [
         "Generate invoices for cleared shipments",
@@ -181,6 +186,64 @@ const slides: Slide[] = [
   },
   {
     id: 7,
+    title: "Notification Portal",
+    subtitle: "Centralized Real-Time Alert & Notification Center",
+    icon: Bell,
+    color: "from-orange-600 to-orange-400",
+    department: "All Departments",
+    content: {
+      description:
+        "A centralized, real-time notification hub that automates alerts for system activities, deadlines, and operational risks — ensuring the right people are notified at the right time.",
+      features: [
+        "Real-time in-app notifications with live updates",
+        "Priority tagging: Critical, High, Medium, Low",
+        "Department-aware filtering — users see only relevant alerts",
+        "Operations alerts: shipment status changes, delayed cargo, ICUMS updates",
+        "Finance alerts: overdue invoices, payment receipts, demurrage risk warnings",
+        "Warehouse alerts: aging cargo, capacity threshold warnings, damage logs",
+        "Management alerts: KPI drops, risk exposure, security warnings",
+        "Bulk actions: Mark all read, resolve, delete",
+        "Notification preferences panel to enable/disable alert types per category",
+      ],
+      useCases: [
+        "Accounts team receives instant alert when an invoice becomes overdue",
+        "Operations receives container arrival notifications automatically",
+        "Management gets escalated alerts for unresolved critical issues",
+        "Warehouse team is notified when space reaches 85% capacity",
+        "Filter inbox by category (Finance, Warehouse, Operations) to prioritize work",
+      ],
+    },
+  },
+  {
+    id: 8,
+    title: "Reports & Analytics",
+    subtitle: "Business Intelligence Across All Departments",
+    icon: BarChart3,
+    color: "from-cyan-600 to-cyan-400",
+    department: "Management",
+    content: {
+      description:
+        "A comprehensive reports and analytics module delivering real-time, filterable, and exportable business intelligence across Operations, Finance, Warehouse, and Client dimensions — with role-based access control.",
+      features: [
+        "Management Tab: KPI summary cards, revenue vs expense trends, department performance, AI executive summary",
+        "Operations Tab: Shipment volume by type (Bar chart), BL/AWB tracking, status distribution (Pie chart)",
+        "Finance Tab: Revenue report, outstanding invoices, net cash position, expense analysis",
+        "Warehouse Tab: Zone occupancy utilization bars, cargo aging breakdown (0–7, 8–14, 15–30, 30+ days)",
+        "Clients Tab: Profitability table, credit exposure progress bars, active vs inactive clients",
+        "Role-based tab visibility — Accounts sees Finance/Clients; Warehouse sees Warehouse only",
+        "Export options: CSV, Excel, PDF",
+      ],
+      useCases: [
+        "Management monthly review: Open Management tab, review KPI cards and AI summary",
+        "Finance audit: Filter by date range and export outstanding invoices to Excel",
+        "Warehouse planning: Check occupancy utilization and identify aging cargo",
+        "Client review: Identify top revenue clients and high credit-risk accounts",
+        "Operations debrief: Review delayed shipments and clearance turnaround analysis",
+      ],
+    },
+  },
+  {
+    id: 9,
     title: "Customer Portal",
     subtitle: "Client Management & Documentation",
     icon: Users,
@@ -188,7 +251,7 @@ const slides: Slide[] = [
     department: "Sales & Customer Service",
     content: {
       description:
-        "Maintain comprehensive customer records including company details, contacts, documents, and shipment history.",
+        "Maintain comprehensive customer records including company details, contacts, documents, and shipment history for all clients managed by SLAC.",
       features: [
         "Customer directory with search and filtering",
         "Company details: TIN Number, Registration, Industry",
@@ -205,51 +268,84 @@ const slides: Slide[] = [
     },
   },
   {
-    id: 8,
-    title: "Reports & Analytics",
-    subtitle: "Business Intelligence & Insights",
-    icon: BarChart3,
-    color: "from-cyan-600 to-cyan-400",
-    department: "Management",
+    id: 10,
+    title: "Client Self-Service Portal",
+    subtitle: "Secure External Portal for Clients",
+    icon: Plane,
+    color: "from-indigo-600 to-indigo-400",
+    department: "Sales & Customer Service",
     content: {
       description:
-        "Generate comprehensive reports and analytics to drive business decisions and monitor operational performance.",
+        "A secure, branded external portal at /portal/login that allows SLAC clients to independently track their shipments, view documents, check invoices, and communicate with the SLAC team — without needing internal system access.",
       features: [
-        "Shipment volume reports by period and type",
-        "Revenue and expense analysis",
-        "Customer performance and outstanding balances",
-        "Fleet utilization and efficiency metrics",
-        "Customs clearance time analysis",
+        "Secure login isolated from internal staff accounts",
+        "Dashboard with live counts: Active Shipments, Documents, Invoices, Unread Messages",
+        "Shipment Tracking: BL/container/vessel search with real-time status badges",
+        "Documents & SOPs: View and securely download shipping documents",
+        "Invoices & Payments: Outstanding balance summary, invoice history, payment status",
+        "Real-time Messaging: Direct chat with SLAC team with instant delivery",
+        "Row-Level Security: Each client sees only their own company's data",
       ],
       useCases: [
-        "Monthly management review presentations",
-        "Identify high-value customers and opportunities",
-        "Analyze operational bottlenecks",
-        "Budget planning and forecasting",
+        "Client logs in to track their shipment ETA without calling SLAC",
+        "Client downloads their Bill of Lading or SOP from the documents section",
+        "Client checks outstanding invoices and payment due dates",
+        "Client sends a message to SLAC requesting an update on a held container",
+        "Staff creates a client portal account from Admin → User Management",
       ],
     },
   },
   {
-    id: 9,
+    id: 11,
+    title: "AI Assistant",
+    subtitle: "Intelligent Department-Aware AI Support",
+    icon: Settings,
+    color: "from-violet-600 to-violet-400",
+    department: "All Departments",
+    content: {
+      description:
+        "A built-in AI assistant powered by advanced language models, providing intelligent support across all departments — from shipment data analysis to financial summaries and warehouse insights.",
+      features: [
+        "Operations module: Shipment queries, status summaries, delay risk detection",
+        "Documentation module: HS code suggestions, customs document validation",
+        "Finance module: Billing anomaly detection, revenue reporting summaries",
+        "Management module: KPI insights, performance summaries, executive briefings",
+        "Warehouse module: Inventory queries and congestion forecasting",
+        "Smart Chat: General assistant available to all users",
+        "All AI interactions logged in audit trail for compliance",
+      ],
+      useCases: [
+        "Ask the Operations AI: 'Which shipments are at risk of demurrage this week?'",
+        "Ask the Finance AI: 'Summarize outstanding invoices over 30 days'",
+        "Ask the Documentation AI: 'What HS code applies to automotive spare parts?'",
+        "Ask Management AI: 'Generate an executive summary of this month's KPIs'",
+        "Access via the AI Assistant page or the floating chat widget on any page",
+      ],
+    },
+  },
+  {
+    id: 12,
     title: "Getting Started",
     subtitle: "Quick Start Guide for Your Team",
     icon: CheckCircle,
-    color: "from-indigo-600 to-indigo-400",
+    color: "from-teal-600 to-teal-400",
     content: {
       description:
         "Follow these steps to get your team up and running with SLAC Operations quickly and efficiently.",
       features: [
-        "Step 1: Set up user accounts with appropriate department access",
-        "Step 2: Import existing customer data and documentation",
-        "Step 3: Configure office accounts and financial settings",
-        "Step 4: Add fleet vehicles and driver information",
-        "Step 5: Start creating shipments and tracking operations",
+        "Step 1: Admin sets up staff user accounts with appropriate department access",
+        "Step 2: Admin creates client portal accounts for each customer company",
+        "Step 3: Import existing customer data and shipping documentation",
+        "Step 4: Configure office accounts and financial settings in Finance",
+        "Step 5: Add fleet vehicles and driver profiles in the Trucking module",
+        "Step 6: Start creating shipments and tracking operations in real time",
+        "Step 7: Share client portal login link with customers for self-service access",
       ],
       useCases: [
-        "Contact support for training sessions",
-        "Use the notifications bell for system alerts",
-        "Access settings for user preferences",
-        "Bookmark frequently used pages for quick access",
+        "Use the Notifications bell to stay on top of urgent alerts",
+        "Visit Reports & Analytics for weekly management reviews",
+        "Use the AI Assistant for quick answers without searching manually",
+        "Bookmark the Client Portal link to share with new customers",
       ],
     },
   },
@@ -401,7 +497,7 @@ export default function Presentation() {
         {/* Quick Navigation */}
         <div className="mt-8">
           <h3 className="text-sm font-medium text-muted-foreground mb-4">Quick Navigation</h3>
-          <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-2">
+          <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
             {slides.map((s, index) => {
               const SlideIcon = s.icon;
               return (
