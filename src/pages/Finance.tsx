@@ -24,6 +24,7 @@ import { ExpensesTable } from "@/components/finance/ExpensesTable";
 import { TaxFilingTable } from "@/components/finance/TaxFilingTable";
 import { DirectorTaxTable } from "@/components/finance/DirectorTaxTable";
 import { RegistrarRenewalTable } from "@/components/finance/RegistrarRenewalTable";
+import { usePLData } from "@/hooks/usePLData";
 import {
   invoices,
   officeAccounts,
@@ -34,11 +35,10 @@ import {
   jobProfitability,
   payables,
   receivables,
-  agingSummary,
   customerCredits,
-  dashboardMetrics,
   exchangeRates,
 } from "@/data/financeData";
+
 import {
   Plus,
   Search,
@@ -68,6 +68,9 @@ const Finance = () => {
   const [invoiceTypeFilter, setInvoiceTypeFilter] = useState<string>("all");
   const [invoiceStatusFilter, setInvoiceStatusFilter] = useState<string>("all");
   const [payableStatusFilter, setPayableStatusFilter] = useState<string>("all");
+
+  // Live P&L data from database
+  const { metrics: liveMetrics, agingSummary: liveAgingSummary, revenueByService, costBreakdown, expenseBreakdown, isLoading: plLoading } = usePLData();
 
   const filteredInvoices = useMemo(() => {
     return invoices.filter((invoice) => {
@@ -120,10 +123,11 @@ const Finance = () => {
 
   // Calculate alerts for display
   const alertsCount = 
-    (dashboardMetrics.overdueInvoices > 0 ? 1 : 0) +
-    (dashboardMetrics.overduePayables > 0 ? 1 : 0) +
+    (liveMetrics.overdueInvoices > 0 ? 1 : 0) +
+    (liveMetrics.overduePayables > 0 ? 1 : 0) +
     taxFilings.filter(t => t.status === "overdue").length +
     registrarRenewals.filter(r => r.status === "expired" || r.status === "expiring_soon").length;
+
 
   return (
     <div className="space-y-6">
@@ -220,11 +224,12 @@ const Finance = () => {
 
         <TabsContent value="dashboard">
           <FinanceDashboard 
-            metrics={dashboardMetrics} 
-            agingSummary={agingSummary}
+            metrics={liveMetrics} 
+            agingSummary={liveAgingSummary}
             exchangeRates={exchangeRates}
           />
         </TabsContent>
+
 
         <TabsContent value="invoices">
           <Card>
@@ -392,12 +397,17 @@ const Finance = () => {
 
         <TabsContent value="reports">
           <PLDashboard 
-            metrics={dashboardMetrics}
-            agingSummary={agingSummary}
+            metrics={liveMetrics}
+            agingSummary={liveAgingSummary}
+            revenueByService={revenueByService}
+            costBreakdown={costBreakdown}
+            expenseBreakdown={expenseBreakdown}
+            isLoading={plLoading}
           />
         </TabsContent>
 
         <TabsContent value="accounts">
+
           <Card>
             <CardHeader>
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

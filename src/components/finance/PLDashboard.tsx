@@ -34,9 +34,20 @@ import { cn } from "@/lib/utils";
 interface PLDashboardProps {
   metrics: FinanceDashboardMetrics;
   agingSummary: AgingSummary;
+  revenueByService?: { label: string; value: number; color: string }[];
+  costBreakdown?: { label: string; value: number }[];
+  expenseBreakdown?: { label: string; value: number; percentage: number }[];
+  isLoading?: boolean;
 }
 
-export function PLDashboard({ metrics, agingSummary }: PLDashboardProps) {
+export function PLDashboard({
+  metrics,
+  agingSummary,
+  revenueByService,
+  costBreakdown: liveCostBreakdown,
+  expenseBreakdown: liveExpenseBreakdown,
+  isLoading = false,
+}: PLDashboardProps) {
   const [reportPeriod, setReportPeriod] = useState("mtd");
 
   const formatCurrency = (amount: number, compact = false) => {
@@ -65,36 +76,53 @@ export function PLDashboard({ metrics, agingSummary }: PLDashboardProps) {
   };
 
   const netProfit = plData.grossProfit - plData.expenses;
-  const netMargin = (netProfit / plData.revenue) * 100;
+  const netMargin = plData.revenue > 0 ? (netProfit / plData.revenue) * 100 : 0;
   const targetRevenue = reportPeriod === "mtd" ? 500000 : 6000000;
   const revenueProgress = (plData.revenue / targetRevenue) * 100;
 
-  // Revenue breakdown
-  const revenueBreakdown = [
-    { label: "Freight Forwarding", value: plData.revenue * 0.45, color: "bg-blue-500" },
-    { label: "Customs Clearing", value: plData.revenue * 0.25, color: "bg-green-500" },
-    { label: "Trucking", value: plData.revenue * 0.15, color: "bg-amber-500" },
-    { label: "Warehousing", value: plData.revenue * 0.10, color: "bg-purple-500" },
-    { label: "Agency Fees", value: plData.revenue * 0.05, color: "bg-pink-500" },
-  ];
+  // Use live data if available, otherwise fallback to proportional estimates
+  const revenueBreakdown =
+    revenueByService && revenueByService.length > 0
+      ? revenueByService
+      : [
+          { label: "Freight Forwarding", value: plData.revenue * 0.45, color: "bg-blue-500" },
+          { label: "Customs Clearing", value: plData.revenue * 0.25, color: "bg-green-500" },
+          { label: "Trucking", value: plData.revenue * 0.15, color: "bg-amber-500" },
+          { label: "Warehousing", value: plData.revenue * 0.10, color: "bg-purple-500" },
+          { label: "Agency Fees", value: plData.revenue * 0.05, color: "bg-pink-500" },
+        ];
 
-  // Cost breakdown
-  const costBreakdown = [
-    { label: "Freight Costs", value: plData.costs * 0.50 },
-    { label: "Port Charges", value: plData.costs * 0.15 },
-    { label: "DO Charges", value: plData.costs * 0.10 },
-    { label: "Trucking", value: plData.costs * 0.15 },
-    { label: "Other", value: plData.costs * 0.10 },
-  ];
+  const costBreakdown =
+    liveCostBreakdown && liveCostBreakdown.length > 0
+      ? liveCostBreakdown
+      : [
+          { label: "Freight Costs", value: plData.costs * 0.50 },
+          { label: "Port Charges", value: plData.costs * 0.15 },
+          { label: "DO Charges", value: plData.costs * 0.10 },
+          { label: "Trucking", value: plData.costs * 0.15 },
+          { label: "Other", value: plData.costs * 0.10 },
+        ];
 
-  // Expense breakdown
-  const expenseBreakdown = [
-    { label: "Salaries", value: plData.expenses * 0.40, percentage: 40 },
-    { label: "Rent & Utilities", value: plData.expenses * 0.20, percentage: 20 },
-    { label: "Vehicle & Fuel", value: plData.expenses * 0.15, percentage: 15 },
-    { label: "Admin", value: plData.expenses * 0.15, percentage: 15 },
-    { label: "Bank Charges", value: plData.expenses * 0.10, percentage: 10 },
-  ];
+  const expenseBreakdown =
+    liveExpenseBreakdown && liveExpenseBreakdown.length > 0
+      ? liveExpenseBreakdown
+      : [
+          { label: "Salaries", value: plData.expenses * 0.40, percentage: 40 },
+          { label: "Rent & Utilities", value: plData.expenses * 0.20, percentage: 20 },
+          { label: "Vehicle & Fuel", value: plData.expenses * 0.15, percentage: 15 },
+          { label: "Admin", value: plData.expenses * 0.15, percentage: 15 },
+          { label: "Bank Charges", value: plData.expenses * 0.10, percentage: 10 },
+        ];
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-32 bg-muted animate-pulse rounded-lg" />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
