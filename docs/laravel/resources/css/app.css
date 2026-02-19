@@ -1,0 +1,308 @@
+/**
+ * SLAC FreightLink 360 — Main Stylesheet
+ * Dark-mode-first design system built on Tailwind CSS
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Google Fonts ─────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── Custom layer overrides ───────────────────────────────────────────────── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Focus ring for accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-gray-900;
+  }
+}
+
+/* ── Print styles ─────────────────────────────────────────────────────────── */
+@media print {
+  .no-print { display: none !important; }
+  .sidebar, .topbar, .chat-widget { display: none !important; }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12px;
+  }
+
+  .print-invoice {
+    background: white !important;
+    color: black !important;
+    padding: 40px !important;
+  }
+
+  .print-invoice * {
+    color: black !important;
+    border-color: #e5e7eb !important;
+    background: white !important;
+  }
+
+  .print-invoice .invoice-header {
+    border-bottom: 2px solid #1d3d8c !important;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+  }
+
+  table { page-break-inside: avoid; }
+  tr { page-break-inside: avoid; }
+}
+
+/* ── Sidebar transition ───────────────────────────────────────────────────── */
+.sidebar {
+  transition: width 0.3s ease, transform 0.3s ease;
+}
+
+/* ── Topbar dropdown ──────────────────────────────────────────────────────── */
+[x-cloak] { display: none !important; }
+
+/* ── Chart.js canvas ──────────────────────────────────────────────────────── */
+canvas {
+  max-width: 100%;
+}
+
+/* ── Status badge mixins ──────────────────────────────────────────────────── */
+.status-pending        { @apply badge badge-yellow; }
+.status-active         { @apply badge badge-green; }
+.status-completed      { @apply badge badge-blue; }
+.status-cancelled      { @apply badge badge-red; }
+.status-in_transit     { @apply badge badge-blue; }
+.status-arrived        { @apply badge badge-green; }
+.status-cleared        { @apply badge badge-teal; }
+.status-overdue        { @apply badge badge-orange; }
+.status-draft          { @apply badge badge-gray; }
+.status-approved       { @apply badge badge-green; }
+.status-rejected       { @apply badge badge-red; }
+.status-paid           { @apply badge badge-green; }
+.status-partial        { @apply badge badge-yellow; }
+.status-unpaid         { @apply badge badge-red; }
+.status-submitted      { @apply badge badge-purple; }
+
+/* ── Notification dot pulse ───────────────────────────────────────────────── */
+.notification-pulse {
+  position: relative;
+}
+.notification-pulse::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  border: 2px solid #0f1629;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ── Typing dots for chat ─────────────────────────────────────────────────── */
+.typing-dots span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background-color: #6b7db0;
+  border-radius: 50%;
+  animation: bounceDot 1.4s infinite ease-in-out both;
+}
+.typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+.typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+.typing-dots span:nth-child(3) { animation-delay: 0s; }
+
+@keyframes bounceDot {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
+/* ── Sidebar nav active indicator ────────────────────────────────────────── */
+.nav-active-indicator {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: linear-gradient(180deg, #5b8fff, #3b6fd4);
+  border-radius: 2px 0 0 2px;
+}
+
+/* ── Timeline for shipment details ───────────────────────────────────────── */
+.timeline {
+  position: relative;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 1.25rem;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, #3b6fd4, #243054);
+}
+.timeline-item {
+  position: relative;
+  padding-left: 3rem;
+  padding-bottom: 1.5rem;
+}
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+.timeline-dot {
+  position: absolute;
+  left: 0.5rem;
+  top: 0.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: #1a2240;
+  border: 2px solid #3b6fd4;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+.timeline-dot.completed {
+  background-color: #3b6fd4;
+}
+
+/* ── DataTable-like stripe ───────────────────────────────────────────────── */
+.table-striped tbody tr:nth-child(odd) {
+  background-color: rgba(26, 34, 64, 0.3);
+}
+
+/* ── Gradient borders ─────────────────────────────────────────────────────── */
+.border-gradient-brand {
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+}
+.border-gradient-brand::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, #3b6fd4, #2553b4);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* ── Tooltip ─────────────────────────────────────────────────────────────── */
+[data-tooltip] {
+  position: relative;
+}
+[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  background: #0f1629;
+  color: #d8e6f5;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  border: 1px solid #243054;
+  z-index: 100;
+  pointer-events: none;
+}
+
+/* ── KPI card highlight ───────────────────────────────────────────────────── */
+.kpi-glow-blue  { box-shadow: 0 0 20px rgba(59, 130, 246, 0.15); }
+.kpi-glow-green { box-shadow: 0 0 20px rgba(34, 197, 94, 0.15); }
+.kpi-glow-gold  { box-shadow: 0 0 20px rgba(245, 158, 11, 0.15); }
+.kpi-glow-red   { box-shadow: 0 0 20px rgba(239, 68, 68, 0.15); }
+
+/* ── Demurrage progress bar ───────────────────────────────────────────────── */
+.demurrage-bar {
+  height: 6px;
+  border-radius: 9999px;
+  background: #1a2240;
+  overflow: hidden;
+}
+.demurrage-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.5s ease;
+}
+.demurrage-bar-fill.safe    { background: linear-gradient(90deg, #22c55e, #16a34a); }
+.demurrage-bar-fill.warning { background: linear-gradient(90deg, #f59e0b, #d97706); }
+.demurrage-bar-fill.danger  { background: linear-gradient(90deg, #ef4444, #dc2626); }
+
+/* ── Finance P&L table ───────────────────────────────────────────────────── */
+.pl-positive { color: #4ade80; }
+.pl-negative { color: #f87171; }
+.pl-subtotal {
+  background-color: rgba(26, 34, 64, 0.5);
+  font-weight: 600;
+}
+.pl-total {
+  background-color: rgba(59, 111, 212, 0.15);
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+/* ── Chat widget transition ───────────────────────────────────────────────── */
+.chat-panel-enter {
+  animation: chatPanelIn 0.25s ease-out;
+}
+@keyframes chatPanelIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+/* ── Invoice print template ───────────────────────────────────────────────── */
+.invoice-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-35deg);
+  font-size: 6rem;
+  font-weight: 800;
+  opacity: 0.04;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* ── Clearance pipeline ───────────────────────────────────────────────────── */
+.pipeline-step {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.pipeline-step::after {
+  content: '';
+  position: absolute;
+  top: 1.25rem;
+  right: -50%;
+  width: 100%;
+  height: 2px;
+  background: #243054;
+}
+.pipeline-step:last-child::after { display: none; }
+.pipeline-step.completed::after  { background: #3b6fd4; }
+
+/* ── Responsive layout ───────────────────────────────────────────────────── */
+@media (max-width: 1023px) {
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 40;
+    backdrop-filter: blur(2px);
+  }
+}
