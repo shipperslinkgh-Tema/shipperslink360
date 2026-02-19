@@ -19,6 +19,7 @@ use App\Http\Controllers\Client\ClientMessageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AI\AIChatController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ChatController;
 
 /*
 |--------------------------------------------------------------------------
