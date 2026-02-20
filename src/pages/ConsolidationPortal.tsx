@@ -7,7 +7,7 @@ import { ConsolidationStats } from "@/components/consolidation/ConsolidationStat
 import { ConsolidationTable } from "@/components/consolidation/ConsolidationTable";
 import { ConsolidationDetailPanel } from "@/components/consolidation/ConsolidationDetailPanel";
 import { NewConsolidationForm } from "@/components/consolidation/NewConsolidationForm";
-import { consolidations, shippers, demurrageRecords, operationalMetrics } from "@/data/consolidationData";
+import { useConsolidations, useShippers, useDemurrageRecords, useOperationalMetrics } from "@/hooks/useConsolidations";
 import { Consolidation } from "@/types/consolidation";
 
 export default function ConsolidationPortal() {
@@ -16,6 +16,11 @@ export default function ConsolidationPortal() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedConsolidation, setSelectedConsolidation] = useState<Consolidation | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
+
+  const { data: consolidations = [] } = useConsolidations();
+  const { data: allShippers = [] } = useShippers();
+  const { data: allDemurrage = [] } = useDemurrageRecords();
+  const operationalMetrics = useOperationalMetrics();
 
   const filteredConsolidations = consolidations.filter((c) => {
     const matchesSearch = c.consolidationRef.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -28,11 +33,11 @@ export default function ConsolidationPortal() {
   });
 
   const selectedShippers = selectedConsolidation 
-    ? shippers.filter(s => s.consolidationId === selectedConsolidation.id)
+    ? allShippers.filter(s => s.consolidationId === selectedConsolidation.id)
     : [];
   
   const selectedDemurrage = selectedConsolidation
-    ? demurrageRecords.find(d => d.consolidationId === selectedConsolidation.id)
+    ? allDemurrage.find(d => d.consolidationId === selectedConsolidation.id)
     : undefined;
 
   return (

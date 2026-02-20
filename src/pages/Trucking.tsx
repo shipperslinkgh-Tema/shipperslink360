@@ -7,11 +7,15 @@ import { TruckFleetTable } from "@/components/trucking/TruckFleetTable";
 import { DriverTable } from "@/components/trucking/DriverTable";
 import { TripTable } from "@/components/trucking/TripTable";
 import { TruckingStats } from "@/components/trucking/TruckingStats";
-import { trucks, drivers, trips } from "@/data/truckingData";
+import { useTrucks, useDrivers, useTrips } from "@/hooks/useTrucking";
 
 export default function Trucking() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("trips");
+
+  const { data: trucks = [] } = useTrucks();
+  const { data: drivers = [] } = useDrivers();
+  const { data: trips = [] } = useTrips();
 
   const filteredTrips = trips.filter(
     (trip) =>

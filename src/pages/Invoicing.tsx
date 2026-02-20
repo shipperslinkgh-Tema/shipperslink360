@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { EnhancedInvoicesTable } from "@/components/finance/EnhancedInvoicesTable";
-import { invoices } from "@/data/financeData";
+import { useFinanceInvoices } from "@/hooks/useFinanceData";
 import { Plus, Search, Download, Filter, FileText, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -18,6 +18,8 @@ const Invoicing = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [invoiceTypeFilter, setInvoiceTypeFilter] = useState<string>("all");
   const [invoiceStatusFilter, setInvoiceStatusFilter] = useState<string>("all");
+
+  const { data: invoices = [] } = useFinanceInvoices();
 
   const filteredInvoices = useMemo(() => {
     return invoices.filter((invoice) => {

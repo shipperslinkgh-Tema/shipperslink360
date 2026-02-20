@@ -18,7 +18,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { ChatMessage, ChatChannel } from "@/types/consolidation";
-import { chatMessages, chatChannels } from "@/data/consolidationData";
+// Chat data now managed locally - will be wired to realtime later
 
 interface InternalChatBoxProps {
   isOpen: boolean;
@@ -44,11 +44,18 @@ const departmentLabels: Record<string, string> = {
 };
 
 export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
-  const [selectedChannel, setSelectedChannel] = useState<ChatChannel | null>(chatChannels[0]);
+  const defaultChannels: ChatChannel[] = [
+    { id: "CH001", name: "General", type: "department", participants: [], unreadCount: 0 },
+    { id: "CH002", name: "Operations", type: "department", participants: [], unreadCount: 0 },
+    { id: "CH003", name: "Finance Team", type: "department", participants: [], unreadCount: 0 },
+  ];
+
+  const [selectedChannel, setSelectedChannel] = useState<ChatChannel | null>(defaultChannels[0]);
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>(chatMessages);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [showChannels, setShowChannels] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatChannels = defaultChannels;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

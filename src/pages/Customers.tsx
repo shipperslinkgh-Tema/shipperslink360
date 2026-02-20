@@ -12,7 +12,7 @@ import {
 import { CustomerTable } from "@/components/customers/CustomerTable";
 import { CustomerDetailsPanel } from "@/components/customers/CustomerDetailsPanel";
 import { CustomerStats } from "@/components/customers/CustomerStats";
-import { customers } from "@/data/customerData";
+import { useCustomers } from "@/hooks/useCustomers";
 import { Customer } from "@/types/customer";
 import { Plus, Search, Filter } from "lucide-react";
 
@@ -21,6 +21,8 @@ const Customers = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+
+  const { data: customers = [], isLoading } = useCustomers();
 
   const filteredCustomers = useMemo(() => {
     return customers.filter((customer) => {
@@ -34,7 +36,7 @@ const Customers = () => {
 
       return matchesSearch && matchesStatus && matchesType;
     });
-  }, [searchTerm, statusFilter, typeFilter]);
+  }, [customers, searchTerm, statusFilter, typeFilter]);
 
   const stats = useMemo(() => {
     const totalCustomers = customers.length;
@@ -46,7 +48,7 @@ const Customers = () => {
     const totalOutstanding = customers.reduce((acc, c) => acc + c.outstandingBalance, 0);
 
     return { totalCustomers, activeCustomers, pendingDocuments, totalOutstanding };
-  }, []);
+  }, [customers]);
 
   return (
     <div className="space-y-6">
