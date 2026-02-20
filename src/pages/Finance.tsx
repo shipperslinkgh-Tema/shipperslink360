@@ -26,18 +26,17 @@ import { DirectorTaxTable } from "@/components/finance/DirectorTaxTable";
 import { RegistrarRenewalTable } from "@/components/finance/RegistrarRenewalTable";
 import { usePLData } from "@/hooks/usePLData";
 import {
-  invoices,
-  officeAccounts,
-  officeExpenses,
-  taxFilings,
-  directorTaxReminders,
-  registrarRenewals,
-  jobProfitability,
-  payables,
-  receivables,
-  customerCredits,
-  exchangeRates,
-} from "@/data/financeData";
+  useFinanceInvoices,
+  useJobProfitability,
+  useFinancePayables,
+  useFinanceReceivables,
+  useCustomerCredits,
+  useExchangeRates,
+  useOfficeAccounts,
+  useFinanceExpenses,
+  useTaxFilings,
+  useRegistrarRenewals,
+} from "@/hooks/useFinanceData";
 
 import {
   Plus,
@@ -68,6 +67,18 @@ const Finance = () => {
   const [invoiceTypeFilter, setInvoiceTypeFilter] = useState<string>("all");
   const [invoiceStatusFilter, setInvoiceStatusFilter] = useState<string>("all");
   const [payableStatusFilter, setPayableStatusFilter] = useState<string>("all");
+
+  // Live data from database
+  const { data: invoices = [] } = useFinanceInvoices();
+  const { data: jobProfitability = [] } = useJobProfitability();
+  const { data: payables = [] } = useFinancePayables();
+  const { data: receivables = [] } = useFinanceReceivables();
+  const { data: customerCredits = [] } = useCustomerCredits();
+  const { data: exchangeRates = [] } = useExchangeRates();
+  const { data: officeAccounts = [] } = useOfficeAccounts();
+  const { data: officeExpenses = [] } = useFinanceExpenses();
+  const { data: taxFilings = [] } = useTaxFilings();
+  const { data: registrarRenewals = [] } = useRegistrarRenewals();
 
   // Live P&L data from database
   const { metrics: liveMetrics, agingSummary: liveAgingSummary, revenueByService, costBreakdown, expenseBreakdown, isLoading: plLoading } = usePLData();
@@ -478,7 +489,7 @@ const Finance = () => {
                 </p>
               </CardHeader>
               <CardContent>
-                <DirectorTaxTable reminders={directorTaxReminders} />
+                <DirectorTaxTable reminders={[]} />
               </CardContent>
             </Card>
             <Card>

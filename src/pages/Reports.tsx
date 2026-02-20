@@ -19,8 +19,8 @@ import {
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-import { invoices, payables } from "@/data/financeData";
-import { customers } from "@/data/customerData";
+import { useFinanceInvoices, useFinancePayables } from "@/hooks/useFinanceData";
+import { useCustomers } from "@/hooks/useCustomers";
 import { toast } from "sonner";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -191,6 +191,10 @@ export default function Reports() {
   const [searchClient, setSearchClient] = useState("");
   const [activeTab, setActiveTab] = useState("management");
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const { data: invoices = [] } = useFinanceInvoices();
+  const { data: payables = [] } = useFinancePayables();
+  const { data: customers = [] } = useCustomers();
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -861,7 +865,7 @@ export default function Reports() {
               { label: "Active Clients", value: activeCustomers, icon: Users, color: "text-success" },
               { label: "Total Clients", value: customers.length, icon: Users, color: "text-primary" },
               { label: "Total Outstanding", value: fmt(customers.reduce((s, c) => s + c.outstandingBalance, 0), true), icon: AlertTriangle, color: "text-warning" },
-              { label: "Avg Shipments/Client", value: Math.round(customers.reduce((s, c) => s + c.totalShipments, 0) / customers.length), icon: Package, color: "text-info" },
+              { label: "Avg Shipments/Client", value: customers.length > 0 ? Math.round(customers.reduce((s, c) => s + c.totalShipments, 0) / customers.length) : 0, icon: Package, color: "text-info" },
             ].map(s => (
               <Card key={s.label}>
                 <CardContent className="p-4 flex items-center gap-3">

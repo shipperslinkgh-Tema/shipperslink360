@@ -13,7 +13,7 @@ import {
 import { PayablesTable } from "@/components/finance/PayablesTable";
 import { ReceivablesTable } from "@/components/finance/ReceivablesTable";
 import { ShippingLinePaymentVoucherForm } from "@/components/finance/ShippingLinePaymentVoucherForm";
-import { payables, receivables, agingSummary } from "@/data/financeData";
+import { useFinancePayables, useFinanceReceivables, useAgingSummary } from "@/hooks/useFinanceData";
 import {
   Plus,
   Search,
@@ -30,6 +30,10 @@ const Payments = () => {
   const [activeTab, setActiveTab] = useState("receivables");
   const [searchTerm, setSearchTerm] = useState("");
   const [payableStatusFilter, setPayableStatusFilter] = useState<string>("all");
+
+  const { data: payables = [] } = useFinancePayables();
+  const { data: receivables = [] } = useFinanceReceivables();
+  const agingSummary = useAgingSummary();
 
   const filteredPayables = useMemo(() => {
     return payables.filter((payable) => {
