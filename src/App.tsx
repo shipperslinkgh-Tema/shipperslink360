@@ -28,6 +28,7 @@ import ClientDataManagement from "./pages/ClientDataManagement";
 import Index from "./pages/Index";
 import Warehouse from "./pages/Warehouse";
 import AIAssistant from "./pages/AIAssistant";
+import OfficeFilesPortal from "./pages/OfficeFilesPortal";
 import Notifications from "./pages/Notifications";
 import { AppLayout } from "./components/layout/AppLayout";
 import ClientLogin from "./pages/client/ClientLogin";
@@ -133,6 +134,7 @@ const App = () => (
                 <Route path="/customs/gpha" element={<ProtectedRoute><WithLayout><GPHAPortStatus /></WithLayout></ProtectedRoute>} />
                 <Route path="/consolidation" element={<ProtectedRoute><WithLayout><ConsolidationPortal /></WithLayout></ProtectedRoute>} />
                 <Route path="/warehouse" element={<ProtectedRoute><WithLayout><Warehouse /></WithLayout></ProtectedRoute>} />
+                <Route path="/office-files" element={<ProtectedRoute><WithLayout><OfficeFilesPortal /></WithLayout></ProtectedRoute>} />
                 <Route path="/reports" element={<ProtectedRoute><WithLayout><Reports /></WithLayout></ProtectedRoute>} />
                 <Route path="/ai-assistant" element={<ProtectedRoute><WithLayout><AIAssistant /></WithLayout></ProtectedRoute>} />
                 <Route path="/notifications" element={<ProtectedRoute><WithLayout><Notifications /></WithLayout></ProtectedRoute>} />
