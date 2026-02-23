@@ -92,7 +92,7 @@ export function NewConsignmentForm({ onSuccess }: { onSuccess: () => void }) {
         </div>
 
         <div>
-          <Label>Clearance Date</Label>
+          <Label>Document Received Date</Label>
           <Input type="date" {...register("clearance_date")} />
         </div>
         <div>
