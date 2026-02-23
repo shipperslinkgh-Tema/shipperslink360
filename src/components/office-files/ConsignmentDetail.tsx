@@ -114,7 +114,7 @@ export function ConsignmentDetail({ consignmentId, onBack }: Props) {
               <Badge variant="secondary" className="capitalize">{consignment.shipment_type}</Badge>
             </div>
             <div>
-              <p className="text-muted-foreground text-xs">Clearance Date</p>
+              <p className="text-muted-foreground text-xs">Document Received Date</p>
               <p className="font-medium">{consignment.clearance_date ? new Date(consignment.clearance_date).toLocaleDateString() : "—"}</p>
             </div>
             <div>
