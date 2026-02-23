@@ -694,6 +694,215 @@ export type Database = {
         }
         Relationships: []
       }
+      completed_consignments: {
+        Row: {
+          awb_number: string | null
+          bl_number: string | null
+          clearance_date: string | null
+          client_id: string | null
+          client_name: string
+          completed_at: string
+          completed_by: string | null
+          consignment_ref: string
+          container_numbers: string[] | null
+          created_at: string
+          delivery_date: string | null
+          financial_summary: Json | null
+          id: string
+          is_locked: boolean
+          notes: string | null
+          officer_in_charge: string
+          officer_user_id: string | null
+          shipment_type: string
+          status: string
+          total_expenses: number | null
+          total_revenue: number | null
+          updated_at: string
+        }
+        Insert: {
+          awb_number?: string | null
+          bl_number?: string | null
+          clearance_date?: string | null
+          client_id?: string | null
+          client_name: string
+          completed_at?: string
+          completed_by?: string | null
+          consignment_ref: string
+          container_numbers?: string[] | null
+          created_at?: string
+          delivery_date?: string | null
+          financial_summary?: Json | null
+          id?: string
+          is_locked?: boolean
+          notes?: string | null
+          officer_in_charge: string
+          officer_user_id?: string | null
+          shipment_type: string
+          status?: string
+          total_expenses?: number | null
+          total_revenue?: number | null
+          updated_at?: string
+        }
+        Update: {
+          awb_number?: string | null
+          bl_number?: string | null
+          clearance_date?: string | null
+          client_id?: string | null
+          client_name?: string
+          completed_at?: string
+          completed_by?: string | null
+          consignment_ref?: string
+          container_numbers?: string[] | null
+          created_at?: string
+          delivery_date?: string | null
+          financial_summary?: Json | null
+          id?: string
+          is_locked?: boolean
+          notes?: string | null
+          officer_in_charge?: string
+          officer_user_id?: string | null
+          shipment_type?: string
+          status?: string
+          total_expenses?: number | null
+          total_revenue?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "completed_consignments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consignment_audit_logs: {
+        Row: {
+          action: string
+          action_details: Json | null
+          consignment_id: string
+          created_at: string
+          document_id: string | null
+          id: string
+          ip_address: string | null
+          performed_by: string
+          performed_by_name: string
+        }
+        Insert: {
+          action: string
+          action_details?: Json | null
+          consignment_id: string
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          ip_address?: string | null
+          performed_by: string
+          performed_by_name: string
+        }
+        Update: {
+          action?: string
+          action_details?: Json | null
+          consignment_id?: string
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          ip_address?: string | null
+          performed_by?: string
+          performed_by_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consignment_audit_logs_consignment_id_fkey"
+            columns: ["consignment_id"]
+            isOneToOne: false
+            referencedRelation: "completed_consignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consignment_audit_logs_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "consignment_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consignment_documents: {
+        Row: {
+          category: string
+          consignment_id: string
+          created_at: string
+          document_name: string
+          document_type: string
+          file_size: number | null
+          file_url: string | null
+          id: string
+          is_current: boolean
+          mime_type: string | null
+          notes: string | null
+          previous_version_id: string | null
+          updated_at: string
+          uploaded_at: string
+          uploaded_by: string
+          uploaded_by_name: string
+          version: number
+        }
+        Insert: {
+          category: string
+          consignment_id: string
+          created_at?: string
+          document_name: string
+          document_type: string
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          is_current?: boolean
+          mime_type?: string | null
+          notes?: string | null
+          previous_version_id?: string | null
+          updated_at?: string
+          uploaded_at?: string
+          uploaded_by: string
+          uploaded_by_name: string
+          version?: number
+        }
+        Update: {
+          category?: string
+          consignment_id?: string
+          created_at?: string
+          document_name?: string
+          document_type?: string
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          is_current?: boolean
+          mime_type?: string | null
+          notes?: string | null
+          previous_version_id?: string | null
+          updated_at?: string
+          uploaded_at?: string
+          uploaded_by?: string
+          uploaded_by_name?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consignment_documents_consignment_id_fkey"
+            columns: ["consignment_id"]
+            isOneToOne: false
+            referencedRelation: "completed_consignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consignment_documents_previous_version_id_fkey"
+            columns: ["previous_version_id"]
+            isOneToOne: false
+            referencedRelation: "consignment_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consolidation_documents: {
         Row: {
           approved_date: string | null

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Ship, Plane, Truck, Package, Warehouse, FileText, DollarSign, Settings, Bell, Users, ChevronDown, ChevronRight, Container, FileCheck, Anchor, BarChart3, Menu, X, User, LogOut, Sliders, BookOpen, Shield, Brain } from "lucide-react";
+import { LayoutDashboard, Ship, Plane, Truck, Package, Warehouse, FileText, DollarSign, Settings, Bell, Users, ChevronDown, ChevronRight, Container, FileCheck, Anchor, BarChart3, Menu, X, User, LogOut, Sliders, BookOpen, Shield, Brain, FileArchive } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
@@ -78,6 +78,10 @@ const navigation: NavItem[] = [{
   title: "Customers",
   icon: Users,
   href: "/customers"
+}, {
+  title: "Office Files",
+  icon: FileArchive,
+  href: "/office-files"
 }, {
   title: "Reports",
   icon: BarChart3,
