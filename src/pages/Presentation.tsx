@@ -325,6 +325,36 @@ const slides: Slide[] = [
   },
   {
     id: 12,
+    title: "Office Files Portal",
+    subtitle: "Secure Archive for Completed Consignments",
+    icon: FileCheck,
+    color: "from-slate-700 to-slate-500",
+    department: "All Departments",
+    content: {
+      description:
+        "A permanent, secure digital archive for all finalized shipment documents. Once a consignment is marked 'Completed', its record and documents become read-only (locked) — only Super Admins can edit or delete locked files.",
+      features: [
+        "Auto-generated Consignment ID with BL/AWB, container numbers, and client details",
+        "Mandatory document checklist across 5 categories: Customs, Shipping Line, Company Financial, Warehouse, and Shipping",
+        "Drag & drop multi-file upload with automatic timestamps and uploader tracking",
+        "Document version history — upload new versions while preserving previous ones",
+        "PDF preview for uploaded documents directly in the portal",
+        "Full audit log tracking every view, download, and upload action",
+        "Financial outcome summary: auto-calculated Revenue vs. Expenses per consignment",
+        "Search by BL, AWB, container number, or client name",
+        "Role-based access: Staff can view/upload, Admins can edit locked files, Super Admins can delete",
+      ],
+      useCases: [
+        "Archive a completed sea freight consignment with all customs and financial documents",
+        "Verify all required documents are uploaded before marking a consignment complete",
+        "Search for a past consignment by BL number to retrieve its Bill of Entry",
+        "Review the financial outcome of a job — total revenue vs. total expenses",
+        "Audit who downloaded or viewed a specific document and when",
+      ],
+    },
+  },
+  {
+    id: 13,
     title: "Getting Started",
     subtitle: "Quick Start Guide for Your Team",
     icon: CheckCircle,
