@@ -157,14 +157,14 @@ export function ShippingLinePaymentVoucherForm({ onSubmit }: ShippingLinePayment
       <DialogTrigger asChild>
         <Button className="gap-2">
           <Ship className="h-4 w-4" />
-          Shipping Line Voucher
+          Payment Voucher
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Ship className="h-5 w-5 text-primary" />
-            Shipping Line Payment Voucher
+            Payment Voucher
           </DialogTitle>
           <DialogDescription>
             Create a payment voucher for shipping line charges (D/O, freight, demurrage, etc.)
