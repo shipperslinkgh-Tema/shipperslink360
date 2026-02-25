@@ -80,22 +80,25 @@ export default function ShippingLineStatus() {
           activeDOs={12}
           pendingPayment={3}
           lastSync="2 min ago"
-        />
-        <ShippingLineCard
-          name="MSC"
-          logo="⚓"
-          status="connected"
-          activeDOs={8}
-          pendingPayment={1}
-          lastSync="5 min ago"
+          portalUrl="https://www.maersk.com/myfinance/"
         />
         <ShippingLineCard
           name="CMA CGM"
           logo="🛳️"
-          status="syncing"
+          status="connected"
           activeDOs={6}
           pendingPayment={2}
+          lastSync="5 min ago"
+          portalUrl="https://www.cma-cgm.com/local/ghana/links"
+        />
+        <ShippingLineCard
+          name="ONE - Ocean Network Express"
+          logo="⚓"
+          status="syncing"
+          activeDOs={8}
+          pendingPayment={1}
           lastSync="Syncing..."
+          portalUrl="https://la.one-line.com/en"
         />
       </div>
 
@@ -116,11 +119,9 @@ export default function ShippingLineStatus() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Lines</SelectItem>
-            <SelectItem value="maersk">Maersk</SelectItem>
-            <SelectItem value="msc">MSC</SelectItem>
+            <SelectItem value="maersk">Maersk Line</SelectItem>
             <SelectItem value="cma">CMA CGM</SelectItem>
-            <SelectItem value="hapag">Hapag-Lloyd</SelectItem>
-            <SelectItem value="cosco">COSCO</SelectItem>
+            <SelectItem value="one">ONE</SelectItem>
           </SelectContent>
         </Select>
         <Button variant="outline" className="gap-2">
