@@ -1,4 +1,4 @@
-import { CheckCircle2, Clock, AlertCircle, RefreshCw } from "lucide-react";
+import { CheckCircle2, Clock, AlertCircle, RefreshCw, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +9,7 @@ interface ShippingLineCardProps {
   activeDOs: number;
   pendingPayment: number;
   lastSync: string;
+  portalUrl?: string;
 }
 
 export function ShippingLineCard({
@@ -18,6 +19,7 @@ export function ShippingLineCard({
   activeDOs,
   pendingPayment,
   lastSync,
+  portalUrl,
 }: ShippingLineCardProps) {
   const getStatusBadge = () => {
     switch (status) {
@@ -76,9 +78,22 @@ export function ShippingLineCard({
 
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>Last sync: {lastSync}</span>
-        <Button variant="link" size="sm" className="h-auto p-0 text-accent">
-          View Details →
-        </Button>
+        <div className="flex items-center gap-2">
+          {portalUrl && (
+            <Button
+              variant="link"
+              size="sm"
+              className="h-auto p-0 text-primary"
+              onClick={() => window.open(portalUrl, '_blank')}
+            >
+              <ExternalLink className="h-3 w-3 mr-1" />
+              Portal
+            </Button>
+          )}
+          <Button variant="link" size="sm" className="h-auto p-0 text-accent">
+            View Details →
+          </Button>
+        </div>
       </div>
     </div>
   );
