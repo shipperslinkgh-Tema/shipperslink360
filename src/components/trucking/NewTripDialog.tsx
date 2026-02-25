@@ -130,25 +130,11 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
             </div>
             <div className="space-y-1.5">
               <Label>Truck *</Label>
-              <Select value={form.truck_id} onValueChange={(v) => setForm({ ...form, truck_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Select truck" /></SelectTrigger>
-                <SelectContent>
-                  {availableTrucks.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>{t.registrationNumber}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input value={form.truck_id} onChange={set("truck_id")} placeholder="e.g. GR-1234-22" />
             </div>
             <div className="space-y-1.5">
               <Label>Driver *</Label>
-              <Select value={form.driver_id} onValueChange={(v) => setForm({ ...form, driver_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Select driver" /></SelectTrigger>
-                <SelectContent>
-                  {availableDrivers.map((d) => (
-                    <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input value={form.driver_id} onChange={set("driver_id")} placeholder="e.g. John Doe" />
             </div>
           </div>
 
