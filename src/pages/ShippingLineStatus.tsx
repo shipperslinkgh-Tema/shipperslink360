@@ -72,7 +72,7 @@ export default function ShippingLineStatus() {
       </div>
 
       {/* Shipping Line Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
         <ShippingLineCard
           name="Maersk Line"
           logo="🚢"
@@ -92,13 +92,40 @@ export default function ShippingLineStatus() {
           portalUrl="https://www.cma-cgm.com/local/ghana/links"
         />
         <ShippingLineCard
-          name="ONE - Ocean Network Express"
+          name="ONE"
           logo="⚓"
           status="syncing"
           activeDOs={8}
           pendingPayment={1}
           lastSync="Syncing..."
           portalUrl="https://la.one-line.com/en"
+        />
+        <ShippingLineCard
+          name="ODeX"
+          logo="📋"
+          status="connected"
+          activeDOs={5}
+          pendingPayment={2}
+          lastSync="3 min ago"
+          portalUrl="https://www.odex.co"
+        />
+        <ShippingLineCard
+          name="ZIM"
+          logo="🚀"
+          status="connected"
+          activeDOs={4}
+          pendingPayment={0}
+          lastSync="1 min ago"
+          portalUrl="https://www.zim.com"
+        />
+        <ShippingLineCard
+          name="MSC"
+          logo="🔱"
+          status="connected"
+          activeDOs={10}
+          pendingPayment={4}
+          lastSync="4 min ago"
+          portalUrl="https://www.msc.com"
         />
       </div>
 
@@ -122,6 +149,9 @@ export default function ShippingLineStatus() {
             <SelectItem value="maersk">Maersk Line</SelectItem>
             <SelectItem value="cma">CMA CGM</SelectItem>
             <SelectItem value="one">ONE</SelectItem>
+            <SelectItem value="odex">ODeX</SelectItem>
+            <SelectItem value="zim">ZIM</SelectItem>
+            <SelectItem value="msc">MSC</SelectItem>
           </SelectContent>
         </Select>
         <Button variant="outline" className="gap-2">
