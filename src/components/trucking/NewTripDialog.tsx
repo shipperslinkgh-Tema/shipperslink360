@@ -34,6 +34,7 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
   const [form, setForm] = useState({
     truck_id: "",
     driver_id: "",
+    truck_type: "",
     container_number: "",
     bl_number: "",
     customer: "",
@@ -72,7 +73,7 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
       toast.success("Trip created successfully");
       onOpenChange(false);
       setForm({
-        truck_id: "", driver_id: "", container_number: "", bl_number: "",
+        truck_id: "", driver_id: "", truck_type: "", container_number: "", bl_number: "",
         customer: "", origin: "", destination: "", pickup_date: "",
         trip_cost: "", driver_payment: "", fuel_cost: "",
         container_return_location: "", notes: "",
@@ -96,6 +97,20 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
         </DialogHeader>
 
         <div className="grid gap-4 py-2">
+          {/* Truck Type */}
+          <div className="space-y-1.5">
+            <Label>Truck Type *</Label>
+            <Select value={form.truck_type} onValueChange={(v) => setForm({ ...form, truck_type: v })}>
+              <SelectTrigger><SelectValue placeholder="Select truck type" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="40ft">40ft Truck</SelectItem>
+                <SelectItem value="20ft">20ft Truck</SelectItem>
+                <SelectItem value="towing">Towing Truck</SelectItem>
+                <SelectItem value="cargo">Cargo Truck</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Truck & Driver */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
