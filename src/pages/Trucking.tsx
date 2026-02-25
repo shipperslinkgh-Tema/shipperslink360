@@ -8,14 +8,13 @@ import { DriverTable } from "@/components/trucking/DriverTable";
 import { TripTable } from "@/components/trucking/TripTable";
 import { TruckingStats } from "@/components/trucking/TruckingStats";
 import { NewTripDialog } from "@/components/trucking/NewTripDialog";
-import { NewTruckDialog } from "@/components/trucking/NewTruckDialog";
 import { useTrucks, useDrivers, useTrips } from "@/hooks/useTrucking";
 
 export default function Trucking() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("trips");
   const [newTripOpen, setNewTripOpen] = useState(false);
-  const [newTruckOpen, setNewTruckOpen] = useState(false);
+  
 
   const { data: trucks = [] } = useTrucks();
   const { data: drivers = [] } = useDrivers();
@@ -53,16 +52,10 @@ export default function Trucking() {
             Manage trucks, drivers, trips, and container returns
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setNewTruckOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Update Trip
-          </Button>
-          <Button className="bg-primary hover:bg-primary/90" onClick={() => setNewTripOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Trip
-          </Button>
-        </div>
+        <Button className="bg-primary hover:bg-primary/90" onClick={() => setNewTripOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          New Trip
+        </Button>
       </div>
 
       {/* Stats */}
@@ -111,7 +104,6 @@ export default function Trucking() {
       </Tabs>
 
       <NewTripDialog open={newTripOpen} onOpenChange={setNewTripOpen} trucks={trucks} drivers={drivers} />
-      <NewTruckDialog open={newTruckOpen} onOpenChange={setNewTruckOpen} />
     </div>
   );
 }
