@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { ShippingLineCard } from "@/components/shipping-line/ShippingLineCard";
 import { DOStatusTable } from "@/components/shipping-line/DOStatusTable";
 import { DemurrageTracker } from "@/components/shipping-line/DemurrageTracker";
+import { ShippingLineDocuments } from "@/components/shipping-line/ShippingLineDocuments";
 
 const metrics = [
   { label: "Active DOs", value: 34, icon: FileText, color: "text-accent" },
@@ -169,6 +170,9 @@ export default function ShippingLineStatus() {
           <DemurrageTracker />
         </div>
       </div>
+
+      {/* Saved Documents Section */}
+      <ShippingLineDocuments />
     </div>
   );
 }

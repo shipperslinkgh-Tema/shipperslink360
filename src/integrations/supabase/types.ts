@@ -2171,6 +2171,51 @@ export type Database = {
         }
         Relationships: []
       }
+      shipping_line_documents: {
+        Row: {
+          bl_number: string | null
+          container_number: string | null
+          created_at: string
+          document_name: string
+          document_type: string
+          file_size: string | null
+          file_url: string | null
+          id: string
+          notes: string | null
+          shipping_line: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          bl_number?: string | null
+          container_number?: string | null
+          created_at?: string
+          document_name: string
+          document_type?: string
+          file_size?: string | null
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          shipping_line: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          bl_number?: string | null
+          container_number?: string | null
+          created_at?: string
+          document_name?: string
+          document_type?: string
+          file_size?: string | null
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          shipping_line?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       tax_filings: {
         Row: {
           amount: number | null
