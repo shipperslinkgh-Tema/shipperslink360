@@ -36,6 +36,8 @@ const INITIAL_FORM = {
   truck_type: "",
   truck_id: "",
   driver_id: "",
+  driver_phone: "",
+  driver_license: "",
   container_number: "",
   bl_number: "",
   customer: "",
@@ -129,12 +131,22 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label>Truck *</Label>
+              <Label>Truck Number *</Label>
               <Input value={form.truck_id} onChange={set("truck_id")} placeholder="e.g. GR-1234-22" />
             </div>
             <div className="space-y-1.5">
               <Label>Driver *</Label>
               <Input value={form.driver_id} onChange={set("driver_id")} placeholder="e.g. John Doe" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>Driver's Number</Label>
+              <Input value={form.driver_phone} onChange={set("driver_phone")} placeholder="e.g. 024 123 4567" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>License Number</Label>
+              <Input value={form.driver_license} onChange={set("driver_license")} placeholder="e.g. DL-12345678" />
             </div>
           </div>
 
