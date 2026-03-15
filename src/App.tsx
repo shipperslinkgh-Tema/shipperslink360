@@ -31,6 +31,8 @@ import AIAssistant from "./pages/AIAssistant";
 import OfficeFilesPortal from "./pages/OfficeFilesPortal";
 import Notifications from "./pages/Notifications";
 import ConsignmentWorkflows from "./pages/ConsignmentWorkflows";
+import LiveTracking from "./pages/LiveTracking";
+import TrackShipment from "./pages/TrackShipment";
 import { AppLayout } from "./components/layout/AppLayout";
 import ClientLogin from "./pages/client/ClientLogin";
 import ClientDashboard from "./pages/client/ClientDashboard";
