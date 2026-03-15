@@ -447,6 +447,57 @@ export type Database = {
           },
         ]
       }
+      chat_messages: {
+        Row: {
+          channel: string
+          consolidation_ref: string | null
+          created_at: string
+          edited_at: string | null
+          file_name: string | null
+          file_url: string | null
+          id: string
+          is_edited: boolean
+          message: string
+          message_type: string
+          sender_department: string | null
+          sender_id: string
+          sender_name: string
+          updated_at: string
+        }
+        Insert: {
+          channel?: string
+          consolidation_ref?: string | null
+          created_at?: string
+          edited_at?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_edited?: boolean
+          message: string
+          message_type?: string
+          sender_department?: string | null
+          sender_id: string
+          sender_name: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          consolidation_ref?: string | null
+          created_at?: string
+          edited_at?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_edited?: boolean
+          message?: string
+          message_type?: string
+          sender_department?: string | null
+          sender_id?: string
+          sender_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_documents: {
         Row: {
           created_at: string
