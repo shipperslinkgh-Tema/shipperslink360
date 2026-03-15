@@ -32,6 +32,7 @@ import OfficeFilesPortal from "./pages/OfficeFilesPortal";
 import Notifications from "./pages/Notifications";
 import ConsignmentWorkflows from "./pages/ConsignmentWorkflows";
 import LiveTracking from "./pages/LiveTracking";
+import PortCommandCenter from "./pages/PortCommandCenter";
 import TrackShipment from "./pages/TrackShipment";
 import { AppLayout } from "./components/layout/AppLayout";
 import ClientLogin from "./pages/client/ClientLogin";
@@ -133,6 +134,7 @@ const App = () => (
                 <Route path="/shipping-lines" element={<ProtectedRoute><WithLayout><ShippingLineStatus /></WithLayout></ProtectedRoute>} />
                 <Route path="/trucking" element={<ProtectedRoute><WithLayout><Trucking /></WithLayout></ProtectedRoute>} />
                 <Route path="/live-tracking" element={<ProtectedRoute><WithLayout><LiveTracking /></WithLayout></ProtectedRoute>} />
+                <Route path="/port-command" element={<ProtectedRoute><WithLayout><PortCommandCenter /></WithLayout></ProtectedRoute>} />
                 <Route path="/customers" element={<ProtectedRoute><WithLayout><Customers /></WithLayout></ProtectedRoute>} />
                 <Route path="/finance" element={<ProtectedRoute><WithLayout><Finance /></WithLayout></ProtectedRoute>} />
                 <Route path="/finance/invoices" element={<ProtectedRoute><WithLayout><Invoicing /></WithLayout></ProtectedRoute>} />

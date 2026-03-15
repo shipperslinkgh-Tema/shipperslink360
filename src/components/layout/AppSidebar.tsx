@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Ship, Plane, Truck, Package, Warehouse, FileText, DollarSign, Settings, Bell, Users, ChevronDown, ChevronRight, Container, FileCheck, Anchor, BarChart3, Menu, X, User, LogOut, Sliders, BookOpen, Shield, Brain, FileArchive, Radio } from "lucide-react";
+import { LayoutDashboard, Ship, Plane, Truck, Package, Warehouse, FileText, DollarSign, Settings, Bell, Users, ChevronDown, ChevronRight, Container, FileCheck, Anchor, BarChart3, Menu, X, User, LogOut, Sliders, BookOpen, Shield, Brain, FileArchive, Radio, Radar } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,10 @@ const navigation: NavItem[] = [{
   title: "Consignment Workflow",
   icon: Container,
   href: "/consignments"
+}, {
+  title: "Port Command Center",
+  icon: Radar,
+  href: "/port-command"
 }, {
   title: "Operations",
   icon: Package,
