@@ -133,6 +133,13 @@ export function AppSidebar() {
     if (!isMobile) setMobileOpen(false);
   }, [isMobile]);
 
+  // Listen for mobile menu toggle events from TopBar
+  useEffect(() => {
+    const handler = () => setMobileOpen(prev => !prev);
+    window.addEventListener("toggle-mobile-menu", handler);
+    return () => window.removeEventListener("toggle-mobile-menu", handler);
+  }, []);
+
   const toggleExpand = (title: string) => {
     setExpandedItems(prev => prev.includes(title) ? prev.filter(t => t !== title) : [...prev, title]);
   };
