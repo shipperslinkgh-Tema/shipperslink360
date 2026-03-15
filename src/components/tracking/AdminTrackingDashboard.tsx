@@ -210,6 +210,13 @@ export function AdminTrackingDashboard() {
     toast.success("Tracking link copied!");
   };
 
+  const shareWhatsApp = (url: string, customer: string) => {
+    const msg = encodeURIComponent(
+      `Hello ${customer}, here is your live shipment tracking link:\n${url}`
+    );
+    window.open(`https://wa.me/?text=${msg}`, "_blank");
+  };
+
   // Build fleet positions for map from active trips' simulated positions
   const fleetPositions = activeTrips.map((t, i) => ({
     id: t.id,
