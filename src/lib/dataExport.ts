@@ -19,6 +19,17 @@ function formatValue(value: unknown): string {
   return str;
 }
 
+/** Auto-export: infers columns from object keys */
+export function autoExportCSV<T extends Record<string, any>>(data: T[], filename: string) {
+  if (!data.length) return;
+  const keys = Object.keys(data[0]);
+  const columns: ExportColumn<T>[] = keys.map(k => ({
+    header: k.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase()),
+    accessor: k as keyof T,
+  }));
+  exportToCSV(data, columns, filename);
+}
+
 export function exportToCSV<T extends Record<string, any>>(
   data: T[],
   columns: ExportColumn<T>[],
