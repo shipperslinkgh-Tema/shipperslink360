@@ -6,27 +6,27 @@ const departmentPaths: Record<Department, string[]> = {
   super_admin: ["*"], // all access
   management: ["*"], // all access
   operations: [
-    "/", "/shipments", "/shipments/sea", "/shipments/air", "/consolidation",
+    "/", "/consignments", "/shipments", "/shipments/sea", "/shipments/air", "/consolidation",
     "/customs/icums", "/shipping-lines", "/customs/gpha",
     "/trucking", "/warehouse", "/customers", "/ai-assistant", "/reports",
   ],
   documentation: [
-    "/", "/shipments", "/shipments/sea", "/shipments/air",
+    "/", "/consignments", "/shipments", "/shipments/sea", "/shipments/air",
     "/customs/icums", "/shipping-lines", "/customs/gpha", "/ai-assistant", "/reports",
   ],
   accounts: [
-    "/", "/finance", "/finance/invoices", "/finance/payments", "/finance/reports",
+    "/", "/consignments", "/finance", "/finance/invoices", "/finance/payments", "/finance/reports",
     "/customers", "/ai-assistant", "/reports",
   ],
   marketing: [
     "/", "/customers", "/reports",
   ],
   customer_service: [
-    "/", "/shipments", "/shipments/sea", "/shipments/air",
+    "/", "/consignments", "/shipments", "/shipments/sea", "/shipments/air",
     "/customers", "/customs/icums",
   ],
   warehouse: [
-    "/", "/warehouse", "/trucking",
+    "/", "/consignments", "/warehouse", "/trucking",
     "/shipments", "/consolidation", "/ai-assistant", "/reports",
   ],
 };
