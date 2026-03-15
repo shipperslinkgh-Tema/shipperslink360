@@ -28,6 +28,7 @@ import ClientDataManagement from "./pages/ClientDataManagement";
 import Index from "./pages/Index";
 import Warehouse from "./pages/Warehouse";
 import AIAssistant from "./pages/AIAssistant";
+import DutyEstimator from "./pages/DutyEstimator";
 import StaffProfile from "./pages/StaffProfile";
 import OfficeFilesPortal from "./pages/OfficeFilesPortal";
 import Notifications from "./pages/Notifications";
@@ -148,6 +149,7 @@ const App = () => (
                 <Route path="/office-files" element={<ProtectedRoute><WithLayout><OfficeFilesPortal /></WithLayout></ProtectedRoute>} />
                 <Route path="/reports" element={<ProtectedRoute><WithLayout><Reports /></WithLayout></ProtectedRoute>} />
                 <Route path="/ai-assistant" element={<ProtectedRoute><WithLayout><AIAssistant /></WithLayout></ProtectedRoute>} />
+                <Route path="/duty-estimator" element={<ProtectedRoute><WithLayout><DutyEstimator /></WithLayout></ProtectedRoute>} />
                 <Route path="/notifications" element={<ProtectedRoute><WithLayout><Notifications /></WithLayout></ProtectedRoute>} />
                 <Route path="/admin/users" element={<ProtectedRoute><WithLayout><AdminUsers /></WithLayout></ProtectedRoute>} />
                 <Route path="/admin/client-documents" element={<ProtectedRoute><WithLayout><ClientDocumentManagement /></WithLayout></ProtectedRoute>} />
