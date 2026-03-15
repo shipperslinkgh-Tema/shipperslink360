@@ -31,6 +31,8 @@ import AIAssistant from "./pages/AIAssistant";
 import OfficeFilesPortal from "./pages/OfficeFilesPortal";
 import Notifications from "./pages/Notifications";
 import ConsignmentWorkflows from "./pages/ConsignmentWorkflows";
+import LiveTracking from "./pages/LiveTracking";
+import TrackShipment from "./pages/TrackShipment";
 import { AppLayout } from "./components/layout/AppLayout";
 import ClientLogin from "./pages/client/ClientLogin";
 import ClientDashboard from "./pages/client/ClientDashboard";
@@ -100,6 +102,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Public tracking page — no auth required */}
+          <Route path="/track/:token" element={<TrackShipment />} />
+
           {/* Client Portal Routes */}
           <Route path="/portal/*" element={
             <ClientAuthProvider>
@@ -127,6 +132,7 @@ const App = () => (
                 <Route path="/customs/icums" element={<ProtectedRoute><WithLayout><ICUMSDeclarations /></WithLayout></ProtectedRoute>} />
                 <Route path="/shipping-lines" element={<ProtectedRoute><WithLayout><ShippingLineStatus /></WithLayout></ProtectedRoute>} />
                 <Route path="/trucking" element={<ProtectedRoute><WithLayout><Trucking /></WithLayout></ProtectedRoute>} />
+                <Route path="/live-tracking" element={<ProtectedRoute><WithLayout><LiveTracking /></WithLayout></ProtectedRoute>} />
                 <Route path="/customers" element={<ProtectedRoute><WithLayout><Customers /></WithLayout></ProtectedRoute>} />
                 <Route path="/finance" element={<ProtectedRoute><WithLayout><Finance /></WithLayout></ProtectedRoute>} />
                 <Route path="/finance/invoices" element={<ProtectedRoute><WithLayout><Invoicing /></WithLayout></ProtectedRoute>} />

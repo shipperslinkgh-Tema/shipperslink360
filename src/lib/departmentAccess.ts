@@ -8,7 +8,7 @@ const departmentPaths: Record<Department, string[]> = {
   operations: [
     "/", "/consignments", "/shipments", "/shipments/sea", "/shipments/air", "/consolidation",
     "/customs/icums", "/shipping-lines", "/customs/gpha",
-    "/trucking", "/warehouse", "/customers", "/ai-assistant", "/reports",
+    "/trucking", "/live-tracking", "/warehouse", "/customers", "/ai-assistant", "/reports",
   ],
   documentation: [
     "/", "/consignments", "/shipments", "/shipments/sea", "/shipments/air",
@@ -26,7 +26,7 @@ const departmentPaths: Record<Department, string[]> = {
     "/customers", "/customs/icums",
   ],
   warehouse: [
-    "/", "/consignments", "/warehouse", "/trucking",
+    "/", "/consignments", "/warehouse", "/trucking", "/live-tracking",
     "/shipments", "/consolidation", "/ai-assistant", "/reports",
   ],
 };
