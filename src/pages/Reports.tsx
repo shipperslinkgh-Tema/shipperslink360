@@ -141,7 +141,7 @@ export default function Reports() {
       toast.error("No data to export");
       return;
     }
-    exportToCSV(data, filename);
+    autoExportCSV(data, filename);
     toast.success(`Exported ${filename}.csv`);
   };
 
