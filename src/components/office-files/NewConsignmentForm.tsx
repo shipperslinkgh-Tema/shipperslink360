@@ -81,6 +81,9 @@ export function NewConsignmentForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {/* AI Document Scanner */}
+      <DocumentScanner onDataExtracted={handleDocumentExtracted} compact />
+
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-2">
           <Label>Client Name *</Label>
