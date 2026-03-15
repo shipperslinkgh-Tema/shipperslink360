@@ -394,11 +394,3 @@ export function AppSidebar() {
   );
 }
 
-// Export for TopBar to use
-export { AppSidebar };
-export function useMobileMenuToggle() {
-  // This is a simple event-based approach
-  return {
-    open: () => window.dispatchEvent(new CustomEvent("toggle-mobile-menu")),
-  };
-}
