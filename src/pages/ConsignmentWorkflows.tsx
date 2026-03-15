@@ -36,6 +36,7 @@ export default function ConsignmentWorkflows() {
   const [stageFilter, setStageFilter] = useState<string>("all");
   const [newDialogOpen, setNewDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("workflows");
 
   const { data: workflows = [], isLoading } = useConsignmentWorkflows({
     stage: stageFilter !== "all" ? (stageFilter as WorkflowStage) : undefined,
