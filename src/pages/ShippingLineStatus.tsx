@@ -93,13 +93,13 @@ export default function ShippingLineStatus() {
           portalUrl="https://www.cma-cgm.com/local/ghana/links"
         />
         <ShippingLineCard
-          name="ONE"
+          name="ONE (Ocean Network Express)"
           logo="⚓"
-          status="syncing"
+          status="connected"
           activeDOs={8}
           pendingPayment={1}
-          lastSync="Syncing..."
-          portalUrl="https://la.one-line.com/en"
+          lastSync="3 min ago"
+          portalUrl="https://ecomm.one-line.com/one-ecom/manage-shipment/cargo-tracking"
         />
         <ShippingLineCard
           name="ODeX"
