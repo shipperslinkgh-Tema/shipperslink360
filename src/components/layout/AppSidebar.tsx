@@ -102,6 +102,10 @@ const navigation: NavItem[] = [{
   title: "AI Assistant",
   icon: Brain,
   href: "/ai-assistant"
+}, {
+  title: "Duty Estimator",
+  icon: Calculator,
+  href: "/duty-estimator"
 }];
 
 const DEPT_LABELS: Record<string, string> = {
