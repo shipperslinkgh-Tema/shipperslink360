@@ -28,6 +28,7 @@ import ClientDataManagement from "./pages/ClientDataManagement";
 import Index from "./pages/Index";
 import Warehouse from "./pages/Warehouse";
 import AIAssistant from "./pages/AIAssistant";
+import StaffProfile from "./pages/StaffProfile";
 import OfficeFilesPortal from "./pages/OfficeFilesPortal";
 import Notifications from "./pages/Notifications";
 import ConsignmentWorkflows from "./pages/ConsignmentWorkflows";
@@ -152,6 +153,7 @@ const App = () => (
                 <Route path="/admin/client-documents" element={<ProtectedRoute><WithLayout><ClientDocumentManagement /></WithLayout></ProtectedRoute>} />
                 <Route path="/admin/client-data" element={<ProtectedRoute><WithLayout><ClientDataManagement /></WithLayout></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><WithLayout><SettingsPage /></WithLayout></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><WithLayout><StaffProfile /></WithLayout></ProtectedRoute>} />
                 <Route path="/presentation" element={<Presentation />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

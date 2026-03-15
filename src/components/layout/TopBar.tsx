@@ -1,4 +1,5 @@
-import { Bell, Search, HelpCircle, RefreshCw, User, Settings, LogOut, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Bell, Search, HelpCircle, RefreshCw, User, Settings, LogOut, CheckCircle2, Clock, AlertCircle, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -54,10 +55,16 @@ const DEPT_LABELS: Record<string, string> = {
 
 export function TopBar() {
   const { profile, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const initials = profile?.full_name
     ? profile.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
     : "??";
+
+  // Build avatar URL from storage
+  const avatarSrc = profile?.avatar_url
+    ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/authenticated/avatars/${profile.avatar_url}`
+    : undefined;
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card/80 backdrop-blur-sm px-6">
@@ -127,7 +134,7 @@ export function TopBar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-9 w-9 rounded-full">
               <Avatar className="h-9 w-9">
-                <AvatarImage src="/placeholder.svg" alt="User" />
+                <AvatarImage src={avatarSrc} alt="User" />
                 <AvatarFallback className="bg-primary/10 text-primary font-semibold">{initials}</AvatarFallback>
               </Avatar>
             </Button>
@@ -143,11 +150,19 @@ export function TopBar() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer">
+            <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/profile")}>
               <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
+              <span>View Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer">
+            <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/profile")}>
+              <Key className="mr-2 h-4 w-4" />
+              <span>Update Password</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/notifications")}>
+              <Bell className="mr-2 h-4 w-4" />
+              <span>Notification Settings</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/settings")}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Account Settings</span>
             </DropdownMenuItem>

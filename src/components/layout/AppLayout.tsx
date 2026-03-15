@@ -2,6 +2,7 @@ import { ReactNode, useState } from "react";
 import { AppSidebar } from "./AppSidebar";
 import { TopBar } from "./TopBar";
 import { InternalChatBox } from "@/components/chat/InternalChatBox";
+import { usePresence } from "@/hooks/usePresence";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -9,6 +10,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  usePresence(); // Track online status
 
   return (
     <div className="min-h-screen bg-background">

@@ -2334,6 +2334,7 @@ export type Database = {
           last_login_at: string | null
           locked_at: string | null
           must_change_password: boolean
+          online_at: string | null
           phone: string | null
           staff_id: string
           updated_at: string
@@ -2353,6 +2354,7 @@ export type Database = {
           last_login_at?: string | null
           locked_at?: string | null
           must_change_password?: boolean
+          online_at?: string | null
           phone?: string | null
           staff_id: string
           updated_at?: string
@@ -2372,6 +2374,7 @@ export type Database = {
           last_login_at?: string | null
           locked_at?: string | null
           must_change_password?: boolean
+          online_at?: string | null
           phone?: string | null
           staff_id?: string
           updated_at?: string
