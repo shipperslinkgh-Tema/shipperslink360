@@ -59,6 +59,9 @@ const navigation: NavItem[] = [{
     title: "Trucking",
     href: "/trucking"
   }, {
+    title: "Live Tracking",
+    href: "/live-tracking"
+  }, {
     title: "Warehousing",
     href: "/warehouse"
   }]
