@@ -21,6 +21,7 @@ import { WORKFLOW_STAGES, STAGE_INDEX, type WorkflowStage } from "@/types/workfl
 import { WorkflowStageTracker } from "./WorkflowStageTracker";
 import { WorkflowTimelineView } from "./WorkflowTimelineView";
 import { WorkflowDocumentManager } from "./WorkflowDocumentManager";
+import { SLABadge } from "./SLABadge";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface ConsignmentDetailDialogProps {
