@@ -136,12 +136,7 @@ export function TopBar() {
           </Button>
         )}
 
-        <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
-          <Bell className="h-4 w-4" />
-          <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px] bg-destructive text-destructive-foreground border-2 border-card">
-            5
-          </Badge>
-        </Button>
+        <NotificationBell />
 
         {!isMobile && (
           <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
