@@ -65,11 +65,22 @@ export default function ConsignmentWorkflows() {
             Track shipments from documents received to final delivery
           </p>
         </div>
-        <Button onClick={() => setNewDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          New Consignment
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setActiveTab(activeTab === "automation" ? "workflows" : "automation")}>
+            <Zap className="h-4 w-4 mr-2" />
+            {activeTab === "automation" ? "View Workflows" : "SLA Monitor"}
+          </Button>
+          <Button onClick={() => setNewDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Consignment
+          </Button>
+        </div>
       </div>
+
+      {activeTab === "automation" ? (
+        <WorkflowAutomationPanel />
+      ) : (
+        <>
 
       {/* Stats */}
       <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
