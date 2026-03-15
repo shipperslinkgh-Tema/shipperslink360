@@ -20,11 +20,8 @@ export function DriverDashboard({ trip }: Props) {
   const [otpDialog, setOtpDialog] = useState(false);
   const [otpInput, setOtpInput] = useState("");
 
-  // Simulated GPS recording
   const recordPosition = useCallback(() => {
     if (!gpsActive) return;
-    // In production, use navigator.geolocation
-    // For now, simulate with Accra coordinates + slight variation
     const baseLat = 5.6037;
     const baseLng = -0.1870;
     recordGps.mutate({
@@ -58,7 +55,6 @@ export function DriverDashboard({ trip }: Props) {
       status: "in-transit",
       extraData: { actual_start_time: new Date().toISOString() },
     });
-    // Record initial position
     setTimeout(recordPosition, 500);
   };
 
@@ -86,12 +82,12 @@ export function DriverDashboard({ trip }: Props) {
   };
 
   return (
-    <div className="space-y-4 max-w-lg mx-auto">
+    <div className="space-y-4 max-w-lg mx-auto px-1">
       {/* Trip Status Header */}
       <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg flex items-center gap-2">
+        <CardHeader className="pb-3 px-4">
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="text-base md:text-lg flex items-center gap-2">
               <Truck className="h-5 w-5 text-primary" />
               Active Trip
             </CardTitle>
@@ -100,31 +96,31 @@ export function DriverDashboard({ trip }: Props) {
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-3 px-4">
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>
-              <span className="text-muted-foreground">Container</span>
-              <p className="font-medium">{trip.containerNumber || "N/A"}</p>
+              <span className="text-muted-foreground text-xs">Container</span>
+              <p className="font-medium truncate">{trip.containerNumber || "N/A"}</p>
             </div>
             <div>
-              <span className="text-muted-foreground">Truck</span>
-              <p className="font-medium">{trip.truckNumber || "N/A"}</p>
+              <span className="text-muted-foreground text-xs">Truck</span>
+              <p className="font-medium truncate">{trip.truckNumber || "N/A"}</p>
             </div>
           </div>
 
           <div className="space-y-2 text-sm">
             <div className="flex items-start gap-2">
               <MapPin className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
-              <div>
-                <span className="text-muted-foreground">Pickup</span>
-                <p className="font-medium">{trip.pickupLocation || trip.origin}</p>
+              <div className="min-w-0">
+                <span className="text-muted-foreground text-xs">Pickup</span>
+                <p className="font-medium break-words">{trip.pickupLocation || trip.origin}</p>
               </div>
             </div>
             <div className="flex items-start gap-2">
               <Navigation className="h-4 w-4 text-red-600 mt-0.5 shrink-0" />
-              <div>
-                <span className="text-muted-foreground">Delivery</span>
-                <p className="font-medium">{trip.deliveryLocation || trip.destination}</p>
+              <div className="min-w-0">
+                <span className="text-muted-foreground text-xs">Delivery</span>
+                <p className="font-medium break-words">{trip.deliveryLocation || trip.destination}</p>
               </div>
             </div>
           </div>
@@ -133,78 +129,78 @@ export function DriverDashboard({ trip }: Props) {
 
       {/* Client Info */}
       <Card>
-        <CardContent className="pt-4 space-y-2 text-sm">
+        <CardContent className="pt-4 space-y-2 text-sm px-4">
           <div className="flex items-center gap-2">
-            <Package className="h-4 w-4 text-muted-foreground" />
+            <Package className="h-4 w-4 text-muted-foreground shrink-0" />
             <span className="text-muted-foreground">Client:</span>
-            <span className="font-medium">{trip.customer}</span>
+            <span className="font-medium truncate">{trip.customer}</span>
           </div>
           {trip.customerPhone && (
             <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-muted-foreground" />
+              <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
               <a href={`tel:${trip.customerPhone}`} className="text-primary underline">{trip.customerPhone}</a>
             </div>
           )}
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
             <span className="text-muted-foreground">Cargo:</span>
-            <span>{trip.cargoDescription || "General cargo"}</span>
+            <span className="truncate">{trip.cargoDescription || "General cargo"}</span>
           </div>
         </CardContent>
       </Card>
 
-      {/* Action Buttons */}
+      {/* Action Buttons — large touch targets */}
       <div className="space-y-3">
         {trip.status === "scheduled" && (
           <Button
-            className="w-full h-14 text-lg bg-amber-600 hover:bg-amber-700"
+            className="w-full h-16 text-base md:text-lg bg-amber-600 hover:bg-amber-700 rounded-xl touch-manipulation"
             onClick={handleArrivedAtPickup}
             disabled={updateStatus.isPending}
           >
-            <MapPin className="h-5 w-5 mr-2" />
+            <MapPin className="h-6 w-6 mr-2" />
             ARRIVED AT PICKUP
           </Button>
         )}
 
         {(trip.status === "scheduled" || trip.status === "arrived_at_pickup") && (
           <Button
-            className="w-full h-14 text-lg bg-primary hover:bg-primary/90"
+            className="w-full h-16 text-base md:text-lg bg-primary hover:bg-primary/90 rounded-xl touch-manipulation"
             onClick={handleStartTrip}
             disabled={updateStatus.isPending}
           >
-            <Play className="h-5 w-5 mr-2" />
+            <Play className="h-6 w-6 mr-2" />
             START TRIP
           </Button>
         )}
 
         {trip.status === "in-transit" && (
           <>
-            <div className="flex items-center justify-center gap-2 text-sm text-green-600">
-              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+            <div className="flex items-center justify-center gap-2 text-sm text-green-600 py-2">
+              <div className="h-3 w-3 rounded-full bg-green-500 animate-pulse" />
               GPS tracking active
             </div>
             <Button
-              className="w-full h-14 text-lg bg-destructive hover:bg-destructive/90"
+              className="w-full h-16 text-base md:text-lg bg-destructive hover:bg-destructive/90 rounded-xl touch-manipulation"
               onClick={handleEndTrip}
               disabled={endTrip.isPending}
             >
-              <Square className="h-5 w-5 mr-2" />
+              <Square className="h-6 w-6 mr-2" />
               END TRIP
             </Button>
           </>
         )}
 
         {(trip.status === "delivered" || trip.status === "completed") && (
-          <div className="flex items-center justify-center gap-2 p-4 bg-green-50 rounded-lg text-green-700">
-            <CheckCircle className="h-5 w-5" />
-            <span className="font-medium">Trip Completed</span>
+          <div className="flex items-center justify-center gap-2 p-5 bg-green-50 rounded-xl text-green-700">
+            <CheckCircle className="h-6 w-6" />
+            <span className="font-medium text-lg">Trip Completed</span>
           </div>
         )}
       </div>
 
       {/* OTP Confirmation Dialog */}
       <Dialog open={otpDialog} onOpenChange={setOtpDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-[92vw] sm:max-w-md rounded-xl">
           <DialogHeader>
             <DialogTitle>Confirm Delivery</DialogTitle>
           </DialogHeader>
@@ -216,11 +212,12 @@ export function DriverDashboard({ trip }: Props) {
             value={otpInput}
             onChange={(e) => setOtpInput(e.target.value)}
             maxLength={6}
-            className="text-center text-2xl tracking-widest"
+            className="text-center text-2xl tracking-widest h-14"
+            inputMode="numeric"
           />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOtpDialog(false)}>Cancel</Button>
-            <Button onClick={confirmEndTrip} disabled={endTrip.isPending}>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setOtpDialog(false)} className="h-12 touch-manipulation">Cancel</Button>
+            <Button onClick={confirmEndTrip} disabled={endTrip.isPending} className="h-12 touch-manipulation">
               Confirm Delivery
             </Button>
           </DialogFooter>

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Bell, Search, HelpCircle, RefreshCw, User, Settings, LogOut, CheckCircle2, Clock, AlertCircle, Key } from "lucide-react";
+import { Bell, Search, HelpCircle, RefreshCw, User, Settings, LogOut, CheckCircle2, Clock, AlertCircle, Key, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const integrationDetails = [
   {
@@ -56,67 +57,80 @@ const DEPT_LABELS: Record<string, string> = {
 export function TopBar() {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const initials = profile?.full_name
     ? profile.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
     : "??";
 
-  // Build avatar URL from storage
   const avatarSrc = profile?.avatar_url
     ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/authenticated/avatars/${profile.avatar_url}`
     : undefined;
 
+  const openMobileMenu = () => {
+    window.dispatchEvent(new CustomEvent("toggle-mobile-menu"));
+  };
+
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card/80 backdrop-blur-sm px-6">
-      {/* Search */}
-      <div className="flex items-center gap-6 flex-1">
-        <div className="relative flex-1 max-w-md">
+    <header className="sticky top-0 z-30 flex h-14 md:h-16 items-center justify-between border-b border-border bg-card/80 backdrop-blur-sm px-3 md:px-6 gap-2">
+      {/* Left side */}
+      <div className="flex items-center gap-2 md:gap-6 flex-1 min-w-0">
+        {isMobile && (
+          <Button variant="ghost" size="icon" className="shrink-0" onClick={openMobileMenu}>
+            <Menu className="h-5 w-5" />
+          </Button>
+        )}
+        <div className="relative flex-1 max-w-md min-w-0">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search shipments, BL numbers, customers..."
-            className="pl-10 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-accent"
+            placeholder={isMobile ? "Search..." : "Search shipments, BL numbers, customers..."}
+            className="pl-10 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-accent text-sm"
           />
         </div>
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-2">
-        {/* Integration Status */}
-        <div className="flex items-center gap-3 px-4 py-1.5 rounded-lg bg-muted/50 mr-2">
-          {integrationDetails.map((integration) => (
-            <Popover key={integration.name}>
-              <PopoverTrigger asChild>
-                <button className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
-                  <span className="integration-dot integration-connected" />
-                  <span className="text-xs font-medium text-muted-foreground">{integration.name}</span>
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-72 p-0" align="center" sideOffset={8}>
-                <div className="p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-semibold text-foreground">{integration.fullName}</h4>
-                    <CheckCircle2 className="h-4 w-4 text-success" />
-                  </div>
-                  <p className="text-xs text-muted-foreground">{integration.details}</p>
-                  <div className="grid grid-cols-2 gap-2 pt-1 border-t border-border">
-                    <div>
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Last Sync</p>
-                      <p className="text-xs font-medium text-foreground">{integration.lastSync}</p>
+      <div className="flex items-center gap-1 md:gap-2 shrink-0">
+        {/* Integration Status - hidden on mobile */}
+        {!isMobile && (
+          <div className="flex items-center gap-3 px-4 py-1.5 rounded-lg bg-muted/50 mr-2">
+            {integrationDetails.map((integration) => (
+              <Popover key={integration.name}>
+                <PopoverTrigger asChild>
+                  <button className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
+                    <span className="integration-dot integration-connected" />
+                    <span className="text-xs font-medium text-muted-foreground">{integration.name}</span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-0" align="center" sideOffset={8}>
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-semibold text-foreground">{integration.fullName}</h4>
+                      <CheckCircle2 className="h-4 w-4 text-success" />
                     </div>
-                    <div>
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Uptime</p>
-                      <p className="text-xs font-medium text-foreground">{integration.uptime}</p>
+                    <p className="text-xs text-muted-foreground">{integration.details}</p>
+                    <div className="grid grid-cols-2 gap-2 pt-1 border-t border-border">
+                      <div>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Last Sync</p>
+                        <p className="text-xs font-medium text-foreground">{integration.lastSync}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Uptime</p>
+                        <p className="text-xs font-medium text-foreground">{integration.uptime}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-          ))}
-        </div>
+                </PopoverContent>
+              </Popover>
+            ))}
+          </div>
+        )}
 
-        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-          <RefreshCw className="h-4 w-4" />
-        </Button>
+        {!isMobile && (
+          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        )}
 
         <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
           <Bell className="h-4 w-4" />
@@ -125,9 +139,11 @@ export function TopBar() {
           </Badge>
         </Button>
 
-        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-          <HelpCircle className="h-4 w-4" />
-        </Button>
+        {!isMobile && (
+          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+            <HelpCircle className="h-4 w-4" />
+          </Button>
+        )}
 
         {/* User Profile Dropdown */}
         <DropdownMenu>
@@ -135,7 +151,7 @@ export function TopBar() {
             <Button variant="ghost" className="relative h-9 w-9 rounded-full">
               <Avatar className="h-9 w-9">
                 <AvatarImage src={avatarSrc} alt="User" />
-                <AvatarFallback className="bg-primary/10 text-primary font-semibold">{initials}</AvatarFallback>
+                <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">{initials}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
