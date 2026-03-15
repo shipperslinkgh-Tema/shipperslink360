@@ -8,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateConsignment } from "@/hooks/useCompletedConsignments";
+import { DocumentScanner } from "@/components/workflow/DocumentScanner";
+import { mapExtractedDataToForm, type ExtractedDocumentData } from "@/hooks/useDocumentProcessor";
+import { toast } from "sonner";
 
 const schema = z.object({
   client_name: z.string().trim().min(1, "Client name is required").max(200),
