@@ -228,6 +228,14 @@ export default function ConsignmentWorkflows() {
                       <Badge className={cn("text-[10px]", stageColors[wf.current_stage])}>
                         {WORKFLOW_STAGES[STAGE_INDEX[wf.current_stage]]?.label}
                       </Badge>
+                      {wf.current_stage !== "delivery_completed" && (
+                        <SLABadge
+                          stage={wf.current_stage}
+                          stageStartedAt={wf.stage_started_at}
+                          createdAt={wf.created_at}
+                          compact
+                        />
+                      )}
                     </div>
                     <Button variant="ghost" size="sm">
                       <Eye className="h-4 w-4 mr-1" /> View
