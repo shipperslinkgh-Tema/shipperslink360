@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { MapPin, Navigation, Phone, Package, CheckCircle, Play, Square, Clock, Truck } from "lucide-react";
+import { MapPin, Navigation, Phone, Package, CheckCircle, Play, Square, Clock, Truck, Camera, AlertTriangle } from "lucide-react";
 import { TrackingTrip } from "@/types/tracking";
-import { useUpdateTripStatus, useRecordGps, useEndTrip } from "@/hooks/useTracking";
+import { useUpdateTripStatus, useRecordGps, useEndTrip, useGpsLogs } from "@/hooks/useTracking";
+import { LiveTrackingMap } from "./LiveTrackingMap";
+import { cn } from "@/lib/utils";
 
 interface Props {
   trip: TrackingTrip;
@@ -16,22 +18,54 @@ export function DriverDashboard({ trip }: Props) {
   const updateStatus = useUpdateTripStatus();
   const recordGps = useRecordGps();
   const endTrip = useEndTrip();
+  const { data: gpsLogs = [] } = useGpsLogs(trip.status === "in-transit" ? trip.id : undefined);
   const [gpsActive, setGpsActive] = useState(false);
   const [otpDialog, setOtpDialog] = useState(false);
   const [otpInput, setOtpInput] = useState("");
+  const [elapsedTime, setElapsedTime] = useState("");
+
+  // Timer
+  useEffect(() => {
+    if (trip.status !== "in-transit" || !trip.actualStartTime) return;
+    const update = () => {
+      const diff = Date.now() - new Date(trip.actualStartTime!).getTime();
+      const hrs = Math.floor(diff / 3600000);
+      const mins = Math.floor((diff % 3600000) / 60000);
+      setElapsedTime(hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`);
+    };
+    update();
+    const iv = setInterval(update, 30000);
+    return () => clearInterval(iv);
+  }, [trip.status, trip.actualStartTime]);
 
   const recordPosition = useCallback(() => {
     if (!gpsActive) return;
-    const baseLat = 5.6037;
-    const baseLng = -0.1870;
-    recordGps.mutate({
-      tripId: trip.id,
-      latitude: baseLat + (Math.random() - 0.5) * 0.05,
-      longitude: baseLng + (Math.random() - 0.5) * 0.05,
-      speed: Math.random() * 60 + 20,
-      heading: Math.random() * 360,
-      accuracy: 10,
-    });
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          recordGps.mutate({
+            tripId: trip.id,
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+            speed: (pos.coords.speed || 0) * 3.6, // m/s to km/h
+            heading: pos.coords.heading || 0,
+            accuracy: pos.coords.accuracy || 0,
+          });
+        },
+        () => {
+          // Fallback to simulated position around Accra
+          recordGps.mutate({
+            tripId: trip.id,
+            latitude: 5.6037 + (Math.random() - 0.5) * 0.05,
+            longitude: -0.1870 + (Math.random() - 0.5) * 0.05,
+            speed: Math.random() * 60 + 20,
+            heading: Math.random() * 360,
+            accuracy: 15,
+          });
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
   }, [gpsActive, trip.id, recordGps]);
 
   useEffect(() => {
@@ -58,89 +92,126 @@ export function DriverDashboard({ trip }: Props) {
     setTimeout(recordPosition, 500);
   };
 
-  const handleEndTrip = () => {
-    setOtpDialog(true);
-  };
+  const handleEndTrip = () => setOtpDialog(true);
 
   const confirmEndTrip = () => {
     setGpsActive(false);
-    endTrip.mutate({
-      tripId: trip.id,
-      otp: otpInput || undefined,
-      confirmedBy: "driver",
-    });
+    endTrip.mutate({ tripId: trip.id, otp: otpInput || undefined, confirmedBy: "driver" });
     setOtpDialog(false);
     setOtpInput("");
   };
 
-  const statusColor: Record<string, string> = {
-    scheduled: "bg-muted text-muted-foreground",
-    arrived_at_pickup: "bg-amber-500/20 text-amber-700",
-    "in-transit": "bg-blue-500/20 text-blue-700",
-    delivered: "bg-green-500/20 text-green-700",
-    completed: "bg-green-500/20 text-green-700",
+  const statusConfig: Record<string, { label: string; color: string }> = {
+    scheduled:         { label: "SCHEDULED", color: "bg-muted text-muted-foreground" },
+    arrived_at_pickup: { label: "AT PICKUP", color: "bg-warning/20 text-warning" },
+    "in-transit":      { label: "IN TRANSIT", color: "bg-info/20 text-info" },
+    delivered:         { label: "DELIVERED", color: "bg-success/20 text-success" },
+    completed:         { label: "COMPLETED", color: "bg-success/20 text-success" },
   };
+
+  const cfg = statusConfig[trip.status] || statusConfig.scheduled;
 
   return (
     <div className="space-y-4 max-w-lg mx-auto px-1">
-      {/* Trip Status Header */}
+      {/* Trip Header */}
       <Card>
-        <CardHeader className="pb-3 px-4">
+        <CardHeader className="pb-2 px-4">
           <div className="flex items-center justify-between gap-2">
-            <CardTitle className="text-base md:text-lg flex items-center gap-2">
+            <CardTitle className="text-base flex items-center gap-2">
               <Truck className="h-5 w-5 text-primary" />
               Active Trip
             </CardTitle>
-            <Badge className={statusColor[trip.status] || "bg-muted"}>
-              {trip.status.replace(/_/g, " ").replace(/-/g, " ").toUpperCase()}
-            </Badge>
+            <Badge className={cfg.color}>{cfg.label}</Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-3 px-4">
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <span className="text-muted-foreground text-xs">Container</span>
-              <p className="font-medium truncate">{trip.containerNumber || "N/A"}</p>
+          {/* Trip elapsed time for in-transit */}
+          {trip.status === "in-transit" && (
+            <div className="flex items-center justify-between bg-info/5 rounded-lg p-2.5">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-info animate-pulse" />
+                <span className="text-sm font-medium text-info">GPS Tracking Active</span>
+              </div>
+              <span className="text-sm font-bold text-foreground">{elapsedTime}</span>
             </div>
-            <div>
-              <span className="text-muted-foreground text-xs">Truck</span>
-              <p className="font-medium truncate">{trip.truckNumber || "N/A"}</p>
+          )}
+
+          {/* Route info */}
+          <div className="space-y-2 text-sm">
+            <div className="flex items-start gap-3">
+              <div className="flex flex-col items-center">
+                <div className="h-6 w-6 rounded-full bg-success flex items-center justify-center">
+                  <MapPin className="h-3.5 w-3.5 text-success-foreground" />
+                </div>
+                <div className="w-0.5 h-4 bg-border" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Pickup</p>
+                <p className="font-medium">{trip.pickupLocation || trip.origin}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="h-6 w-6 rounded-full bg-destructive flex items-center justify-center">
+                <Navigation className="h-3.5 w-3.5 text-destructive-foreground" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Delivery</p>
+                <p className="font-medium">{trip.deliveryLocation || trip.destination}</p>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-2 text-sm">
-            <div className="flex items-start gap-2">
-              <MapPin className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
-              <div className="min-w-0">
-                <span className="text-muted-foreground text-xs">Pickup</span>
-                <p className="font-medium break-words">{trip.pickupLocation || trip.origin}</p>
-              </div>
+          {/* Quick info grid */}
+          <div className="grid grid-cols-3 gap-2 pt-1">
+            <div className="bg-muted/50 rounded-lg p-2 text-center">
+              <p className="text-xs text-muted-foreground">Container</p>
+              <p className="font-mono text-xs font-semibold truncate">{trip.containerNumber || "N/A"}</p>
             </div>
-            <div className="flex items-start gap-2">
-              <Navigation className="h-4 w-4 text-red-600 mt-0.5 shrink-0" />
-              <div className="min-w-0">
-                <span className="text-muted-foreground text-xs">Delivery</span>
-                <p className="font-medium break-words">{trip.deliveryLocation || trip.destination}</p>
-              </div>
+            <div className="bg-muted/50 rounded-lg p-2 text-center">
+              <p className="text-xs text-muted-foreground">Truck</p>
+              <p className="text-xs font-semibold truncate">{trip.truckNumber || "N/A"}</p>
+            </div>
+            <div className="bg-muted/50 rounded-lg p-2 text-center">
+              <p className="text-xs text-muted-foreground">Distance</p>
+              <p className="text-xs font-semibold">{trip.distanceKm} km</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
+      {/* Live Map for in-transit */}
+      {trip.status === "in-transit" && (
+        <Card className="overflow-hidden">
+          <CardContent className="p-0">
+            <LiveTrackingMap
+              gpsLogs={gpsLogs}
+              tripStatus={trip.status}
+              origin={trip.pickupLocation || trip.origin}
+              destination={trip.deliveryLocation || trip.destination}
+              className="h-48"
+            />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Client Info */}
       <Card>
         <CardContent className="pt-4 space-y-2 text-sm px-4">
-          <div className="flex items-center gap-2">
-            <Package className="h-4 w-4 text-muted-foreground shrink-0" />
-            <span className="text-muted-foreground">Client:</span>
-            <span className="font-medium truncate">{trip.customer}</span>
-          </div>
-          {trip.customerPhone && (
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
-              <a href={`tel:${trip.customerPhone}`} className="text-primary underline">{trip.customerPhone}</a>
+              <Package className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground">Client:</span>
+              <span className="font-medium truncate">{trip.customer}</span>
             </div>
-          )}
+            {trip.customerPhone && (
+              <a
+                href={`tel:${trip.customerPhone}`}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors"
+              >
+                <Phone className="h-3.5 w-3.5" /> Call
+              </a>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
             <span className="text-muted-foreground">Cargo:</span>
@@ -149,11 +220,11 @@ export function DriverDashboard({ trip }: Props) {
         </CardContent>
       </Card>
 
-      {/* Action Buttons — large touch targets */}
+      {/* Action Buttons */}
       <div className="space-y-3">
         {trip.status === "scheduled" && (
           <Button
-            className="w-full h-16 text-base md:text-lg bg-amber-600 hover:bg-amber-700 rounded-xl touch-manipulation"
+            className="w-full h-16 text-base bg-warning hover:bg-warning/90 text-warning-foreground rounded-xl touch-manipulation"
             onClick={handleArrivedAtPickup}
             disabled={updateStatus.isPending}
           >
@@ -164,7 +235,7 @@ export function DriverDashboard({ trip }: Props) {
 
         {(trip.status === "scheduled" || trip.status === "arrived_at_pickup") && (
           <Button
-            className="w-full h-16 text-base md:text-lg bg-primary hover:bg-primary/90 rounded-xl touch-manipulation"
+            className="w-full h-16 text-base bg-primary hover:bg-primary/90 rounded-xl touch-manipulation"
             onClick={handleStartTrip}
             disabled={updateStatus.isPending}
           >
@@ -174,50 +245,55 @@ export function DriverDashboard({ trip }: Props) {
         )}
 
         {trip.status === "in-transit" && (
-          <>
-            <div className="flex items-center justify-center gap-2 text-sm text-green-600 py-2">
-              <div className="h-3 w-3 rounded-full bg-green-500 animate-pulse" />
-              GPS tracking active
-            </div>
-            <Button
-              className="w-full h-16 text-base md:text-lg bg-destructive hover:bg-destructive/90 rounded-xl touch-manipulation"
-              onClick={handleEndTrip}
-              disabled={endTrip.isPending}
-            >
-              <Square className="h-6 w-6 mr-2" />
-              END TRIP
-            </Button>
-          </>
+          <Button
+            className="w-full h-16 text-base bg-destructive hover:bg-destructive/90 rounded-xl touch-manipulation"
+            onClick={handleEndTrip}
+            disabled={endTrip.isPending}
+          >
+            <Square className="h-6 w-6 mr-2" />
+            END TRIP & CONFIRM DELIVERY
+          </Button>
         )}
 
         {(trip.status === "delivered" || trip.status === "completed") && (
-          <div className="flex items-center justify-center gap-2 p-5 bg-green-50 rounded-xl text-green-700">
-            <CheckCircle className="h-6 w-6" />
-            <span className="font-medium text-lg">Trip Completed</span>
+          <div className="flex items-center justify-center gap-3 p-6 bg-success/10 rounded-xl">
+            <CheckCircle className="h-8 w-8 text-success" />
+            <div>
+              <p className="font-bold text-success text-lg">Trip Completed</p>
+              {trip.actualEndTime && (
+                <p className="text-sm text-muted-foreground">
+                  {new Date(trip.actualEndTime).toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short" })}
+                </p>
+              )}
+            </div>
           </div>
         )}
       </div>
 
-      {/* OTP Confirmation Dialog */}
+      {/* OTP Dialog */}
       <Dialog open={otpDialog} onOpenChange={setOtpDialog}>
         <DialogContent className="max-w-[92vw] sm:max-w-md rounded-xl">
           <DialogHeader>
-            <DialogTitle>Confirm Delivery</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-warning" />
+              Confirm Delivery
+            </DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Enter the delivery OTP from the customer to confirm delivery, or leave blank to skip verification.
+            Enter the 6-digit OTP from the customer to confirm delivery, or skip to complete without verification.
           </p>
           <Input
             placeholder="Enter 6-digit OTP"
             value={otpInput}
             onChange={(e) => setOtpInput(e.target.value)}
             maxLength={6}
-            className="text-center text-2xl tracking-widest h-14"
+            className="text-center text-2xl tracking-[0.3em] h-14 font-mono"
             inputMode="numeric"
           />
           <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={() => setOtpDialog(false)} className="h-12 touch-manipulation">Cancel</Button>
             <Button onClick={confirmEndTrip} disabled={endTrip.isPending} className="h-12 touch-manipulation">
+              <CheckCircle className="h-4 w-4 mr-2" />
               Confirm Delivery
             </Button>
           </DialogFooter>
