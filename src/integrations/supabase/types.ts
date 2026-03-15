@@ -2470,74 +2470,181 @@ export type Database = {
         }
         Relationships: []
       }
+      trip_gps_logs: {
+        Row: {
+          accuracy: number | null
+          created_at: string
+          heading: number | null
+          id: string
+          latitude: number
+          longitude: number
+          recorded_at: string
+          speed: number | null
+          trip_id: string
+        }
+        Insert: {
+          accuracy?: number | null
+          created_at?: string
+          heading?: number | null
+          id?: string
+          latitude: number
+          longitude: number
+          recorded_at?: string
+          speed?: number | null
+          trip_id: string
+        }
+        Update: {
+          accuracy?: number | null
+          created_at?: string
+          heading?: number | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          recorded_at?: string
+          speed?: number | null
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_gps_logs_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trucking_trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trucking_trips: {
         Row: {
+          actual_end_time: string | null
+          actual_start_time: string | null
+          arrived_at_pickup_time: string | null
           bl_number: string | null
+          cargo_description: string | null
           container_number: string | null
           container_return_date: string | null
           container_return_location: string | null
           container_returned: boolean | null
           created_at: string
           customer: string | null
+          customer_accepted: boolean | null
+          customer_accepted_at: string | null
+          customer_email: string | null
           customer_id: string | null
+          customer_phone: string | null
+          delivery_confirmed_by: string | null
           delivery_date: string | null
+          delivery_location: string | null
+          delivery_otp: string | null
           destination: string
+          distance_km: number | null
           driver_id: string
+          driver_name: string | null
           driver_payment: number | null
+          driver_phone: string | null
+          estimated_delivery_time: string | null
           fuel_cost: number | null
           id: string
           notes: string | null
           origin: string
           pickup_date: string | null
+          pickup_location: string | null
+          pod_url: string | null
           status: string
+          tracking_active: boolean | null
+          tracking_token: string | null
+          tracking_url: string | null
           trip_cost: number | null
           truck_id: string
+          truck_number: string | null
           updated_at: string
         }
         Insert: {
+          actual_end_time?: string | null
+          actual_start_time?: string | null
+          arrived_at_pickup_time?: string | null
           bl_number?: string | null
+          cargo_description?: string | null
           container_number?: string | null
           container_return_date?: string | null
           container_return_location?: string | null
           container_returned?: boolean | null
           created_at?: string
           customer?: string | null
+          customer_accepted?: boolean | null
+          customer_accepted_at?: string | null
+          customer_email?: string | null
           customer_id?: string | null
+          customer_phone?: string | null
+          delivery_confirmed_by?: string | null
           delivery_date?: string | null
+          delivery_location?: string | null
+          delivery_otp?: string | null
           destination: string
+          distance_km?: number | null
           driver_id: string
+          driver_name?: string | null
           driver_payment?: number | null
+          driver_phone?: string | null
+          estimated_delivery_time?: string | null
           fuel_cost?: number | null
           id?: string
           notes?: string | null
           origin: string
           pickup_date?: string | null
+          pickup_location?: string | null
+          pod_url?: string | null
           status?: string
+          tracking_active?: boolean | null
+          tracking_token?: string | null
+          tracking_url?: string | null
           trip_cost?: number | null
           truck_id: string
+          truck_number?: string | null
           updated_at?: string
         }
         Update: {
+          actual_end_time?: string | null
+          actual_start_time?: string | null
+          arrived_at_pickup_time?: string | null
           bl_number?: string | null
+          cargo_description?: string | null
           container_number?: string | null
           container_return_date?: string | null
           container_return_location?: string | null
           container_returned?: boolean | null
           created_at?: string
           customer?: string | null
+          customer_accepted?: boolean | null
+          customer_accepted_at?: string | null
+          customer_email?: string | null
           customer_id?: string | null
+          customer_phone?: string | null
+          delivery_confirmed_by?: string | null
           delivery_date?: string | null
+          delivery_location?: string | null
+          delivery_otp?: string | null
           destination?: string
+          distance_km?: number | null
           driver_id?: string
+          driver_name?: string | null
           driver_payment?: number | null
+          driver_phone?: string | null
+          estimated_delivery_time?: string | null
           fuel_cost?: number | null
           id?: string
           notes?: string | null
           origin?: string
           pickup_date?: string | null
+          pickup_location?: string | null
+          pod_url?: string | null
           status?: string
+          tracking_active?: boolean | null
+          tracking_token?: string | null
+          tracking_url?: string | null
           trip_cost?: number | null
           truck_id?: string
+          truck_number?: string | null
           updated_at?: string
         }
         Relationships: [
