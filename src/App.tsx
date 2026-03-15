@@ -32,6 +32,7 @@ import OfficeFilesPortal from "./pages/OfficeFilesPortal";
 import Notifications from "./pages/Notifications";
 import ConsignmentWorkflows from "./pages/ConsignmentWorkflows";
 import LiveTracking from "./pages/LiveTracking";
+import PortCommandCenter from "./pages/PortCommandCenter";
 import TrackShipment from "./pages/TrackShipment";
 import { AppLayout } from "./components/layout/AppLayout";
 import ClientLogin from "./pages/client/ClientLogin";
