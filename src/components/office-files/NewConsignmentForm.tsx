@@ -37,6 +37,25 @@ export function NewConsignmentForm({ onSuccess }: { onSuccess: () => void }) {
 
   const shipmentType = watch("shipment_type");
 
+  const handleDocumentExtracted = (data: ExtractedDocumentData) => {
+    const mapped = mapExtractedDataToForm(data);
+    let fieldsSet = 0;
+
+    if (mapped.client_name) { setValue("client_name", String(mapped.client_name)); fieldsSet++; }
+    if (mapped.bl_number) { setValue("bl_number", String(mapped.bl_number)); fieldsSet++; }
+    if (mapped.awb_number) { setValue("awb_number", String(mapped.awb_number)); fieldsSet++; }
+    if (mapped.shipment_type) {
+      setValue("shipment_type", mapped.shipment_type as "sea" | "air");
+      fieldsSet++;
+    }
+    if (data.container_number) {
+      setValue("container_numbers_raw", data.container_number);
+      fieldsSet++;
+    }
+    if (mapped.eta) { setValue("clearance_date", String(mapped.eta)); fieldsSet++; }
+
+    toast.success(`Auto-filled ${fieldsSet} fields from document`);
+  };
   const onSubmit = (data: FormData) => {
     const containers = data.container_numbers_raw
       ? data.container_numbers_raw.split(",").map(s => s.trim()).filter(Boolean)
