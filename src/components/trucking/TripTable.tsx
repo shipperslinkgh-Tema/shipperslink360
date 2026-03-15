@@ -1,5 +1,6 @@
 import { Trip, Truck, Driver } from "@/types/trucking";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -8,8 +9,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Route, Calendar, DollarSign, Container, CheckCircle2, Clock } from "lucide-react";
+import { Route, Calendar, DollarSign, Container, CheckCircle2, Clock, Copy, ExternalLink, Radio, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useActivateTracking } from "@/hooks/useTracking";
+import { useTrackingTrips } from "@/hooks/useTracking";
+import { toast } from "sonner";
 
 interface TripTableProps {
   trips: Trip[];
@@ -27,6 +31,23 @@ const statusConfig = {
 export function TripTable({ trips, trucks, drivers }: TripTableProps) {
   const getTruck = (truckId: string) => trucks.find((t) => t.id === truckId);
   const getDriver = (driverId: string) => drivers.find((d) => d.id === driverId);
+  const activateTracking = useActivateTracking();
+  const { data: trackingTrips = [] } = useTrackingTrips();
+
+  const getTrackingInfo = (tripId: string) =>
+    trackingTrips.find((t) => t.id === tripId);
+
+  const copyLink = (url: string) => {
+    navigator.clipboard.writeText(url);
+    toast.success("Tracking link copied!");
+  };
+
+  const shareWhatsApp = (url: string, customer: string) => {
+    const msg = encodeURIComponent(
+      `Hello ${customer}, here is your live shipment tracking link:\n${url}`
+    );
+    window.open(`https://wa.me/?text=${msg}`, "_blank");
+  };
 
   return (
     <div className="rounded-lg border bg-card">
@@ -51,6 +72,7 @@ export function TripTable({ trips, trucks, drivers }: TripTableProps) {
               <TableHead>Container Return</TableHead>
               <TableHead className="text-right">Payment (GHS)</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Tracking</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -58,6 +80,7 @@ export function TripTable({ trips, trucks, drivers }: TripTableProps) {
               const truck = getTruck(trip.truckId);
               const driver = getDriver(trip.driverId);
               const status = statusConfig[trip.status];
+              const tracking = getTrackingInfo(trip.id);
 
               return (
                 <TableRow key={trip.id}>
@@ -134,6 +157,32 @@ export function TripTable({ trips, trucks, drivers }: TripTableProps) {
                   </TableCell>
                   <TableCell>
                     <Badge className={cn("text-xs", status.className)}>{status.label}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    {tracking?.trackingUrl ? (
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" title="Copy link" onClick={() => copyLink(tracking.trackingUrl!)}>
+                          <Copy className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-success" title="Share via WhatsApp" onClick={() => shareWhatsApp(tracking.trackingUrl!, trip.customer)}>
+                          <MessageCircle className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" title="Open link" onClick={() => window.open(tracking.trackingUrl!, "_blank")}>
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1 text-xs"
+                        onClick={() => activateTracking.mutate(trip.id)}
+                        disabled={activateTracking.isPending}
+                      >
+                        <Radio className="h-3 w-3" />
+                        Activate
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               );

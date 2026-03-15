@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Navigation, Truck, Copy, ExternalLink, Eye, Search, Radio, Clock, Package, User, Phone, Route, Gauge, Calendar, CheckCircle } from "lucide-react";
+import { MapPin, Navigation, Truck, Copy, ExternalLink, Eye, Search, Radio, Clock, Package, User, Phone, Route, Gauge, Calendar, CheckCircle, MessageCircle } from "lucide-react";
 import { useTrackingTrips, useActivateTracking, useGpsLogs, useLatestGps } from "@/hooks/useTracking";
 import { TrackingTrip } from "@/types/tracking";
 import { DriverDashboard } from "./DriverDashboard";
@@ -210,6 +210,13 @@ export function AdminTrackingDashboard() {
     toast.success("Tracking link copied!");
   };
 
+  const shareWhatsApp = (url: string, customer: string) => {
+    const msg = encodeURIComponent(
+      `Hello ${customer}, here is your live shipment tracking link:\n${url}`
+    );
+    window.open(`https://wa.me/?text=${msg}`, "_blank");
+  };
+
   // Build fleet positions for map from active trips' simulated positions
   const fleetPositions = activeTrips.map((t, i) => ({
     id: t.id,
@@ -396,10 +403,13 @@ export function AdminTrackingDashboard() {
                         <TableCell>
                           {trip.trackingUrl ? (
                             <div className="flex items-center gap-1">
-                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => copyTrackingLink(trip.trackingUrl!)}>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" title="Copy link" onClick={() => copyTrackingLink(trip.trackingUrl!)}>
                                 <Copy className="h-3.5 w-3.5" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => window.open(trip.trackingUrl!, "_blank")}>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-success" title="Share via WhatsApp" onClick={() => shareWhatsApp(trip.trackingUrl!, trip.customer)}>
+                                <MessageCircle className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" title="Open link" onClick={() => window.open(trip.trackingUrl!, "_blank")}>
                                 <ExternalLink className="h-3.5 w-3.5" />
                               </Button>
                             </div>
