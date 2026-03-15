@@ -121,6 +121,7 @@ const App = () => (
                 <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
                 <Route path="/change-password" element={<ChangePassword />} />
                 <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                <Route path="/consignments" element={<ProtectedRoute><WithLayout><ConsignmentWorkflows /></WithLayout></ProtectedRoute>} />
                 <Route path="/shipments" element={<ProtectedRoute><WithLayout><Shipments /></WithLayout></ProtectedRoute>} />
                 <Route path="/shipments/:type" element={<ProtectedRoute><WithLayout><Shipments /></WithLayout></ProtectedRoute>} />
                 <Route path="/customs/icums" element={<ProtectedRoute><WithLayout><ICUMSDeclarations /></WithLayout></ProtectedRoute>} />
