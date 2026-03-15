@@ -24,6 +24,10 @@ const navigation: NavItem[] = [{
   icon: Container,
   href: "/consignments"
 }, {
+  title: "Port Command Center",
+  icon: Radar,
+  href: "/port-command"
+}, {
   title: "Operations",
   icon: Package,
   children: [{
