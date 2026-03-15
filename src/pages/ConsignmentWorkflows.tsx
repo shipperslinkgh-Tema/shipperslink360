@@ -277,6 +277,10 @@ export default function ConsignmentWorkflows() {
             </Card>
           ))}
         </div>
+        </div>
+      )}
+
+      </>
       )}
 
       <NewConsignmentDialog open={newDialogOpen} onOpenChange={setNewDialogOpen} />
