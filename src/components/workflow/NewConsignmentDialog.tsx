@@ -112,7 +112,7 @@ export function NewConsignmentDialog({ open, onOpenChange }: NewConsignmentDialo
                   <SelectTrigger><SelectValue placeholder="Select client" /></SelectTrigger>
                   <SelectContent>
                     {customers.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.company_name}</SelectItem>
+                      <SelectItem key={c.id} value={c.id}>{c.companyName}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
