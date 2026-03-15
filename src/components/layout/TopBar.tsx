@@ -158,7 +158,7 @@ function NotificationBell() {
   );
 }
 
-
+export function TopBar() {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
