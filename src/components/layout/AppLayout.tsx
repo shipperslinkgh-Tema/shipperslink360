@@ -10,6 +10,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  usePresence(); // Track online status
 
   return (
     <div className="min-h-screen bg-background">
