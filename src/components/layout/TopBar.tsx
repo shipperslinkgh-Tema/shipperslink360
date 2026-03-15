@@ -61,6 +61,11 @@ export function TopBar() {
     ? profile.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
     : "??";
 
+  // Build avatar URL from storage
+  const avatarSrc = profile?.avatar_url
+    ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/authenticated/avatars/${profile.avatar_url}`
+    : undefined;
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card/80 backdrop-blur-sm px-6">
       {/* Search */}
