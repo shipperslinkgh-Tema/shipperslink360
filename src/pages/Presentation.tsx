@@ -303,7 +303,7 @@ const slides: Slide[] = [
     },
   },
   {
-    id: 10,
+    id: 11,
     title: "Client Self-Service Portal",
     subtitle: "Secure External Portal for Clients",
     icon: Plane,
