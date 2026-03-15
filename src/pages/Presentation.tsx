@@ -250,7 +250,7 @@ const slides: Slide[] = [
     },
   },
   {
-    id: 8,
+    id: 9,
     title: "Reports & Analytics",
     subtitle: "Business Intelligence Across All Departments",
     icon: BarChart3,
