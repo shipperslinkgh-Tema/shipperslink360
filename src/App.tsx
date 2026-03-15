@@ -30,6 +30,7 @@ import Warehouse from "./pages/Warehouse";
 import AIAssistant from "./pages/AIAssistant";
 import OfficeFilesPortal from "./pages/OfficeFilesPortal";
 import Notifications from "./pages/Notifications";
+import ConsignmentWorkflows from "./pages/ConsignmentWorkflows";
 import { AppLayout } from "./components/layout/AppLayout";
 import ClientLogin from "./pages/client/ClientLogin";
 import ClientDashboard from "./pages/client/ClientDashboard";
