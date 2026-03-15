@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMonthlyFinancials, useOperationsStats, useFinanceSummary, useClientAnalytics, useTruckingStats } from "@/hooks/useReportsData";
 import { useFinanceInvoices } from "@/hooks/useFinanceData";
-import { exportToCSV } from "@/lib/dataExport";
+import { autoExportCSV } from "@/lib/dataExport";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
