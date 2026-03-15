@@ -21,6 +21,7 @@ import { WORKFLOW_STAGES, STAGE_INDEX, type WorkflowStage } from "@/types/workfl
 import { WorkflowStageTracker } from "./WorkflowStageTracker";
 import { WorkflowTimelineView } from "./WorkflowTimelineView";
 import { WorkflowDocumentManager } from "./WorkflowDocumentManager";
+import { SLABadge } from "./SLABadge";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface ConsignmentDetailDialogProps {
@@ -104,6 +105,13 @@ export function ConsignmentDetailDialog({
               <Badge variant="outline" className="capitalize">
                 {workflow.shipment_type}
               </Badge>
+              {!isCompleted && (
+                <SLABadge
+                  stage={workflow.current_stage}
+                  stageStartedAt={workflow.stage_started_at}
+                  createdAt={workflow.created_at}
+                />
+              )}
             </div>
           </div>
         </DialogHeader>

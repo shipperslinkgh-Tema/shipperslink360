@@ -4,9 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Plus, Search, Package, FileText, Ship, Plane, Truck, Clock,
-  AlertTriangle, CheckCircle, ArrowRight, Eye, Loader2
+  AlertTriangle, CheckCircle, ArrowRight, Eye, Loader2, Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -15,6 +16,8 @@ import { WORKFLOW_STAGES, STAGE_INDEX, type WorkflowStage, type ConsignmentWorkf
 import { WorkflowStageTracker } from "@/components/workflow/WorkflowStageTracker";
 import { NewConsignmentDialog } from "@/components/workflow/NewConsignmentDialog";
 import { ConsignmentDetailDialog } from "@/components/workflow/ConsignmentDetailDialog";
+import { WorkflowAutomationPanel } from "@/components/workflow/WorkflowAutomationPanel";
+import { SLABadge } from "@/components/workflow/SLABadge";
 
 const stageColors: Record<string, string> = {
   documents_received: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
@@ -33,6 +36,7 @@ export default function ConsignmentWorkflows() {
   const [stageFilter, setStageFilter] = useState<string>("all");
   const [newDialogOpen, setNewDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("workflows");
 
   const { data: workflows = [], isLoading } = useConsignmentWorkflows({
     stage: stageFilter !== "all" ? (stageFilter as WorkflowStage) : undefined,
@@ -61,11 +65,22 @@ export default function ConsignmentWorkflows() {
             Track shipments from documents received to final delivery
           </p>
         </div>
-        <Button onClick={() => setNewDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          New Consignment
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setActiveTab(activeTab === "automation" ? "workflows" : "automation")}>
+            <Zap className="h-4 w-4 mr-2" />
+            {activeTab === "automation" ? "View Workflows" : "SLA Monitor"}
+          </Button>
+          <Button onClick={() => setNewDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Consignment
+          </Button>
+        </div>
       </div>
+
+      {activeTab === "automation" ? (
+        <WorkflowAutomationPanel />
+      ) : (
+        <>
 
       {/* Stats */}
       <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
@@ -213,6 +228,14 @@ export default function ConsignmentWorkflows() {
                       <Badge className={cn("text-[10px]", stageColors[wf.current_stage])}>
                         {WORKFLOW_STAGES[STAGE_INDEX[wf.current_stage]]?.label}
                       </Badge>
+                      {wf.current_stage !== "delivery_completed" && (
+                        <SLABadge
+                          stage={wf.current_stage}
+                          stageStartedAt={wf.stage_started_at}
+                          createdAt={wf.created_at}
+                          compact
+                        />
+                      )}
                     </div>
                     <Button variant="ghost" size="sm">
                       <Eye className="h-4 w-4 mr-1" /> View
@@ -254,6 +277,8 @@ export default function ConsignmentWorkflows() {
             </Card>
           ))}
         </div>
+      )}
+      </>
       )}
 
       <NewConsignmentDialog open={newDialogOpen} onOpenChange={setNewDialogOpen} />
