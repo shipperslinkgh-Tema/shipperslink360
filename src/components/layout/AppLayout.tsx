@@ -2,6 +2,7 @@ import { ReactNode, useState } from "react";
 import { AppSidebar } from "./AppSidebar";
 import { TopBar } from "./TopBar";
 import { InternalChatBox } from "@/components/chat/InternalChatBox";
+import { usePresence } from "@/hooks/usePresence";
 
 interface AppLayoutProps {
   children: ReactNode;
