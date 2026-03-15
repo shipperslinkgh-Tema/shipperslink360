@@ -403,10 +403,13 @@ export function AdminTrackingDashboard() {
                         <TableCell>
                           {trip.trackingUrl ? (
                             <div className="flex items-center gap-1">
-                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => copyTrackingLink(trip.trackingUrl!)}>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" title="Copy link" onClick={() => copyTrackingLink(trip.trackingUrl!)}>
                                 <Copy className="h-3.5 w-3.5" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => window.open(trip.trackingUrl!, "_blank")}>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-success" title="Share via WhatsApp" onClick={() => shareWhatsApp(trip.trackingUrl!, trip.customer)}>
+                                <MessageCircle className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" title="Open link" onClick={() => window.open(trip.trackingUrl!, "_blank")}>
                                 <ExternalLink className="h-3.5 w-3.5" />
                               </Button>
                             </div>
