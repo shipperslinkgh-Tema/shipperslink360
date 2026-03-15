@@ -102,6 +102,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Public tracking page — no auth required */}
+          <Route path="/track/:token" element={<TrackShipment />} />
+
           {/* Client Portal Routes */}
           <Route path="/portal/*" element={
             <ClientAuthProvider>
