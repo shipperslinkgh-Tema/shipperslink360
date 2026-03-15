@@ -278,7 +278,7 @@ const slides: Slide[] = [
     },
   },
   {
-    id: 9,
+    id: 10,
     title: "Customer Portal",
     subtitle: "Client Management & Documentation",
     icon: Users,
