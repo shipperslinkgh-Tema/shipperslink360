@@ -8,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateConsignment } from "@/hooks/useCompletedConsignments";
+import { DocumentScanner } from "@/components/workflow/DocumentScanner";
+import { mapExtractedDataToForm, type ExtractedDocumentData } from "@/hooks/useDocumentProcessor";
+import { toast } from "sonner";
 
 const schema = z.object({
   client_name: z.string().trim().min(1, "Client name is required").max(200),
@@ -34,6 +37,25 @@ export function NewConsignmentForm({ onSuccess }: { onSuccess: () => void }) {
 
   const shipmentType = watch("shipment_type");
 
+  const handleDocumentExtracted = (data: ExtractedDocumentData) => {
+    const mapped = mapExtractedDataToForm(data);
+    let fieldsSet = 0;
+
+    if (mapped.client_name) { setValue("client_name", String(mapped.client_name)); fieldsSet++; }
+    if (mapped.bl_number) { setValue("bl_number", String(mapped.bl_number)); fieldsSet++; }
+    if (mapped.awb_number) { setValue("awb_number", String(mapped.awb_number)); fieldsSet++; }
+    if (mapped.shipment_type) {
+      setValue("shipment_type", mapped.shipment_type as "sea" | "air");
+      fieldsSet++;
+    }
+    if (data.container_number) {
+      setValue("container_numbers_raw", data.container_number);
+      fieldsSet++;
+    }
+    if (mapped.eta) { setValue("clearance_date", String(mapped.eta)); fieldsSet++; }
+
+    toast.success(`Auto-filled ${fieldsSet} fields from document`);
+  };
   const onSubmit = (data: FormData) => {
     const containers = data.container_numbers_raw
       ? data.container_numbers_raw.split(",").map(s => s.trim()).filter(Boolean)
@@ -59,6 +81,9 @@ export function NewConsignmentForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {/* AI Document Scanner */}
+      <DocumentScanner onDataExtracted={handleDocumentExtracted} compact />
+
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-2">
           <Label>Client Name *</Label>
