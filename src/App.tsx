@@ -28,6 +28,7 @@ import ClientDataManagement from "./pages/ClientDataManagement";
 import Index from "./pages/Index";
 import Warehouse from "./pages/Warehouse";
 import AIAssistant from "./pages/AIAssistant";
+import StaffProfile from "./pages/StaffProfile";
 import OfficeFilesPortal from "./pages/OfficeFilesPortal";
 import Notifications from "./pages/Notifications";
 import ConsignmentWorkflows from "./pages/ConsignmentWorkflows";
