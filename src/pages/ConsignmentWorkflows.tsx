@@ -4,9 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Plus, Search, Package, FileText, Ship, Plane, Truck, Clock,
-  AlertTriangle, CheckCircle, ArrowRight, Eye, Loader2
+  AlertTriangle, CheckCircle, ArrowRight, Eye, Loader2, Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -15,6 +16,8 @@ import { WORKFLOW_STAGES, STAGE_INDEX, type WorkflowStage, type ConsignmentWorkf
 import { WorkflowStageTracker } from "@/components/workflow/WorkflowStageTracker";
 import { NewConsignmentDialog } from "@/components/workflow/NewConsignmentDialog";
 import { ConsignmentDetailDialog } from "@/components/workflow/ConsignmentDetailDialog";
+import { WorkflowAutomationPanel } from "@/components/workflow/WorkflowAutomationPanel";
+import { SLABadge } from "@/components/workflow/SLABadge";
 
 const stageColors: Record<string, string> = {
   documents_received: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
