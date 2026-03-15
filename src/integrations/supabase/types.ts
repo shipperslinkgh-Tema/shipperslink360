@@ -903,6 +903,212 @@ export type Database = {
           },
         ]
       }
+      consignment_workflows: {
+        Row: {
+          assigned_officer: string | null
+          assigned_officer_id: string | null
+          awb_number: string | null
+          bl_number: string | null
+          cargo_description: string | null
+          cargo_released_at: string | null
+          cargo_released_by: string | null
+          cif_value: number | null
+          client_contact: string | null
+          client_id: string | null
+          client_name: string
+          consignment_ref: string
+          consolidation_id: string | null
+          container_number: string | null
+          created_at: string
+          created_by: string | null
+          current_stage: string
+          customs_declared_at: string | null
+          customs_declared_by: string | null
+          delivery_completed_at: string | null
+          delivery_completed_by: string | null
+          delivery_order_number: string | null
+          delivery_started_at: string | null
+          documentation_completed_at: string | null
+          documentation_completed_by: string | null
+          documentation_started_at: string | null
+          documents_received_at: string | null
+          documents_received_by: string | null
+          duty_amount: number | null
+          duty_paid_at: string | null
+          duty_paid_by: string | null
+          eta: string | null
+          fob_value: number | null
+          free_days: number | null
+          free_days_start: string | null
+          freight_value: number | null
+          hs_code: string | null
+          icums_declaration_number: string | null
+          id: string
+          incoterms: string | null
+          insurance_value: number | null
+          is_urgent: boolean | null
+          notes: string | null
+          origin_country: string | null
+          port_of_discharge: string | null
+          port_of_loading: string | null
+          port_processing_at: string | null
+          port_processing_by: string | null
+          shipment_type: string
+          shipping_line: string | null
+          shipping_line_charges: number | null
+          stage_started_at: string | null
+          supplier_name: string | null
+          terminal: string | null
+          terminal_charges: number | null
+          truck_assigned_at: string | null
+          truck_assigned_by: string | null
+          trucking_trip_id: string | null
+          updated_at: string
+          vessel_name: string | null
+          volume_cbm: number | null
+          voyage_number: string | null
+          weight_kg: number | null
+        }
+        Insert: {
+          assigned_officer?: string | null
+          assigned_officer_id?: string | null
+          awb_number?: string | null
+          bl_number?: string | null
+          cargo_description?: string | null
+          cargo_released_at?: string | null
+          cargo_released_by?: string | null
+          cif_value?: number | null
+          client_contact?: string | null
+          client_id?: string | null
+          client_name: string
+          consignment_ref: string
+          consolidation_id?: string | null
+          container_number?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_stage?: string
+          customs_declared_at?: string | null
+          customs_declared_by?: string | null
+          delivery_completed_at?: string | null
+          delivery_completed_by?: string | null
+          delivery_order_number?: string | null
+          delivery_started_at?: string | null
+          documentation_completed_at?: string | null
+          documentation_completed_by?: string | null
+          documentation_started_at?: string | null
+          documents_received_at?: string | null
+          documents_received_by?: string | null
+          duty_amount?: number | null
+          duty_paid_at?: string | null
+          duty_paid_by?: string | null
+          eta?: string | null
+          fob_value?: number | null
+          free_days?: number | null
+          free_days_start?: string | null
+          freight_value?: number | null
+          hs_code?: string | null
+          icums_declaration_number?: string | null
+          id?: string
+          incoterms?: string | null
+          insurance_value?: number | null
+          is_urgent?: boolean | null
+          notes?: string | null
+          origin_country?: string | null
+          port_of_discharge?: string | null
+          port_of_loading?: string | null
+          port_processing_at?: string | null
+          port_processing_by?: string | null
+          shipment_type?: string
+          shipping_line?: string | null
+          shipping_line_charges?: number | null
+          stage_started_at?: string | null
+          supplier_name?: string | null
+          terminal?: string | null
+          terminal_charges?: number | null
+          truck_assigned_at?: string | null
+          truck_assigned_by?: string | null
+          trucking_trip_id?: string | null
+          updated_at?: string
+          vessel_name?: string | null
+          volume_cbm?: number | null
+          voyage_number?: string | null
+          weight_kg?: number | null
+        }
+        Update: {
+          assigned_officer?: string | null
+          assigned_officer_id?: string | null
+          awb_number?: string | null
+          bl_number?: string | null
+          cargo_description?: string | null
+          cargo_released_at?: string | null
+          cargo_released_by?: string | null
+          cif_value?: number | null
+          client_contact?: string | null
+          client_id?: string | null
+          client_name?: string
+          consignment_ref?: string
+          consolidation_id?: string | null
+          container_number?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_stage?: string
+          customs_declared_at?: string | null
+          customs_declared_by?: string | null
+          delivery_completed_at?: string | null
+          delivery_completed_by?: string | null
+          delivery_order_number?: string | null
+          delivery_started_at?: string | null
+          documentation_completed_at?: string | null
+          documentation_completed_by?: string | null
+          documentation_started_at?: string | null
+          documents_received_at?: string | null
+          documents_received_by?: string | null
+          duty_amount?: number | null
+          duty_paid_at?: string | null
+          duty_paid_by?: string | null
+          eta?: string | null
+          fob_value?: number | null
+          free_days?: number | null
+          free_days_start?: string | null
+          freight_value?: number | null
+          hs_code?: string | null
+          icums_declaration_number?: string | null
+          id?: string
+          incoterms?: string | null
+          insurance_value?: number | null
+          is_urgent?: boolean | null
+          notes?: string | null
+          origin_country?: string | null
+          port_of_discharge?: string | null
+          port_of_loading?: string | null
+          port_processing_at?: string | null
+          port_processing_by?: string | null
+          shipment_type?: string
+          shipping_line?: string | null
+          shipping_line_charges?: number | null
+          stage_started_at?: string | null
+          supplier_name?: string | null
+          terminal?: string | null
+          terminal_charges?: number | null
+          truck_assigned_at?: string | null
+          truck_assigned_by?: string | null
+          trucking_trip_id?: string | null
+          updated_at?: string
+          vessel_name?: string | null
+          volume_cbm?: number | null
+          voyage_number?: string | null
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consignment_workflows_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consolidation_documents: {
         Row: {
           approved_date: string | null
@@ -2411,6 +2617,168 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      workflow_documents: {
+        Row: {
+          created_at: string
+          document_name: string
+          document_type: string
+          file_size: number | null
+          file_url: string | null
+          id: string
+          mime_type: string | null
+          notes: string | null
+          stage: string
+          uploaded_by: string
+          uploaded_by_name: string
+          workflow_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_name: string
+          document_type: string
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          mime_type?: string | null
+          notes?: string | null
+          stage: string
+          uploaded_by: string
+          uploaded_by_name: string
+          workflow_id: string
+        }
+        Update: {
+          created_at?: string
+          document_name?: string
+          document_type?: string
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          mime_type?: string | null
+          notes?: string | null
+          stage?: string
+          uploaded_by?: string
+          uploaded_by_name?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_documents_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "consignment_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_notifications: {
+        Row: {
+          action_required: string | null
+          action_url: string | null
+          actioned_at: string | null
+          consignment_ref: string
+          created_at: string
+          id: string
+          is_actioned: boolean
+          is_read: boolean
+          message: string
+          priority: string
+          read_at: string | null
+          target_department: string
+          target_user_id: string | null
+          title: string
+          workflow_id: string
+        }
+        Insert: {
+          action_required?: string | null
+          action_url?: string | null
+          actioned_at?: string | null
+          consignment_ref: string
+          created_at?: string
+          id?: string
+          is_actioned?: boolean
+          is_read?: boolean
+          message: string
+          priority?: string
+          read_at?: string | null
+          target_department: string
+          target_user_id?: string | null
+          title: string
+          workflow_id: string
+        }
+        Update: {
+          action_required?: string | null
+          action_url?: string | null
+          actioned_at?: string | null
+          consignment_ref?: string
+          created_at?: string
+          id?: string
+          is_actioned?: boolean
+          is_read?: boolean
+          message?: string
+          priority?: string
+          read_at?: string | null
+          target_department?: string
+          target_user_id?: string | null
+          title?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_notifications_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "consignment_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_timeline: {
+        Row: {
+          created_at: string
+          description: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          performed_by: string | null
+          performed_by_name: string | null
+          stage: string | null
+          title: string
+          workflow_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          performed_by?: string | null
+          performed_by_name?: string | null
+          stage?: string | null
+          title: string
+          workflow_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          performed_by?: string | null
+          performed_by_name?: string | null
+          stage?: string | null
+          title?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_timeline_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "consignment_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

@@ -20,6 +20,10 @@ const navigation: NavItem[] = [{
   icon: LayoutDashboard,
   href: "/"
 }, {
+  title: "Consignment Workflow",
+  icon: Container,
+  href: "/consignments"
+}, {
   title: "Operations",
   icon: Package,
   children: [{

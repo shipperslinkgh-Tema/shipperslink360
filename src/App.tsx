@@ -30,6 +30,7 @@ import Warehouse from "./pages/Warehouse";
 import AIAssistant from "./pages/AIAssistant";
 import OfficeFilesPortal from "./pages/OfficeFilesPortal";
 import Notifications from "./pages/Notifications";
+import ConsignmentWorkflows from "./pages/ConsignmentWorkflows";
 import { AppLayout } from "./components/layout/AppLayout";
 import ClientLogin from "./pages/client/ClientLogin";
 import ClientDashboard from "./pages/client/ClientDashboard";
@@ -120,6 +121,7 @@ const App = () => (
                 <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
                 <Route path="/change-password" element={<ChangePassword />} />
                 <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                <Route path="/consignments" element={<ProtectedRoute><WithLayout><ConsignmentWorkflows /></WithLayout></ProtectedRoute>} />
                 <Route path="/shipments" element={<ProtectedRoute><WithLayout><Shipments /></WithLayout></ProtectedRoute>} />
                 <Route path="/shipments/:type" element={<ProtectedRoute><WithLayout><Shipments /></WithLayout></ProtectedRoute>} />
                 <Route path="/customs/icums" element={<ProtectedRoute><WithLayout><ICUMSDeclarations /></WithLayout></ProtectedRoute>} />
