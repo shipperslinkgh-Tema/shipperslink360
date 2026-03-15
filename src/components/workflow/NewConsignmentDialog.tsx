@@ -9,6 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
 import { useCreateConsignment } from "@/hooks/useConsignmentWorkflow";
 import { useCustomers } from "@/hooks/useCustomers";
+import { DocumentScanner } from "./DocumentScanner";
+import { mapExtractedDataToForm, type ExtractedDocumentData } from "@/hooks/useDocumentProcessor";
 
 interface NewConsignmentDialogProps {
   open: boolean;
@@ -91,6 +93,22 @@ export function NewConsignmentDialog({ open, onOpenChange }: NewConsignmentDialo
     }
   };
 
+  const handleDocumentExtracted = (data: ExtractedDocumentData) => {
+    const mapped = mapExtractedDataToForm(data);
+    setForm((prev) => {
+      const updated = { ...prev };
+      for (const [key, value] of Object.entries(mapped)) {
+        if (key in updated && value) {
+          // Only overwrite empty fields or explicit overwrite
+          if (!(updated as any)[key] || (updated as any)[key] === "" || (updated as any)[key] === "Tema") {
+            (updated as any)[key] = value;
+          }
+        }
+      }
+      return updated;
+    });
+  };
+
   const update = (field: string, value: string | boolean) =>
     setForm((f) => ({ ...f, [field]: value }));
 
@@ -102,6 +120,9 @@ export function NewConsignmentDialog({ open, onOpenChange }: NewConsignmentDialo
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* AI Document Scanner */}
+          <DocumentScanner onDataExtracted={handleDocumentExtracted} compact />
+
           {/* Client & Supplier */}
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-foreground border-b pb-1">Client & Supplier</h3>
