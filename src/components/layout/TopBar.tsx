@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Bell, Search, HelpCircle, RefreshCw, User, Settings, LogOut, CheckCircle2, Clock, AlertCircle, Key, Menu } from "lucide-react";
+import { Bell, Search, HelpCircle, RefreshCw, User, Settings, LogOut, CheckCircle2, Clock, AlertCircle, AlertTriangle, Key, Menu, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,10 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNotificationCount } from "@/hooks/useNotificationCount";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
 const integrationDetails = [
   {
@@ -53,6 +57,106 @@ const DEPT_LABELS: Record<string, string> = {
   management: "Management",
   super_admin: "Super Admin",
 };
+const typeIcons: Record<string, React.ElementType> = {
+  info: Info,
+  success: CheckCircle2,
+  warning: AlertTriangle,
+  error: AlertCircle,
+};
+
+const typeColors: Record<string, string> = {
+  info: "text-info",
+  success: "text-success",
+  warning: "text-warning",
+  error: "text-destructive",
+};
+
+function timeAgo(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+function NotificationBell() {
+  const count = useNotificationCount();
+  const navigate = useNavigate();
+
+  const { data: recentNotifs = [] } = useQuery({
+    queryKey: ["recent-notifications-bell"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("notifications")
+        .select("id, title, message, type, priority, created_at, is_read")
+        .eq("is_read", false)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      return data || [];
+    },
+    refetchInterval: 30000,
+  });
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
+          <Bell className="h-4 w-4" />
+          {count > 0 && (
+            <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px] bg-destructive text-destructive-foreground border-2 border-card">
+              {count > 99 ? "99+" : count}
+            </Badge>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 p-0" align="end" sideOffset={8}>
+        <div className="p-3 border-b border-border flex items-center justify-between">
+          <h4 className="text-sm font-semibold text-foreground">Notifications</h4>
+          {count > 0 && (
+            <Badge variant="secondary" className="text-xs">{count} unread</Badge>
+          )}
+        </div>
+        <div className="max-h-72 overflow-y-auto">
+          {recentNotifs.length === 0 ? (
+            <div className="p-6 text-center text-sm text-muted-foreground">
+              No unread notifications
+            </div>
+          ) : (
+            recentNotifs.map((n: any) => {
+              const Icon = typeIcons[n.type] || Info;
+              return (
+                <div
+                  key={n.id}
+                  className="flex gap-3 p-3 hover:bg-muted/50 cursor-pointer border-b border-border last:border-0"
+                  onClick={() => navigate("/notifications")}
+                >
+                  <Icon className={cn("h-4 w-4 mt-0.5 shrink-0", typeColors[n.type])} />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground leading-tight line-clamp-1">{n.title}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{n.message}</p>
+                    <p className="text-[10px] text-muted-foreground/60 mt-1">{timeAgo(n.created_at)}</p>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+        <div className="p-2 border-t border-border">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full text-xs text-primary"
+            onClick={() => navigate("/notifications")}
+          >
+            View All Notifications
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 export function TopBar() {
   const { profile, signOut } = useAuth();
@@ -132,12 +236,7 @@ export function TopBar() {
           </Button>
         )}
 
-        <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
-          <Bell className="h-4 w-4" />
-          <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px] bg-destructive text-destructive-foreground border-2 border-card">
-            5
-          </Badge>
-        </Button>
+        <NotificationBell />
 
         {!isMobile && (
           <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
