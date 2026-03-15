@@ -17,3 +17,9 @@ verify_jwt = false
 
 [functions.ai-assistant]
 verify_jwt = false
+
+[functions.track-shipment]
+verify_jwt = false
+
+[functions.process-document]
+verify_jwt = false
