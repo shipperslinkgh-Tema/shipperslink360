@@ -85,7 +85,7 @@ export function NewConsignmentDialog({ open, onOpenChange }: NewConsignmentDialo
       setForm((f) => ({
         ...f,
         client_id: customerId,
-        client_name: customer.company_name,
+        client_name: customer.companyName,
         client_contact: customer.phone || "",
       }));
     }
