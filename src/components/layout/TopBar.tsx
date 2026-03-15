@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Bell, Search, HelpCircle, RefreshCw, User, Settings, LogOut, CheckCircle2, Clock, AlertCircle, Key, Menu } from "lucide-react";
+import { Bell, Search, HelpCircle, RefreshCw, User, Settings, LogOut, CheckCircle2, Clock, AlertCircle, AlertTriangle, Key, Menu, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,10 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNotificationCount } from "@/hooks/useNotificationCount";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
 const integrationDetails = [
   {
