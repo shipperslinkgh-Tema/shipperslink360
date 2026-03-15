@@ -1,13 +1,12 @@
 import { useState, useMemo } from "react";
 import {
   BarChart3, TrendingUp, TrendingDown, Package, DollarSign, Users, Warehouse,
-  FileText, Download, Filter, Calendar, RefreshCw, AlertTriangle,
-  CheckCircle, Clock, Ship, Plane, Truck, Target, Activity, PieChart,
-  ArrowUpRight, ArrowDownRight, Eye, Search, ChevronDown, Brain
+  FileText, Download, Calendar, RefreshCw, AlertTriangle,
+  CheckCircle, Clock, Ship, Plane, Truck, Target, Activity,
+  ArrowUpRight, ArrowDownRight, Search, Brain, Loader2
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,11 +18,13 @@ import {
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-import { useFinanceInvoices, useFinancePayables } from "@/hooks/useFinanceData";
-import { useCustomers } from "@/hooks/useCustomers";
+import { useMonthlyFinancials, useOperationsStats, useFinanceSummary, useClientAnalytics, useTruckingStats } from "@/hooks/useReportsData";
+import { useFinanceInvoices } from "@/hooks/useFinanceData";
+import { exportToCSV } from "@/lib/dataExport";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Helpers ──
 const fmt = (n: number, compact = false) =>
   new Intl.NumberFormat("en-GH", {
     style: "currency", currency: "GHS",
@@ -31,100 +32,21 @@ const fmt = (n: number, compact = false) =>
     maximumFractionDigits: compact ? 1 : 0,
   }).format(n);
 
-// ── Mock Data ─────────────────────────────────────────────────────────────────
-const monthlyRevenue = [
-  { month: "Aug", revenue: 285000, expenses: 198000, profit: 87000 },
-  { month: "Sep", revenue: 312000, expenses: 210000, profit: 102000 },
-  { month: "Oct", revenue: 298000, expenses: 205000, profit: 93000 },
-  { month: "Nov", revenue: 340000, expenses: 225000, profit: 115000 },
-  { month: "Dec", revenue: 420000, expenses: 270000, profit: 150000 },
-  { month: "Jan", revenue: 378000, expenses: 248000, profit: 130000 },
+const PIE_COLORS = [
+  "hsl(var(--primary))",
+  "hsl(var(--warning))",
+  "hsl(38 92% 60%)",
+  "hsl(var(--success))",
+  "hsl(var(--muted-foreground))",
 ];
 
-const shipmentsByStatus = [
-  { name: "In Transit", value: 34, color: "hsl(var(--primary))" },
-  { name: "At Port", value: 18, color: "hsl(var(--warning))" },
-  { name: "Customs", value: 12, color: "hsl(38 92% 60%)" },
-  { name: "Delivered", value: 67, color: "hsl(var(--success))" },
-  { name: "Pending", value: 9, color: "hsl(var(--muted-foreground))" },
-];
-
-const shipmentsByType = [
-  { month: "Aug", sea: 45, air: 18, road: 12 },
-  { month: "Sep", sea: 52, air: 21, road: 15 },
-  { month: "Oct", sea: 48, air: 19, road: 11 },
-  { month: "Nov", sea: 60, air: 25, road: 18 },
-  { month: "Dec", sea: 72, air: 30, road: 20 },
-  { month: "Jan", sea: 65, air: 27, road: 16 },
-];
-
-const warehouseOccupancy = [
-  { zone: "Zone A", capacity: 500, used: 420, percentage: 84 },
-  { zone: "Zone B", capacity: 400, used: 290, percentage: 73 },
-  { zone: "Zone C", capacity: 300, used: 145, percentage: 48 },
-  { zone: "Zone D", capacity: 250, used: 230, percentage: 92 },
-];
-
-const cargoAging = [
-  { range: "0–7 days", count: 48, cbm: 320, color: "hsl(var(--success))" },
-  { range: "8–14 days", count: 22, cbm: 145, color: "hsl(var(--warning))" },
-  { range: "15–30 days", count: 11, cbm: 72, color: "hsl(38 92% 60%)" },
-  { range: "30+ days", count: 5, cbm: 38, color: "hsl(var(--destructive))" },
-];
-
-const topClients = [
-  { client: "Ghana Cocoa Board", revenue: 850000, shipments: 156, outstanding: 45000, status: "active" },
-  { client: "Nestle Ghana Ltd", revenue: 720000, shipments: 234, outstanding: 120000, status: "active" },
-  { client: "MTN Ghana", revenue: 580000, shipments: 78, outstanding: 250000, status: "active" },
-  { client: "Unilever Ghana", revenue: 450000, shipments: 189, outstanding: 85000, status: "active" },
-  { client: "AngloGold Ashanti", revenue: 380000, shipments: 62, outstanding: 0, status: "active" },
-  { client: "Kasapreko Ltd", revenue: 220000, shipments: 45, outstanding: 0, status: "inactive" },
-  { client: "Accra Brewery", revenue: 190000, shipments: 38, outstanding: 32000, status: "active" },
-  { client: "Scancom Ghana", revenue: 165000, shipments: 29, outstanding: 18000, status: "active" },
-];
-
-const operationsData = [
-  { bl: "BL-HLCU123456789", customer: "Ghana Cocoa Board", type: "Sea", status: "Delivered", origin: "China", destination: "Tema", eta: "Jan 15, 2026", clearance: "Jan 18, 2026", daysToClose: 3, officer: "Kofi Mensah" },
-  { bl: "BL-OOLU987654321", customer: "Nestle Ghana Ltd", type: "Sea", status: "Customs", origin: "Netherlands", destination: "Tema", eta: "Jan 20, 2026", clearance: "—", daysToClose: null, officer: "Kwame Asante" },
-  { bl: "AWB-78901234", customer: "MTN Ghana", type: "Air", status: "In Transit", origin: "UAE", destination: "Kotoka", eta: "Jan 28, 2026", clearance: "—", daysToClose: null, officer: "Ama Serwaa" },
-  { bl: "BL-MAEU456789", customer: "Unilever Ghana", type: "Sea", status: "At Port", origin: "Germany", destination: "Tema", eta: "Jan 22, 2026", clearance: "—", daysToClose: null, officer: "Kofi Mensah" },
-  { bl: "AWB-56789012", customer: "AngloGold Ashanti", type: "Air", status: "Delivered", origin: "South Africa", destination: "Kotoka", eta: "Jan 10, 2026", clearance: "Jan 11, 2026", daysToClose: 1, officer: "Ama Serwaa" },
-  { bl: "BL-MSCU234567", customer: "Accra Brewery", type: "Sea", status: "Pending", origin: "Belgium", destination: "Tema", eta: "Feb 05, 2026", clearance: "—", daysToClose: null, officer: "Kwame Asante" },
-];
-
-const kpiData = [
-  { label: "Total Revenue (MTD)", value: 378000, prev: 340000, icon: DollarSign, color: "text-primary", bg: "bg-primary/10", positive: true },
-  { label: "Active Shipments", value: 140, prev: 128, icon: Package, color: "text-info", bg: "bg-info/10", positive: true },
-  { label: "Clearance Speed", value: "2.4 days", prevLabel: "3.1 days prior", icon: Clock, color: "text-success", bg: "bg-success/10", positive: true },
-  { label: "Warehouse Occupancy", value: "74%", prevLabel: "68% last month", icon: Warehouse, color: "text-warning", bg: "bg-warning/10", positive: false },
-];
-
-const departmentPerf = [
-  { dept: "Operations", target: 95, actual: 88, kpi: "Shipments On-Time" },
-  { dept: "Customs", target: 90, actual: 82, kpi: "Declarations Approved" },
-  { dept: "Finance", target: 98, actual: 94, kpi: "Invoice Accuracy" },
-  { dept: "Warehouse", target: 85, actual: 79, kpi: "Dispatch Efficiency" },
-  { dept: "Trucking", target: 92, actual: 91, kpi: "Trip Completion" },
-];
-
-const riskAlerts = [
-  { type: "Demurrage Risk", item: "BL-OOLU987654321", detail: "Free days expire Jan 28", severity: "critical" },
-  { type: "Overdue Invoice", item: "SLAC-2026-0003", detail: "GHS 20,812 overdue 10 days", severity: "high" },
-  { type: "Storage Overdue", item: "Zone D, Rack 4", detail: "Cargo aging 32 days", severity: "high" },
-  { type: "Credit Limit", item: "MTN Ghana", detail: "25% of GHS 1M limit used", severity: "medium" },
-  { type: "Delayed Shipment", item: "BL-MSCU234567", detail: "Vessel delayed 5 days", severity: "medium" },
-];
-
-type DateRange = "mtd" | "qtd" | "ytd" | "custom";
-type ShipmentType = "all" | "sea" | "air" | "road";
-
-// ── Sub-components ────────────────────────────────────────────────────────────
+// ── Sub-components ──
 function KPICard({ label, value, prev, prevLabel, icon: Icon, color, bg, positive }: {
   label: string; value: number | string; prev?: number; prevLabel?: string;
   icon: React.ComponentType<{ className?: string }>; color: string; bg: string; positive: boolean;
 }) {
   const isNum = typeof value === "number";
-  const change = isNum && typeof prev === "number"
+  const change = isNum && typeof prev === "number" && prev > 0
     ? ((value - prev) / prev * 100).toFixed(1)
     : null;
 
@@ -144,7 +66,7 @@ function KPICard({ label, value, prev, prevLabel, icon: Icon, color, bg, positiv
                   <span>{change}% vs prior period</span>
                 </>
               ) : (
-                <span className="text-muted-foreground">{prevLabel}</span>
+                <span className="text-muted-foreground">{prevLabel || "—"}</span>
               )}
             </div>
           </div>
@@ -176,53 +98,65 @@ function ShipmentStatusBadge({ status }: { status: string }) {
     "Delivered": "status-badge status-success",
     "In Transit": "status-badge status-info",
     "Customs": "status-badge status-warning",
-    "At Port": "status-badge bg-purple-100 text-purple-700",
+    "At Port": "status-badge bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
     "Pending": "status-badge status-pending",
   };
   return <span className={map[status] || "status-badge status-pending"}>{status}</span>;
 }
 
-// ── Main Page ─────────────────────────────────────────────────────────────────
+type ShipmentType = "all" | "sea" | "air" | "road";
+
+// ── Main Page ──
 export default function Reports() {
-  const { profile, department } = useAuth();
-  const [dateRange, setDateRange] = useState<DateRange>("mtd");
+  const { department } = useAuth();
+  const queryClient = useQueryClient();
   const [shipmentType, setShipmentType] = useState<ShipmentType>("all");
   const [searchOps, setSearchOps] = useState("");
   const [searchClient, setSearchClient] = useState("");
   const [activeTab, setActiveTab] = useState("management");
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // Real data hooks
+  const { data: monthlyData, isLoading: loadingMonthly } = useMonthlyFinancials();
+  const { data: opsStats, isLoading: loadingOps } = useOperationsStats();
+  const { data: financeSummary, isLoading: loadingFinance } = useFinanceSummary();
+  const { data: clientData, isLoading: loadingClients } = useClientAnalytics();
+  const { data: truckingStats } = useTruckingStats();
   const { data: invoices = [] } = useFinanceInvoices();
-  const { data: payables = [] } = useFinancePayables();
-  const { data: customers = [] } = useCustomers();
 
   const handleRefresh = () => {
     setIsRefreshing(true);
+    queryClient.invalidateQueries({ queryKey: ["reports-monthly-financials"] });
+    queryClient.invalidateQueries({ queryKey: ["reports-operations-stats"] });
+    queryClient.invalidateQueries({ queryKey: ["reports-finance-summary"] });
+    queryClient.invalidateQueries({ queryKey: ["reports-client-analytics"] });
+    queryClient.invalidateQueries({ queryKey: ["reports-trucking-stats"] });
+    queryClient.invalidateQueries({ queryKey: ["finance-invoices"] });
     setTimeout(() => setIsRefreshing(false), 1200);
     toast.success("Reports refreshed");
   };
 
-  const handleExport = (format: "csv" | "pdf" | "excel") => {
-    toast.success(`Exporting report as ${format.toUpperCase()}…`, { description: "Your download will start shortly." });
+  const handleExportCSV = (data: any[], filename: string) => {
+    if (!data || data.length === 0) {
+      toast.error("No data to export");
+      return;
+    }
+    exportToCSV(data, filename);
+    toast.success(`Exported ${filename}.csv`);
   };
 
   const filteredOps = useMemo(() =>
-    operationsData.filter(r => {
+    (opsStats?.rows || []).filter(r => {
       const matchType = shipmentType === "all" || r.type.toLowerCase() === shipmentType;
       const matchSearch = !searchOps || r.bl.toLowerCase().includes(searchOps.toLowerCase()) || r.customer.toLowerCase().includes(searchOps.toLowerCase());
       return matchType && matchSearch;
-    }), [shipmentType, searchOps]);
+    }), [shipmentType, searchOps, opsStats]);
 
   const filteredClients = useMemo(() =>
-    topClients.filter(c => !searchClient || c.client.toLowerCase().includes(searchClient.toLowerCase())),
-    [searchClient]);
+    (clientData?.clientRows || []).filter(c => !searchClient || c.client.toLowerCase().includes(searchClient.toLowerCase())),
+    [searchClient, clientData]);
 
-  const totalRevenue = invoices.filter(i => i.status === "paid").reduce((s, i) => s + i.totalAmount, 0);
-  const totalOutstanding = invoices.filter(i => ["sent", "overdue"].includes(i.status)).reduce((s, i) => s + i.totalAmount, 0);
-  const totalPayables = payables.filter(p => p.status === "pending").reduce((s, p) => s + p.ghsEquivalent, 0);
-  const activeCustomers = customers.filter(c => c.status === "active").length;
-
-  // Department-based default tab
+  // Department-based tab access
   const allowedTabs = useMemo(() => {
     if (!department || department === "super_admin" || department === "management") {
       return ["management", "operations", "finance", "warehouse", "clients"];
@@ -233,8 +167,95 @@ export default function Reports() {
     return ["operations"];
   }, [department]);
 
+  // Pie chart data from real ops stats
+  const shipmentsByStatus = useMemo(() => {
+    if (!opsStats) return [];
+    return Object.entries(opsStats.statusCounts).map(([name, value], i) => ({
+      name, value, color: PIE_COLORS[i % PIE_COLORS.length],
+    }));
+  }, [opsStats]);
+
+  // Department performance from real data
+  const departmentPerf = useMemo(() => {
+    const clearanceTarget = 3;
+    const clearanceActual = opsStats?.avgClearanceDays || 0;
+    const truckCompletion = truckingStats?.completionRate || 0;
+    const invoiceAccuracy = financeSummary ? Math.round(((financeSummary.invoiceCount - financeSummary.overdueCount) / Math.max(financeSummary.invoiceCount, 1)) * 100) : 0;
+    const deliveryRate = opsStats ? Math.round((opsStats.delivered / Math.max(opsStats.total, 1)) * 100) : 0;
+
+    return [
+      { dept: "Operations", target: 95, actual: Math.min(deliveryRate, 100), kpi: "Delivery Completion" },
+      { dept: "Customs", target: clearanceTarget, actual: clearanceActual, kpi: `Avg Clearance (${clearanceActual} days)`, isTime: true },
+      { dept: "Finance", target: 98, actual: invoiceAccuracy, kpi: "Invoice Accuracy" },
+      { dept: "Trucking", target: 92, actual: truckCompletion, kpi: "Trip Completion" },
+    ];
+  }, [opsStats, truckingStats, financeSummary]);
+
+  // Risk alerts from real data
+  const riskAlerts = useMemo(() => {
+    const alerts: { type: string; item: string; detail: string; severity: string }[] = [];
+
+    if (financeSummary && financeSummary.overdueCount > 0) {
+      alerts.push({
+        type: "Overdue Invoices",
+        item: `${financeSummary.overdueCount} invoice(s)`,
+        detail: `${fmt(financeSummary.totalOutstanding)} in outstanding receivables`,
+        severity: financeSummary.overdueCount > 3 ? "critical" : "high",
+      });
+    }
+
+    if (opsStats && opsStats.delayed > 0) {
+      alerts.push({
+        type: "Delayed Shipments",
+        item: `${opsStats.delayed} shipment(s)`,
+        detail: "Past ETA and not yet delivered",
+        severity: opsStats.delayed > 5 ? "critical" : "high",
+      });
+    }
+
+    if (financeSummary && financeSummary.totalPayables > 50000) {
+      alerts.push({
+        type: "Pending Payables",
+        item: fmt(financeSummary.totalPayables),
+        detail: "Vendor payments pending approval",
+        severity: financeSummary.totalPayables > 200000 ? "high" : "medium",
+      });
+    }
+
+    if (clientData) {
+      const highExposure = clientData.clientRows.filter(c => c.creditLimit > 0 && (c.outstanding / c.creditLimit) > 0.75);
+      highExposure.forEach(c => {
+        alerts.push({
+          type: "Credit Limit Risk",
+          item: c.client,
+          detail: `${Math.round((c.outstanding / c.creditLimit) * 100)}% of limit used`,
+          severity: (c.outstanding / c.creditLimit) > 0.9 ? "critical" : "high",
+        });
+      });
+    }
+
+    return alerts.slice(0, 6);
+  }, [financeSummary, opsStats, clientData]);
+
+  const isLoading = loadingMonthly || loadingOps || loadingFinance || loadingClients;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const kpiData = [
+    { label: "Total Revenue", value: financeSummary?.totalRevenue || 0, icon: DollarSign, color: "text-primary", bg: "bg-primary/10", positive: true, prevLabel: "All paid invoices" },
+    { label: "Active Consignments", value: String(opsStats?.total || 0), icon: Package, color: "text-info", bg: "bg-info/10", positive: true, prevLabel: `${opsStats?.delivered || 0} delivered` },
+    { label: "Clearance Speed", value: `${opsStats?.avgClearanceDays || 0} days`, icon: Clock, color: "text-success", bg: "bg-success/10", positive: true, prevLabel: "Average customs-to-release" },
+    { label: "Outstanding", value: financeSummary?.totalOutstanding || 0, icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10", positive: false, prevLabel: `${financeSummary?.overdueCount || 0} overdue` },
+  ];
+
   return (
-    <div className="p-6 space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       {/* ── Header ── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -243,44 +264,24 @@ export default function Reports() {
             Reports & Analytics
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Real-time business intelligence · Shippers Link Agencies Co., Ltd
+            Live business intelligence · Shippers Link Agencies Co., Ltd
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <Select value={dateRange} onValueChange={(v) => setDateRange(v as DateRange)}>
-            <SelectTrigger className="w-36 h-9 text-sm">
-              <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="mtd">Month to Date</SelectItem>
-              <SelectItem value="qtd">Quarter to Date</SelectItem>
-              <SelectItem value="ytd">Year to Date</SelectItem>
-              <SelectItem value="custom">Custom Range</SelectItem>
-            </SelectContent>
-          </Select>
           <Button variant="outline" size="sm" onClick={handleRefresh} className="gap-1.5">
             <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
             Refresh
           </Button>
-          <div className="flex items-center gap-1">
-            <Button variant="outline" size="sm" onClick={() => handleExport("csv")} className="gap-1.5 text-xs">
-              <Download className="h-3.5 w-3.5" /> CSV
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => handleExport("excel")} className="gap-1.5 text-xs">
-              <Download className="h-3.5 w-3.5" /> Excel
-            </Button>
-            <Button size="sm" onClick={() => handleExport("pdf")} className="gap-1.5 text-xs">
-              <Download className="h-3.5 w-3.5" /> PDF
-            </Button>
-          </div>
+          <Button variant="outline" size="sm" onClick={() => handleExportCSV(opsStats?.rows || [], "operations-report")} className="gap-1.5 text-xs">
+            <Download className="h-3.5 w-3.5" /> CSV
+          </Button>
         </div>
       </div>
 
-      {/* ── KPI Summary Row ── */}
+      {/* ── KPI Summary ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {kpiData.map((k) => (
-          <KPICard key={k.label} {...k} />
+          <KPICard key={k.label} {...k} value={typeof k.value === "string" ? k.value : k.value} />
         ))}
       </div>
 
@@ -314,70 +315,80 @@ export default function Reports() {
           )}
         </TabsList>
 
-        {/* ══════════════════════════════════════════════
-            TAB: MANAGEMENT DASHBOARD
-        ══════════════════════════════════════════════ */}
+        {/* ═══ TAB: MANAGEMENT ═══ */}
         <TabsContent value="management" className="space-y-6 mt-6">
-          {/* Revenue Trend + Shipment Mix */}
+          {/* Revenue Trend + Shipment Status */}
           <div className="grid gap-6 lg:grid-cols-3">
             <Card className="lg:col-span-2">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base font-semibold">Revenue vs Expenses (6 months)</CardTitle>
-                <CardDescription>Monthly P&L trend in GHS</CardDescription>
+                <CardDescription>Monthly P&L trend in GHS from actual invoices &amp; expenses</CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={260}>
-                  <AreaChart data={monthlyRevenue}>
-                    <defs>
-                      <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(210,100%,40%)" stopOpacity={0.15} />
-                        <stop offset="95%" stopColor="hsl(210,100%,40%)" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="expGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(0,84%,60%)" stopOpacity={0.1} />
-                        <stop offset="95%" stopColor="hsl(0,84%,60%)" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                    <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `₵${(v / 1000).toFixed(0)}k`} />
-                    <Tooltip formatter={(v: number) => fmt(v)} />
-                    <Legend />
-                    <Area type="monotone" dataKey="revenue" stroke="hsl(210,100%,40%)" fill="url(#revGrad)" strokeWidth={2} name="Revenue" />
-                    <Area type="monotone" dataKey="expenses" stroke="hsl(0,84%,60%)" fill="url(#expGrad)" strokeWidth={2} name="Expenses" />
-                    <Line type="monotone" dataKey="profit" stroke="hsl(160,84%,39%)" strokeWidth={2.5} dot={{ r: 4 }} name="Net Profit" />
-                  </AreaChart>
-                </ResponsiveContainer>
+                {(monthlyData && monthlyData.length > 0) ? (
+                  <ResponsiveContainer width="100%" height={260}>
+                    <AreaChart data={monthlyData}>
+                      <defs>
+                        <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(210,100%,40%)" stopOpacity={0.15} />
+                          <stop offset="95%" stopColor="hsl(210,100%,40%)" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="expGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(0,84%,60%)" stopOpacity={0.1} />
+                          <stop offset="95%" stopColor="hsl(0,84%,60%)" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                      <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `₵${(v / 1000).toFixed(0)}k`} />
+                      <Tooltip formatter={(v: number) => fmt(v)} />
+                      <Legend />
+                      <Area type="monotone" dataKey="revenue" stroke="hsl(210,100%,40%)" fill="url(#revGrad)" strokeWidth={2} name="Revenue" />
+                      <Area type="monotone" dataKey="expenses" stroke="hsl(0,84%,60%)" fill="url(#expGrad)" strokeWidth={2} name="Expenses" />
+                      <Line type="monotone" dataKey="profit" stroke="hsl(160,84%,39%)" strokeWidth={2.5} dot={{ r: 4 }} name="Net Profit" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-[260px] text-muted-foreground text-sm">
+                    No financial data available for the last 6 months
+                  </div>
+                )}
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold">Shipments by Status</CardTitle>
+                <CardTitle className="text-base font-semibold">Consignments by Status</CardTitle>
                 <CardDescription>Current distribution</CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={180}>
-                  <RechartsPie>
-                    <Pie data={shipmentsByStatus} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">
-                      {shipmentsByStatus.map((entry, i) => (
-                        <Cell key={i} fill={entry.color} />
+                {shipmentsByStatus.length > 0 ? (
+                  <>
+                    <ResponsiveContainer width="100%" height={180}>
+                      <RechartsPie>
+                        <Pie data={shipmentsByStatus} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">
+                          {shipmentsByStatus.map((entry, i) => (
+                            <Cell key={i} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </RechartsPie>
+                    </ResponsiveContainer>
+                    <div className="mt-2 space-y-1.5">
+                      {shipmentsByStatus.map((s) => (
+                        <div key={s.name} className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: s.color }} />
+                            <span className="text-muted-foreground">{s.name}</span>
+                          </div>
+                          <span className="font-semibold">{s.value}</span>
+                        </div>
                       ))}
-                    </Pie>
-                    <Tooltip />
-                  </RechartsPie>
-                </ResponsiveContainer>
-                <div className="mt-2 space-y-1.5">
-                  {shipmentsByStatus.map((s) => (
-                    <div key={s.name} className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2">
-                        <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: s.color }} />
-                        <span className="text-muted-foreground">{s.name}</span>
-                      </div>
-                      <span className="font-semibold">{s.value}</span>
                     </div>
-                  ))}
-                </div>
+                  </>
+                ) : (
+                  <div className="flex items-center justify-center h-[260px] text-muted-foreground text-sm">No consignment data</div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -390,7 +401,7 @@ export default function Reports() {
                   <Activity className="h-4 w-4 text-primary" />
                   Department Performance
                 </CardTitle>
-                <CardDescription>KPI achievement vs targets</CardDescription>
+                <CardDescription>KPI achievement computed from live data</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -402,14 +413,17 @@ export default function Reports() {
                           <span className="text-xs text-muted-foreground ml-2">{d.kpi}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className={cn("text-sm font-bold", d.actual >= d.target ? "text-success" : "text-warning")}>
-                            {d.actual}%
+                          <span className={cn("text-sm font-bold",
+                            d.isTime ? (d.actual <= d.target ? "text-success" : "text-warning") :
+                            d.actual >= d.target ? "text-success" : "text-warning"
+                          )}>
+                            {d.isTime ? `${d.actual}d` : `${d.actual}%`}
                           </span>
-                          <span className="text-xs text-muted-foreground">/ {d.target}%</span>
+                          <span className="text-xs text-muted-foreground">/ {d.isTime ? `${d.target}d target` : `${d.target}%`}</span>
                         </div>
                       </div>
                       <Progress
-                        value={(d.actual / d.target) * 100}
+                        value={d.isTime ? Math.max(0, Math.min(100, ((d.target - d.actual + d.target) / (d.target * 2)) * 100)) : (d.actual / d.target) * 100}
                         className="h-2"
                       />
                     </div>
@@ -424,39 +438,46 @@ export default function Reports() {
                   <AlertTriangle className="h-4 w-4 text-warning" />
                   Operational Risk Alerts
                 </CardTitle>
-                <CardDescription>{riskAlerts.length} active alerts requiring attention</CardDescription>
+                <CardDescription>{riskAlerts.length} active alerts detected</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {riskAlerts.map((alert, i) => (
-                    <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
-                      <AlertTriangle className={cn("h-4 w-4 mt-0.5 flex-shrink-0",
-                        alert.severity === "critical" ? "text-destructive" :
-                        alert.severity === "high" ? "text-warning" : "text-info"
-                      )} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-xs font-semibold">{alert.type}</span>
-                          <SeverityBadge severity={alert.severity} />
+                {riskAlerts.length > 0 ? (
+                  <div className="space-y-3">
+                    {riskAlerts.map((alert, i) => (
+                      <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
+                        <AlertTriangle className={cn("h-4 w-4 mt-0.5 flex-shrink-0",
+                          alert.severity === "critical" ? "text-destructive" :
+                          alert.severity === "high" ? "text-warning" : "text-info"
+                        )} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="text-xs font-semibold">{alert.type}</span>
+                            <SeverityBadge severity={alert.severity} />
+                          </div>
+                          <p className="text-xs text-muted-foreground font-mono">{alert.item}</p>
+                          <p className="text-xs text-muted-foreground">{alert.detail}</p>
                         </div>
-                        <p className="text-xs text-muted-foreground font-mono">{alert.item}</p>
-                        <p className="text-xs text-muted-foreground">{alert.detail}</p>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    <CheckCircle className="h-8 w-8 mx-auto mb-2 text-success" />
+                    No active risk alerts — all systems normal
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
 
-          {/* Top Clients Summary */}
+          {/* Top Clients from real data */}
           <Card>
             <CardHeader className="pb-3 flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-base font-semibold">Top 10 Clients by Revenue</CardTitle>
-                <CardDescription>MTD performance and outstanding balances</CardDescription>
+                <CardTitle className="text-base font-semibold">Top Clients by Revenue</CardTitle>
+                <CardDescription>Based on paid invoices</CardDescription>
               </div>
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleExport("csv")}>
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleExportCSV(clientData?.clientRows || [], "top-clients")}>
                 <Download className="h-3.5 w-3.5" /> Export
               </Button>
             </CardHeader>
@@ -472,8 +493,8 @@ export default function Reports() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {topClients.slice(0, 8).map((c, i) => (
-                    <TableRow key={c.client} className="data-row">
+                  {(clientData?.clientRows || []).slice(0, 10).map((c, i) => (
+                    <TableRow key={c.id} className="data-row">
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">
@@ -494,51 +515,17 @@ export default function Reports() {
                       </TableCell>
                     </TableRow>
                   ))}
+                  {(!clientData?.clientRows || clientData.clientRows.length === 0) && (
+                    <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">No client data available</TableCell></TableRow>
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
           </Card>
-
-          {/* AI Executive Summary */}
-          <Card className="border-primary/20 bg-primary/5">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <Brain className="h-4 w-4 text-primary" />
-                AI Executive Summary
-              </CardTitle>
-              <CardDescription>Auto-generated insights powered by Lovable AI</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 text-sm text-foreground">
-                <div className="flex items-start gap-2">
-                  <TrendingUp className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
-                  <p><strong>Revenue trending up 11.2%</strong> MTD vs prior period, driven by increased air freight volumes from MTN Ghana and AngloGold Ashanti contracts.</p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
-                  <p><strong>Zone D at 92% capacity</strong> — projected to hit full occupancy by Feb 3. Recommend activating overflow Zone E or accelerating dispatches for aged cargo.</p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Clock className="h-4 w-4 text-info mt-0.5 flex-shrink-0" />
-                  <p><strong>Clearance turnaround improved</strong> to 2.4 days avg (from 3.1 days). ICUMS e-filing adoption is the key driver — target 100% digital submissions by Q1 end.</p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <DollarSign className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
-                  <p><strong>GHS 375,812 in outstanding receivables</strong> with Unilever Ghana (10 days overdue) flagged as highest risk. Recommend immediate follow-up before Feb 1.</p>
-                </div>
-              </div>
-              <Button variant="outline" size="sm" className="mt-4 gap-1.5">
-                <Brain className="h-3.5 w-3.5" /> Open Full AI Analysis
-              </Button>
-            </CardContent>
-          </Card>
         </TabsContent>
 
-        {/* ══════════════════════════════════════════════
-            TAB: OPERATIONS REPORTS
-        ══════════════════════════════════════════════ */}
+        {/* ═══ TAB: OPERATIONS ═══ */}
         <TabsContent value="operations" className="space-y-6 mt-6">
-          {/* Filters */}
           <Card>
             <CardContent className="p-4">
               <div className="flex flex-wrap gap-3 items-center">
@@ -555,30 +542,19 @@ export default function Reports() {
                     <SelectItem value="road">Road</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select defaultValue="all">
-                  <SelectTrigger className="w-36 h-9"><SelectValue placeholder="Status" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="in-transit">In Transit</SelectItem>
-                    <SelectItem value="customs">Customs</SelectItem>
-                    <SelectItem value="delivered">Delivered</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button variant="outline" size="sm" onClick={() => handleExport("csv")} className="gap-1.5 ml-auto">
+                <Button variant="outline" size="sm" onClick={() => handleExportCSV(filteredOps, "operations-report")} className="gap-1.5 ml-auto">
                   <Download className="h-3.5 w-3.5" /> Export
                 </Button>
               </div>
             </CardContent>
           </Card>
 
-          {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: "Total Shipments", value: 140, icon: Package, color: "text-primary" },
-              { label: "Delivered", value: 67, icon: CheckCircle, color: "text-success" },
-              { label: "In Progress", value: 64, icon: Clock, color: "text-warning" },
-              { label: "Delayed", value: 9, icon: AlertTriangle, color: "text-destructive" },
+              { label: "Total Consignments", value: opsStats?.total || 0, icon: Package, color: "text-primary" },
+              { label: "Delivered", value: opsStats?.delivered || 0, icon: CheckCircle, color: "text-success" },
+              { label: "In Progress", value: opsStats?.inProgress || 0, icon: Clock, color: "text-warning" },
+              { label: "Delayed", value: opsStats?.delayed || 0, icon: AlertTriangle, color: "text-destructive" },
             ].map(s => (
               <Card key={s.label}>
                 <CardContent className="p-4 flex items-center gap-3">
@@ -592,34 +568,36 @@ export default function Reports() {
             ))}
           </div>
 
-          {/* Shipment Volume Chart */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Shipment Volume by Type (6 months)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={240}>
-                <BarChart data={shipmentsByType}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="sea" fill="hsl(210,100%,40%)" name="Sea" radius={[3, 3, 0, 0]} />
-                  <Bar dataKey="air" fill="hsl(160,84%,39%)" name="Air" radius={[3, 3, 0, 0]} />
-                  <Bar dataKey="road" fill="hsl(38,92%,50%)" name="Road" radius={[3, 3, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          {/* Volume Chart */}
+          {opsStats?.volumeByMonth && opsStats.volumeByMonth.length > 0 && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold">Consignment Volume by Type</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={240}>
+                  <BarChart data={opsStats.volumeByMonth}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 11 }} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="sea" fill="hsl(210,100%,40%)" name="Sea" radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="air" fill="hsl(160,84%,39%)" name="Air" radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="road" fill="hsl(38,92%,50%)" name="Road" radius={[3, 3, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
 
-          {/* BL Tracking Table */}
+          {/* Tracking Table */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-semibold">BL / AWB Tracking Summary</CardTitle>
-              <CardDescription>{filteredOps.length} shipments matching filters</CardDescription>
+              <CardDescription>{filteredOps.length} consignments matching filters</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -635,7 +613,7 @@ export default function Reports() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredOps.map((r) => (
+                  {filteredOps.slice(0, 50).map((r) => (
                     <TableRow key={r.bl} className="data-row">
                       <TableCell className="font-mono text-xs text-primary">{r.bl}</TableCell>
                       <TableCell className="text-sm font-medium">{r.customer}</TableCell>
@@ -653,7 +631,7 @@ export default function Reports() {
                       <TableCell className="text-xs">{r.clearance}</TableCell>
                       <TableCell className="text-center">
                         {r.daysToClose !== null ? (
-                          <span className={cn("text-xs font-medium", r.daysToClose <= 2 ? "text-success" : "text-warning")}>
+                          <span className={cn("text-xs font-medium", r.daysToClose <= 5 ? "text-success" : "text-warning")}>
                             {r.daysToClose}d
                           </span>
                         ) : "—"}
@@ -661,23 +639,23 @@ export default function Reports() {
                       <TableCell className="text-xs">{r.officer}</TableCell>
                     </TableRow>
                   ))}
+                  {filteredOps.length === 0 && (
+                    <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">No consignments found</TableCell></TableRow>
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* ══════════════════════════════════════════════
-            TAB: FINANCE REPORTS
-        ══════════════════════════════════════════════ */}
+        {/* ═══ TAB: FINANCE ═══ */}
         <TabsContent value="finance" className="space-y-6 mt-6">
-          {/* Finance KPIs */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: "Total Revenue (Paid)", value: totalRevenue, icon: TrendingUp, color: "text-success", bg: "bg-success/10" },
-              { label: "Outstanding Receivables", value: totalOutstanding, icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10" },
-              { label: "Pending Payables", value: totalPayables, icon: TrendingDown, color: "text-destructive", bg: "bg-destructive/10" },
-              { label: "Net Cash Position", value: totalRevenue - totalPayables, icon: DollarSign, color: "text-primary", bg: "bg-primary/10" },
+              { label: "Total Revenue (Paid)", value: financeSummary?.totalRevenue || 0, icon: TrendingUp, color: "text-success", bg: "bg-success/10" },
+              { label: "Outstanding Receivables", value: financeSummary?.totalOutstanding || 0, icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10" },
+              { label: "Pending Payables", value: financeSummary?.totalPayables || 0, icon: TrendingDown, color: "text-destructive", bg: "bg-destructive/10" },
+              { label: "Net Cash Position", value: financeSummary?.netCashPosition || 0, icon: DollarSign, color: "text-primary", bg: "bg-primary/10" },
             ].map(k => (
               <Card key={k.label} className="metric-card">
                 <CardContent className="p-4">
@@ -692,38 +670,71 @@ export default function Reports() {
           </div>
 
           {/* Revenue chart */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Revenue Report (6 months)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={monthlyRevenue}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `₵${(v / 1000).toFixed(0)}k`} />
-                  <Tooltip formatter={(v: number) => fmt(v)} />
-                  <Legend />
-                  <Bar dataKey="revenue" fill="hsl(210,100%,40%)" name="Revenue" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="expenses" fill="hsl(0,84%,60%)" name="Expenses" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="profit" fill="hsl(160,84%,39%)" name="Net Profit" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          {monthlyData && monthlyData.length > 0 && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold">Revenue Report (6 months)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `₵${(v / 1000).toFixed(0)}k`} />
+                    <Tooltip formatter={(v: number) => fmt(v)} />
+                    <Legend />
+                    <Bar dataKey="revenue" fill="hsl(210,100%,40%)" name="Revenue" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="expenses" fill="hsl(0,84%,60%)" name="Expenses" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="profit" fill="hsl(160,84%,39%)" name="Net Profit" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Aging Buckets */}
+          {financeSummary?.agingBuckets && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold">Receivables Aging</CardTitle>
+                <CardDescription>Outstanding amounts by aging bucket</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                  {Object.entries(financeSummary.agingBuckets).map(([bucket, data]) => {
+                    const labels: Record<string, string> = {
+                      current: "Current", "30_days": "30 Days", "60_days": "60 Days",
+                      "90_days": "90 Days", "over_90": "Over 90",
+                    };
+                    const colors: Record<string, string> = {
+                      current: "text-success", "30_days": "text-info", "60_days": "text-warning",
+                      "90_days": "text-destructive", "over_90": "text-destructive",
+                    };
+                    return (
+                      <div key={bucket} className="p-3 rounded-lg bg-muted/50 border border-border/50 text-center">
+                        <p className="text-xs text-muted-foreground mb-1">{labels[bucket] || bucket}</p>
+                        <p className={cn("text-lg font-bold", colors[bucket])}>{data.count}</p>
+                        <p className="text-xs text-muted-foreground">{fmt(data.amount, true)}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Outstanding Invoices */}
           <Card>
             <CardHeader className="pb-3 flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-base font-semibold">Outstanding Invoices Report</CardTitle>
-                <CardDescription>Unpaid and overdue invoices</CardDescription>
+                <CardTitle className="text-base font-semibold">Invoice Report</CardTitle>
+                <CardDescription>All invoices from the system</CardDescription>
               </div>
-              <Button variant="outline" size="sm" onClick={() => handleExport("excel")} className="gap-1.5">
+              <Button variant="outline" size="sm" onClick={() => handleExportCSV(invoices.map(i => ({ invoice: i.invoiceNumber, customer: i.customer, amount: i.totalAmount, status: i.status, dueDate: i.dueDate })), "invoices")} className="gap-1.5">
                 <Download className="h-3.5 w-3.5" /> Export
               </Button>
             </CardHeader>
-            <CardContent>
+            <CardContent className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -733,11 +744,10 @@ export default function Reports() {
                     <TableHead className="text-right">Amount</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Due Date</TableHead>
-                    <TableHead>Issue Date</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {invoices.map((inv) => (
+                  {invoices.slice(0, 30).map((inv) => (
                     <TableRow key={inv.id} className="data-row">
                       <TableCell className="font-mono text-xs text-primary">{inv.invoiceNumber}</TableCell>
                       <TableCell className="text-sm font-medium">{inv.customer}</TableCell>
@@ -753,26 +763,25 @@ export default function Reports() {
                         </span>
                       </TableCell>
                       <TableCell className="text-xs">{inv.dueDate}</TableCell>
-                      <TableCell className="text-xs">{inv.issueDate}</TableCell>
                     </TableRow>
                   ))}
+                  {invoices.length === 0 && (
+                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No invoices found</TableCell></TableRow>
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* ══════════════════════════════════════════════
-            TAB: WAREHOUSE REPORTS
-        ══════════════════════════════════════════════ */}
+        {/* ═══ TAB: WAREHOUSE ═══ */}
         <TabsContent value="warehouse" className="space-y-6 mt-6">
-          {/* Warehouse KPIs */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: "Total Cargo Items", value: "86", icon: Package, color: "text-primary" },
-              { label: "Avg Occupancy", value: "74%", icon: Warehouse, color: "text-warning" },
-              { label: "Inbound (MTD)", value: "142", icon: TrendingUp, color: "text-success" },
-              { label: "Outbound (MTD)", value: "128", icon: TrendingDown, color: "text-info" },
+              { label: "Total Consignments", value: opsStats?.total || 0, icon: Package, color: "text-primary" },
+              { label: "At Port / Customs", value: (opsStats?.statusCounts?.["At Port"] || 0) + (opsStats?.statusCounts?.["Customs"] || 0), icon: Warehouse, color: "text-warning" },
+              { label: "In Transit", value: opsStats?.statusCounts?.["In Transit"] || 0, icon: Truck, color: "text-info" },
+              { label: "Delivered", value: opsStats?.delivered || 0, icon: CheckCircle, color: "text-success" },
             ].map(s => (
               <Card key={s.label}>
                 <CardContent className="p-4 flex items-center gap-3">
@@ -786,92 +795,51 @@ export default function Reports() {
             ))}
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Zone Utilization */}
+          {/* Trucking Stats */}
+          {truckingStats && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold">Space Utilization by Zone</CardTitle>
-                <CardDescription>Current capacity usage (CBM)</CardDescription>
+                <CardTitle className="text-base font-semibold">Trucking & Delivery Performance</CardTitle>
+                <CardDescription>Trip completion and cost summary</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-5">
-                  {warehouseOccupancy.map((zone) => (
-                    <div key={zone.zone}>
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <span className="text-sm font-semibold">{zone.zone}</span>
-                          <span className="text-xs text-muted-foreground ml-2">{zone.used} / {zone.capacity} CBM</span>
-                        </div>
-                        <span className={cn("text-sm font-bold",
-                          zone.percentage >= 90 ? "text-destructive" :
-                          zone.percentage >= 75 ? "text-warning" : "text-success"
-                        )}>
-                          {zone.percentage}%
-                        </span>
-                      </div>
-                      <Progress value={zone.percentage} className="h-3" />
-                    </div>
-                  ))}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-4 rounded-lg bg-muted/50 border border-border/50 text-center">
+                    <p className="text-2xl font-bold text-foreground">{truckingStats.total}</p>
+                    <p className="text-xs text-muted-foreground">Total Trips</p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-muted/50 border border-border/50 text-center">
+                    <p className="text-2xl font-bold text-success">{truckingStats.completed}</p>
+                    <p className="text-xs text-muted-foreground">Completed</p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-muted/50 border border-border/50 text-center">
+                    <p className="text-2xl font-bold text-warning">{truckingStats.inProgress}</p>
+                    <p className="text-xs text-muted-foreground">In Progress</p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-muted/50 border border-border/50 text-center">
+                    <p className="text-2xl font-bold text-primary">{truckingStats.completionRate}%</p>
+                    <p className="text-xs text-muted-foreground">Completion Rate</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-
-            {/* Cargo Aging */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold">Cargo Aging Report</CardTitle>
-                <CardDescription>Number of cargo items by dwell time</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={cargoAging} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
-                    <XAxis type="number" tick={{ fontSize: 11 }} />
-                    <YAxis dataKey="range" type="category" width={80} tick={{ fontSize: 11 }} />
-                    <Tooltip />
-                    <Bar dataKey="count" name="Cargo Items" radius={[0, 4, 4, 0]}>
-                      {cargoAging.map((entry, i) => (
-                        <Cell key={i} fill={entry.color} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-                <div className="mt-4 space-y-2">
-                  {cargoAging.map((c) => (
-                    <div key={c.range} className="flex items-center justify-between p-2 rounded bg-muted/50">
-                      <div className="flex items-center gap-2">
-                        <div className="h-3 w-3 rounded-full" style={{ backgroundColor: c.color }} />
-                        <span className="text-xs font-medium">{c.range}</span>
-                      </div>
-                      <div className="flex gap-4 text-xs text-muted-foreground">
-                        <span><strong className="text-foreground">{c.count}</strong> items</span>
-                        <span><strong className="text-foreground">{c.cbm}</strong> CBM</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          )}
         </TabsContent>
 
-        {/* ══════════════════════════════════════════════
-            TAB: CLIENT REPORTS
-        ══════════════════════════════════════════════ */}
+        {/* ═══ TAB: CLIENTS ═══ */}
         <TabsContent value="clients" className="space-y-6 mt-6">
-          {/* Client KPIs */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: "Active Clients", value: activeCustomers, icon: Users, color: "text-success" },
-              { label: "Total Clients", value: customers.length, icon: Users, color: "text-primary" },
-              { label: "Total Outstanding", value: fmt(customers.reduce((s, c) => s + c.outstandingBalance, 0), true), icon: AlertTriangle, color: "text-warning" },
-              { label: "Avg Shipments/Client", value: customers.length > 0 ? Math.round(customers.reduce((s, c) => s + c.totalShipments, 0) / customers.length) : 0, icon: Package, color: "text-info" },
+              { label: "Active Clients", value: clientData?.activeCount || 0, icon: Users, color: "text-success" },
+              { label: "Total Clients", value: clientData?.totalCount || 0, icon: Users, color: "text-primary" },
+              { label: "Total Outstanding", value: fmt(clientData?.totalOutstanding || 0, true), icon: AlertTriangle, color: "text-warning" },
+              { label: "Avg Shipments/Client", value: clientData?.avgShipments || 0, icon: Package, color: "text-info" },
             ].map(s => (
               <Card key={s.label}>
                 <CardContent className="p-4 flex items-center gap-3">
                   <s.icon className={cn("h-8 w-8", s.color)} />
                   <div>
-                    <p className="text-xl font-bold">{typeof s.value === "number" ? s.value : s.value}</p>
+                    <p className="text-xl font-bold">{s.value}</p>
                     <p className="text-xs text-muted-foreground">{s.label}</p>
                   </div>
                 </CardContent>
@@ -879,24 +847,22 @@ export default function Reports() {
             ))}
           </div>
 
-          {/* Search */}
           <div className="flex items-center gap-3">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input className="pl-9 h-9" placeholder="Search clients…" value={searchClient} onChange={e => setSearchClient(e.target.value)} />
             </div>
-            <Button variant="outline" size="sm" onClick={() => handleExport("csv")} className="gap-1.5 ml-auto">
+            <Button variant="outline" size="sm" onClick={() => handleExportCSV(filteredClients, "client-profitability")} className="gap-1.5 ml-auto">
               <Download className="h-3.5 w-3.5" /> Export
             </Button>
           </div>
 
-          {/* Client Profitability Table */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-semibold">Client Profitability Report</CardTitle>
               <CardDescription>Revenue, shipments, and credit exposure per client</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -912,11 +878,9 @@ export default function Reports() {
                 </TableHeader>
                 <TableBody>
                   {filteredClients.map((c, i) => {
-                    const cust = customers.find(cu => cu.companyName === c.client);
-                    const limit = cust?.creditLimit ?? 0;
-                    const exposure = limit > 0 ? Math.round((c.outstanding / limit) * 100) : 0;
+                    const exposure = c.creditLimit > 0 ? Math.round((c.outstanding / c.creditLimit) * 100) : 0;
                     return (
-                      <TableRow key={c.client} className="data-row">
+                      <TableRow key={c.id} className="data-row">
                         <TableCell className="text-muted-foreground text-sm">{i + 1}</TableCell>
                         <TableCell className="font-medium text-sm">{c.client}</TableCell>
                         <TableCell className="text-right font-semibold text-sm">{fmt(c.revenue, true)}</TableCell>
@@ -924,7 +888,7 @@ export default function Reports() {
                         <TableCell className={cn("text-right text-sm font-medium", c.outstanding > 0 ? "text-warning" : "text-muted-foreground")}>
                           {c.outstanding > 0 ? fmt(c.outstanding, true) : "—"}
                         </TableCell>
-                        <TableCell className="text-right text-sm text-muted-foreground">{limit > 0 ? fmt(limit, true) : "—"}</TableCell>
+                        <TableCell className="text-right text-sm text-muted-foreground">{c.creditLimit > 0 ? fmt(c.creditLimit, true) : "—"}</TableCell>
                         <TableCell>
                           {exposure > 0 && (
                             <div className="flex items-center gap-2">
@@ -943,6 +907,9 @@ export default function Reports() {
                       </TableRow>
                     );
                   })}
+                  {filteredClients.length === 0 && (
+                    <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">No clients found</TableCell></TableRow>
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
