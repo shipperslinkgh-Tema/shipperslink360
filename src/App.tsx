@@ -132,6 +132,7 @@ const App = () => (
                 <Route path="/customs/icums" element={<ProtectedRoute><WithLayout><ICUMSDeclarations /></WithLayout></ProtectedRoute>} />
                 <Route path="/shipping-lines" element={<ProtectedRoute><WithLayout><ShippingLineStatus /></WithLayout></ProtectedRoute>} />
                 <Route path="/trucking" element={<ProtectedRoute><WithLayout><Trucking /></WithLayout></ProtectedRoute>} />
+                <Route path="/live-tracking" element={<ProtectedRoute><WithLayout><LiveTracking /></WithLayout></ProtectedRoute>} />
                 <Route path="/customers" element={<ProtectedRoute><WithLayout><Customers /></WithLayout></ProtectedRoute>} />
                 <Route path="/finance" element={<ProtectedRoute><WithLayout><Finance /></WithLayout></ProtectedRoute>} />
                 <Route path="/finance/invoices" element={<ProtectedRoute><WithLayout><Invoicing /></WithLayout></ProtectedRoute>} />
