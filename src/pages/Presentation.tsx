@@ -331,7 +331,7 @@ const slides: Slide[] = [
     },
   },
   {
-    id: 11,
+    id: 12,
     title: "AI Assistant",
     subtitle: "Intelligent Department-Aware AI Support",
     icon: Settings,
