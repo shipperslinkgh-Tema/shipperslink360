@@ -55,6 +55,7 @@ const DEPT_LABELS: Record<string, string> = {
 
 export function TopBar() {
   const { profile, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const initials = profile?.full_name
     ? profile.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
