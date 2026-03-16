@@ -2254,6 +2254,96 @@ export type Database = {
         }
         Relationships: []
       }
+      media_articles: {
+        Row: {
+          author: string | null
+          category: string
+          content: string
+          content_type: string
+          created_at: string
+          download_url: string | null
+          featured_image: string | null
+          id: string
+          is_featured: boolean | null
+          is_published: boolean | null
+          published_at: string | null
+          slug: string
+          summary: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          video_url: string | null
+          views_count: number | null
+        }
+        Insert: {
+          author?: string | null
+          category?: string
+          content: string
+          content_type?: string
+          created_at?: string
+          download_url?: string | null
+          featured_image?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          published_at?: string | null
+          slug: string
+          summary: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          video_url?: string | null
+          views_count?: number | null
+        }
+        Update: {
+          author?: string | null
+          category?: string
+          content?: string
+          content_type?: string
+          created_at?: string
+          download_url?: string | null
+          featured_image?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          published_at?: string | null
+          slug?: string
+          summary?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+          views_count?: number | null
+        }
+        Relationships: []
+      }
+      newsletter_subscribers: {
+        Row: {
+          company: string | null
+          email: string
+          id: string
+          is_active: boolean | null
+          name: string
+          subscribed_at: string
+        }
+        Insert: {
+          company?: string | null
+          email: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          subscribed_at?: string
+        }
+        Update: {
+          company?: string | null
+          email?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          subscribed_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           action_url: string | null
