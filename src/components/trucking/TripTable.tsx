@@ -199,6 +199,11 @@ export function TripTable({ trips, trucks, drivers }: TripTableProps) {
           </TableBody>
         </Table>
       </div>
+      <ContainerReturnDialog
+        open={!!returnTrip}
+        onOpenChange={(open) => !open && setReturnTrip(null)}
+        trip={returnTrip}
+      />
     </div>
   );
 }
