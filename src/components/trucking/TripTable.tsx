@@ -128,19 +128,26 @@ export function TripTable({ trips, trucks, drivers }: TripTableProps) {
                   <TableCell>
                     <div className="space-y-1">
                       {trip.containerReturned ? (
-                        <div className="flex items-center gap-1 text-sm text-status-success">
-                          <CheckCircle2 className="h-3 w-3" />
-                          {trip.containerReturnDate}
-                        </div>
+                        <>
+                          <div className="flex items-center gap-1 text-sm text-status-success">
+                            <CheckCircle2 className="h-3 w-3" />
+                            {trip.containerReturnDate}
+                          </div>
+                          <div className="text-xs text-muted-foreground truncate max-w-[120px]">
+                            {trip.containerReturnLocation}
+                          </div>
+                        </>
                       ) : (
-                        <div className="flex items-center gap-1 text-sm text-status-warning">
-                          <Clock className="h-3 w-3" />
-                          Pending
-                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1 text-xs"
+                          onClick={() => setReturnTrip(trip)}
+                        >
+                          <Package className="h-3 w-3" />
+                          Confirm Return
+                        </Button>
                       )}
-                      <div className="text-xs text-muted-foreground truncate max-w-[120px]">
-                        {trip.containerReturnLocation}
-                      </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
