@@ -349,7 +349,7 @@ const slides: Slide[] = [
         "Department-Aware Context: Automatically tailors responses based on the user's department — Operations, Documentation, Accounts, Management, Warehouse, or Customer Service",
         "Conversation Memory: Remembers context within sessions — 'Show consignments arriving tomorrow' → 'Generate report for the first one'",
         "AI Document Reader: Upload shipping documents (BL, invoices, packing lists) to auto-extract and populate consignment forms",
-        "AI Duty Estimator: Calculate estimated Ghana customs duties and taxes by HS code",
+        "SLAC AI DUTY ESTIMATOR: Calculate estimated Ghana customs duties and taxes by HS code",
         "All AI interactions logged in audit trail for compliance",
       ],
       useCases: [
