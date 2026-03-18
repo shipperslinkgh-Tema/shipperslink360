@@ -140,7 +140,7 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
         </button>
 
         {showChannels && (
-          <div className="border-t border-border bg-muted/20">
+          <ScrollArea className="border-t border-border bg-muted/20 max-h-48">
             {channels.map((channel) => (
               <button
                 key={channel.id}
@@ -159,7 +159,7 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
                 </div>
               </button>
             ))}
-          </div>
+          </ScrollArea>
         )}
       </div>
 
