@@ -67,6 +67,36 @@ export default function DutyEstimator() {
 
   const update = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }));
 
+  const handleSuggestHsCode = async () => {
+    if (!form.goods_description.trim()) {
+      toast({ title: "Description required", description: "Enter a goods description first.", variant: "destructive" });
+      return;
+    }
+    setSuggestingHs(true);
+    setHsSuggestions([]);
+    setShowSuggestions(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("suggest-hs-code", {
+        body: { goods_description: form.goods_description },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setHsSuggestions(data.suggestions || []);
+    } catch (err: any) {
+      console.error("HS suggestion error:", err);
+      toast({ title: "Suggestion Failed", description: err.message || "Could not suggest HS codes.", variant: "destructive" });
+      setShowSuggestions(false);
+    } finally {
+      setSuggestingHs(false);
+    }
+  };
+
+  const selectHsCode = (suggestion: HsSuggestion) => {
+    update("hs_code", suggestion.hs_code);
+    setShowSuggestions(false);
+    toast({ title: "HS Code Selected", description: `${suggestion.hs_code} — ${suggestion.description}` });
+  };
+
   const handleEstimate = async () => {
     if (!form.hs_code.trim()) {
       toast({ title: "HS Code required", description: "Enter an HS code to estimate duties.", variant: "destructive" });
