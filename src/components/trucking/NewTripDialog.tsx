@@ -147,7 +147,16 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
             </div>
             <div className="space-y-1.5">
               <Label>Driver *</Label>
-              <Input value={form.driver_id} onChange={set("driver_id")} placeholder="e.g. John Doe" />
+              <Select value={form.driver_id} onValueChange={handleDriverSelect}>
+                <SelectTrigger><SelectValue placeholder="Select driver" /></SelectTrigger>
+                <SelectContent>
+                  {drivers.map((d) => (
+                    <SelectItem key={d.id} value={d.id}>
+                      {d.name} {d.status !== "available" ? `(${d.status})` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
