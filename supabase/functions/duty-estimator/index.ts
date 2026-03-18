@@ -6,6 +6,43 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Fallback rates in case the API is unavailable
+const FALLBACK_RATES: Record<string, number> = {
+  USD: 15.5,
+  EUR: 17.0,
+  GBP: 19.5,
+  CNY: 2.15,
+  GHS: 1,
+};
+
+async function getExchangeRate(fromCurrency: string): Promise<{ rate: number; source: string }> {
+  if (fromCurrency === "GHS") {
+    return { rate: 1, source: "direct" };
+  }
+
+  try {
+    // Use the free exchangerate.host API (no key required)
+    const res = await fetch(
+      `https://open.er-api.com/v6/latest/${fromCurrency}`,
+      { signal: AbortSignal.timeout(5000) }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      if (data.rates?.GHS) {
+        return { rate: data.rates.GHS, source: "live" };
+      }
+    }
+  } catch (e) {
+    console.warn("Exchange rate API failed, using fallback:", e);
+  }
+
+  const fallback = FALLBACK_RATES[fromCurrency];
+  if (fallback) {
+    return { rate: fallback, source: "fallback" };
+  }
+  return { rate: 15.5, source: "default" };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -28,6 +65,9 @@ serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Fetch exchange rate in parallel with AI call preparation
+    const exchangeRatePromise = getExchangeRate(currency || "USD");
 
     const systemPrompt = `You are a Ghana Customs duty estimation expert. You have deep knowledge of:
 - Ghana Revenue Authority (GRA) import duty rates by HS Code
@@ -146,8 +186,27 @@ Return your response using the suggest_duties tool.`;
 
     const estimate = JSON.parse(toolCall.function.arguments);
 
+    // Get exchange rate result
+    const { rate: exchangeRate, source: rateSource } = await exchangeRatePromise;
+
+    // Add GHS equivalents
+    const ghsConversion = {
+      exchange_rate: exchangeRate,
+      rate_source: rateSource,
+      from_currency: currency || "USD",
+      ghs_cif_value: Math.round(estimate.cif_value * exchangeRate * 100) / 100,
+      ghs_import_duty: Math.round(estimate.import_duty * exchangeRate * 100) / 100,
+      ghs_vat: Math.round(estimate.vat * exchangeRate * 100) / 100,
+      ghs_nhil: Math.round(estimate.nhil * exchangeRate * 100) / 100,
+      ghs_getfund: Math.round(estimate.getfund * exchangeRate * 100) / 100,
+      ghs_exim_levy: Math.round(estimate.exim_levy * exchangeRate * 100) / 100,
+      ghs_processing_fee: Math.round(estimate.processing_fee * exchangeRate * 100) / 100,
+      ghs_total_duties: Math.round(estimate.total_duties * exchangeRate * 100) / 100,
+      ghs_total_landed_cost: Math.round(estimate.total_landed_cost * exchangeRate * 100) / 100,
+    };
+
     return new Response(
-      JSON.stringify({ success: true, estimate }),
+      JSON.stringify({ success: true, estimate, ghs_conversion: ghsConversion }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
