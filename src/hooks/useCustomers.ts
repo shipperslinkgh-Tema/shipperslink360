@@ -13,7 +13,6 @@ export function useCustomers() {
 
       if (error) throw error;
 
-      // Fetch contacts and documents for all customers
       const customerIds = customers.map((c: any) => c.id);
 
       const [contactsRes, docsRes] = await Promise.all([
@@ -23,8 +22,10 @@ export function useCustomers() {
 
       return customers.map((c: any): Customer => ({
         id: c.id,
+        customerCode: c.customer_code || undefined,
         companyName: c.company_name,
         tradeName: c.trade_name,
+        contactName: c.contact_name || undefined,
         registrationNumber: c.registration_number || "",
         tinNumber: c.tin_number || "",
         industry: c.industry || "",
@@ -39,6 +40,8 @@ export function useCustomers() {
         creditLimit: Number(c.credit_limit) || 0,
         outstandingBalance: Number(c.outstanding_balance) || 0,
         totalShipments: c.total_shipments || 0,
+        warehouseDestinations: c.warehouse_destinations || [],
+        notes: c.notes || undefined,
         contacts: (contactsRes.data || [])
           .filter((ct: any) => ct.customer_id === c.id)
           .map((ct: any): CustomerContact => ({
@@ -76,6 +79,7 @@ export function useCreateCustomer() {
         .insert({
           company_name: customer.companyName!,
           trade_name: customer.tradeName,
+          contact_name: customer.contactName,
           registration_number: customer.registrationNumber,
           tin_number: customer.tinNumber,
           industry: customer.industry,
@@ -83,11 +87,43 @@ export function useCreateCustomer() {
           address: customer.address,
           city: customer.city,
           country: customer.country || "Ghana",
-          email: customer.email!,
+          email: customer.email || `${Date.now()}@placeholder.com`,
           phone: customer.phone,
           website: customer.website,
           credit_limit: customer.creditLimit || 0,
-        })
+          warehouse_destinations: customer.warehouseDestinations || [],
+          notes: customer.notes,
+        } as any)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["customers"] }),
+  });
+}
+
+export function useUpdateCustomer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...customer }: Partial<Customer> & { id: string }) => {
+      const updateData: any = {};
+      if (customer.companyName !== undefined) updateData.company_name = customer.companyName;
+      if (customer.contactName !== undefined) updateData.contact_name = customer.contactName;
+      if (customer.tinNumber !== undefined) updateData.tin_number = customer.tinNumber;
+      if (customer.companyType !== undefined) updateData.company_type = customer.companyType;
+      if (customer.phone !== undefined) updateData.phone = customer.phone;
+      if (customer.email !== undefined) updateData.email = customer.email;
+      if (customer.warehouseDestinations !== undefined) updateData.warehouse_destinations = customer.warehouseDestinations;
+      if (customer.notes !== undefined) updateData.notes = customer.notes;
+      if (customer.address !== undefined) updateData.address = customer.address;
+      if (customer.city !== undefined) updateData.city = customer.city;
+      if (customer.status !== undefined) updateData.status = customer.status;
+
+      const { data, error } = await supabase
+        .from("customers")
+        .update(updateData)
+        .eq("id", id)
         .select()
         .single();
       if (error) throw error;

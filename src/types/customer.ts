@@ -19,8 +19,10 @@ export interface CustomerContact {
 
 export interface Customer {
   id: string;
+  customerCode?: string;
   companyName: string;
   tradeName?: string;
+  contactName?: string;
   registrationNumber: string;
   tinNumber: string;
   industry: string;
@@ -35,6 +37,8 @@ export interface Customer {
   creditLimit: number;
   outstandingBalance: number;
   totalShipments: number;
+  warehouseDestinations: string[];
+  notes?: string;
   contacts: CustomerContact[];
   documents: CustomerDocument[];
   createdAt: string;
