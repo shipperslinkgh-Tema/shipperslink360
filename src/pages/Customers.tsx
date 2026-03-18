@@ -119,7 +119,7 @@ const Customers = () => {
           <Button variant="outline" size="sm" onClick={() => setImportOpen(true)} className="gap-1.5">
             <Upload className="h-4 w-4" /> Import
           </Button>
-          <Button>
+          <Button onClick={() => setAddOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Add Customer
           </Button>
