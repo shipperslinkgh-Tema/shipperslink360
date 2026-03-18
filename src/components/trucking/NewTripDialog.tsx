@@ -229,21 +229,6 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
 
           <Separator />
 
-          {/* Container Return */}
-          <SectionHeader icon={Package} title="Container Return" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>Return Location</Label>
-              <Input value={form.container_return_location} onChange={set("container_return_location")} placeholder="e.g. Meridian Port" />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Return Date</Label>
-              <Input type="date" value={form.container_return_date} onChange={set("container_return_date")} />
-            </div>
-          </div>
-
-          <Separator />
-
           {/* Notes */}
           <SectionHeader icon={FileText} title="Additional Notes" />
           <Textarea value={form.notes} onChange={set("notes")} placeholder="Any additional details about this trip..." rows={3} />
