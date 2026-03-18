@@ -15,7 +15,7 @@ export default function Trucking() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("trips");
   const [newTripOpen, setNewTripOpen] = useState(false);
-  
+  const [newDriverOpen, setNewDriverOpen] = useState(false);
 
   const { data: trucks = [] } = useTrucks();
   const { data: drivers = [] } = useDrivers();
