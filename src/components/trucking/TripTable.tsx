@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Route, Calendar, DollarSign, Container, CheckCircle2, Clock, Copy, ExternalLink, Radio, MessageCircle } from "lucide-react";
+import { Route, Calendar, DollarSign, Container, CheckCircle2, Package, Copy, ExternalLink, Radio, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useActivateTracking, useTrackingTrips } from "@/hooks/useTracking";
 import { toast } from "sonner";
