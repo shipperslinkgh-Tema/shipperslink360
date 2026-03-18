@@ -28,6 +28,7 @@ export function ContainerReturnDialog({ open, onOpenChange, trip }: ContainerRet
   const [returnLocation, setReturnLocation] = useState("");
   const [returnDate, setReturnDate] = useState(new Date().toISOString().split("T")[0]);
   const [notes, setNotes] = useState("");
+  const [tripCostPaid, setTripCostPaid] = useState(false);
 
   const mutation = useMutation({
     mutationFn: async () => {
