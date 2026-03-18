@@ -47,7 +47,7 @@ const INITIAL_FORM = {
   delivery_date: "",
   trip_cost: "",
   advance_deposit: "",
-  trip_cost_paid: false,
+  
   notes: "",
 };
 
