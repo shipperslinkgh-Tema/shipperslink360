@@ -209,6 +209,7 @@ export function useInternalChat(activeChannel: string) {
     loading,
     channels: CHANNELS,
     sendMessage,
+    sendFileMessage,
     editMessage,
     deleteMessage,
     currentUserId: session?.user?.id,
