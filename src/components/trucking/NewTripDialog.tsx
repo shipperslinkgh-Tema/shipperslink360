@@ -69,11 +69,25 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
   const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [field]: e.target.value }));
 
+  const handleDriverSelect = (driverId: string) => {
+    const driver = drivers.find((d) => d.id === driverId);
+    if (driver) {
+      setForm((f) => ({
+        ...f,
+        driver_id: driverId,
+        driver_phone: driver.phone,
+        driver_license: driver.licenseNumber,
+      }));
+    }
+  };
   const mutation = useMutation({
     mutationFn: async () => {
+      const selectedDriver = drivers.find((d) => d.id === form.driver_id);
       const { error } = await supabase.from("trucking_trips").insert({
         truck_id: form.truck_id,
         driver_id: form.driver_id,
+        driver_name: selectedDriver?.name || null,
+        driver_phone: selectedDriver?.phone || form.driver_phone || null,
         container_number: form.container_number || null,
         bl_number: form.bl_number || null,
         customer: form.customer || null,
@@ -136,17 +150,26 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
             </div>
             <div className="space-y-1.5">
               <Label>Driver *</Label>
-              <Input value={form.driver_id} onChange={set("driver_id")} placeholder="e.g. John Doe" />
+              <Select value={form.driver_id} onValueChange={handleDriverSelect}>
+                <SelectTrigger><SelectValue placeholder="Select driver" /></SelectTrigger>
+                <SelectContent>
+                  {drivers.map((d) => (
+                    <SelectItem key={d.id} value={d.id}>
+                      {d.name} {d.status !== "available" ? `(${d.status})` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Driver's Number</Label>
-              <Input value={form.driver_phone} onChange={set("driver_phone")} placeholder="e.g. 024 123 4567" />
+              <Input value={form.driver_phone} readOnly className="bg-muted/50" placeholder="Auto-filled from driver" />
             </div>
             <div className="space-y-1.5">
               <Label>License Number</Label>
-              <Input value={form.driver_license} onChange={set("driver_license")} placeholder="e.g. DL-12345678" />
+              <Input value={form.driver_license} readOnly className="bg-muted/50" placeholder="Auto-filled from driver" />
             </div>
           </div>
 
