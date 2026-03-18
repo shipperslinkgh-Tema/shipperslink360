@@ -2662,6 +2662,7 @@ export type Database = {
         Row: {
           actual_end_time: string | null
           actual_start_time: string | null
+          advance_deposit: number | null
           arrived_at_pickup_time: string | null
           bl_number: string | null
           cargo_description: string | null
@@ -2699,6 +2700,7 @@ export type Database = {
           tracking_token: string | null
           tracking_url: string | null
           trip_cost: number | null
+          trip_cost_paid: boolean | null
           truck_id: string
           truck_number: string | null
           updated_at: string
@@ -2706,6 +2708,7 @@ export type Database = {
         Insert: {
           actual_end_time?: string | null
           actual_start_time?: string | null
+          advance_deposit?: number | null
           arrived_at_pickup_time?: string | null
           bl_number?: string | null
           cargo_description?: string | null
@@ -2743,6 +2746,7 @@ export type Database = {
           tracking_token?: string | null
           tracking_url?: string | null
           trip_cost?: number | null
+          trip_cost_paid?: boolean | null
           truck_id: string
           truck_number?: string | null
           updated_at?: string
@@ -2750,6 +2754,7 @@ export type Database = {
         Update: {
           actual_end_time?: string | null
           actual_start_time?: string | null
+          advance_deposit?: number | null
           arrived_at_pickup_time?: string | null
           bl_number?: string | null
           cargo_description?: string | null
@@ -2787,6 +2792,7 @@ export type Database = {
           tracking_token?: string | null
           tracking_url?: string | null
           trip_cost?: number | null
+          trip_cost_paid?: boolean | null
           truck_id?: string
           truck_number?: string | null
           updated_at?: string
