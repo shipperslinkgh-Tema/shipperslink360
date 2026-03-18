@@ -34,6 +34,7 @@ export function TripTable({ trips, trucks, drivers }: TripTableProps) {
   const getTruck = (truckId: string) => trucks.find((t) => t.id === truckId);
   const getDriver = (driverId: string) => drivers.find((d) => d.id === driverId);
   const activateTracking = useActivateTracking();
+  const { data: trackingTrips = [] } = useTrackingTrips();
 
   const getTrackingInfo = (tripId: string) =>
     trackingTrips.find((t) => t.id === tripId);
