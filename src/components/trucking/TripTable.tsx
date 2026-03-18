@@ -153,7 +153,7 @@ export function TripTable({ trips, trucks, drivers }: TripTableProps) {
                   <TableCell className="text-right">
                     <div className="space-y-1">
                       <div className="flex items-center justify-end gap-1 text-sm font-medium">
-                        <DollarSign className="h-3 w-3 text-status-success" />
+                        <span className="text-xs text-status-success">GHS</span>
                         {trip.tripCost.toLocaleString()}
                       </div>
                       <div className="text-xs text-muted-foreground">
