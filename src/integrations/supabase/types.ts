@@ -1535,15 +1535,18 @@ export type Database = {
           city: string | null
           company_name: string
           company_type: string
+          contact_name: string | null
           country: string | null
           created_at: string
           created_by: string | null
           credit_limit: number | null
           credit_status: string | null
+          customer_code: string | null
           email: string
           id: string
           industry: string | null
           is_active: boolean | null
+          notes: string | null
           outstanding_balance: number | null
           phone: string | null
           registration_number: string | null
@@ -1552,6 +1555,7 @@ export type Database = {
           total_shipments: number | null
           trade_name: string | null
           updated_at: string
+          warehouse_destinations: string[] | null
           website: string | null
         }
         Insert: {
@@ -1559,15 +1563,18 @@ export type Database = {
           city?: string | null
           company_name: string
           company_type?: string
+          contact_name?: string | null
           country?: string | null
           created_at?: string
           created_by?: string | null
           credit_limit?: number | null
           credit_status?: string | null
+          customer_code?: string | null
           email: string
           id?: string
           industry?: string | null
           is_active?: boolean | null
+          notes?: string | null
           outstanding_balance?: number | null
           phone?: string | null
           registration_number?: string | null
@@ -1576,6 +1583,7 @@ export type Database = {
           total_shipments?: number | null
           trade_name?: string | null
           updated_at?: string
+          warehouse_destinations?: string[] | null
           website?: string | null
         }
         Update: {
@@ -1583,15 +1591,18 @@ export type Database = {
           city?: string | null
           company_name?: string
           company_type?: string
+          contact_name?: string | null
           country?: string | null
           created_at?: string
           created_by?: string | null
           credit_limit?: number | null
           credit_status?: string | null
+          customer_code?: string | null
           email?: string
           id?: string
           industry?: string | null
           is_active?: boolean | null
+          notes?: string | null
           outstanding_balance?: number | null
           phone?: string | null
           registration_number?: string | null
@@ -1600,6 +1611,7 @@ export type Database = {
           total_shipments?: number | null
           trade_name?: string | null
           updated_at?: string
+          warehouse_destinations?: string[] | null
           website?: string | null
         }
         Relationships: []
