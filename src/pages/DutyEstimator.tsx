@@ -125,6 +125,7 @@ export default function DutyEstimator() {
 
     setLoading(true);
     setEstimate(null);
+    setGhsConversion(null);
 
     try {
       const { data, error } = await supabase.functions.invoke("duty-estimator", {
