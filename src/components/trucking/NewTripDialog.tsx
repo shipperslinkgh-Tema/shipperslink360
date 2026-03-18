@@ -64,6 +64,19 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
   const queryClient = useQueryClient();
   const [form, setForm] = useState(INITIAL_FORM);
 
+  const { data: customers = [] } = useQuery({
+    queryKey: ["customers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("customers")
+        .select("id, company_name")
+        .eq("is_active", true)
+        .order("company_name");
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [field]: e.target.value }));
 
