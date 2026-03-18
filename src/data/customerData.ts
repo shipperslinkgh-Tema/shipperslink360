@@ -66,6 +66,7 @@ export const customers: Customer[] = [
         fileSize: "3.2 MB",
       },
     ],
+    warehouseDestinations: [],
     createdAt: "Jan 10, 2020",
     lastActivityDate: "Jan 20, 2026",
   },
