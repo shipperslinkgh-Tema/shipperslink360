@@ -230,12 +230,19 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
               <Input type="number" value={form.trip_cost} onChange={set("trip_cost")} placeholder="0.00" />
             </div>
             <div className="space-y-1.5">
-              <Label>Driver Payment</Label>
-              <Input type="number" value={form.driver_payment} onChange={set("driver_payment")} placeholder="0.00" />
+              <Label>Advance/Deposit</Label>
+              <Input type="number" value={form.advance_deposit} onChange={set("advance_deposit")} placeholder="0.00" />
             </div>
-            <div className="space-y-1.5">
-              <Label>Fuel Cost</Label>
-              <Input type="number" value={form.fuel_cost} onChange={set("fuel_cost")} placeholder="0.00" />
+            <div className="space-y-1.5 flex items-end">
+              <label className="flex items-center gap-2 cursor-pointer pb-2">
+                <input
+                  type="checkbox"
+                  checked={form.trip_cost_paid}
+                  onChange={(e) => setForm((f) => ({ ...f, trip_cost_paid: e.target.checked }))}
+                  className="h-4 w-4 rounded border-input"
+                />
+                <span className="text-sm font-medium">Trip Cost Paid</span>
+              </label>
             </div>
           </div>
 
