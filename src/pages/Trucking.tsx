@@ -9,6 +9,7 @@ import { TripTable } from "@/components/trucking/TripTable";
 import { TruckingStats } from "@/components/trucking/TruckingStats";
 import { NewTripDialog } from "@/components/trucking/NewTripDialog";
 import { NewDriverDialog } from "@/components/trucking/NewDriverDialog";
+import { NewTruckDialog } from "@/components/trucking/NewTruckDialog";
 import { useTrucks, useDrivers, useTrips } from "@/hooks/useTrucking";
 
 export default function Trucking() {
@@ -16,6 +17,7 @@ export default function Trucking() {
   const [activeTab, setActiveTab] = useState("trips");
   const [newTripOpen, setNewTripOpen] = useState(false);
   const [newDriverOpen, setNewDriverOpen] = useState(false);
+  const [newTruckOpen, setNewTruckOpen] = useState(false);
 
   const { data: trucks = [] } = useTrucks();
   const { data: drivers = [] } = useDrivers();
@@ -54,6 +56,10 @@ export default function Trucking() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setNewTruckOpen(true)}>
+            <TruckIcon className="h-4 w-4 mr-2" />
+            Add Truck
+          </Button>
           <Button variant="outline" onClick={() => setNewDriverOpen(true)}>
             <Users className="h-4 w-4 mr-2" />
             Register Driver
@@ -112,6 +118,7 @@ export default function Trucking() {
 
       <NewTripDialog open={newTripOpen} onOpenChange={setNewTripOpen} trucks={trucks} drivers={drivers} />
       <NewDriverDialog open={newDriverOpen} onOpenChange={setNewDriverOpen} />
+      <NewTruckDialog open={newTruckOpen} onOpenChange={setNewTruckOpen} />
     </div>
   );
 }
