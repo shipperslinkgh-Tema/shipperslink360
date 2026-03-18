@@ -108,7 +108,7 @@ export default function ShippingLineStatus() {
           activeDOs={5}
           pendingPayment={2}
           lastSync="3 min ago"
-          portalUrl="https://www.odex.co"
+          portalUrl="https://gh.odexglobal.com/loginLanding.do"
         />
         <ShippingLineCard
           name="ZIM"
