@@ -53,10 +53,16 @@ export default function Trucking() {
             Manage trucks, drivers, trips, and container returns
           </p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90" onClick={() => setNewTripOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          New Trip
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setNewDriverOpen(true)}>
+            <Users className="h-4 w-4 mr-2" />
+            Register Driver
+          </Button>
+          <Button className="bg-primary hover:bg-primary/90" onClick={() => setNewTripOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Trip
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
