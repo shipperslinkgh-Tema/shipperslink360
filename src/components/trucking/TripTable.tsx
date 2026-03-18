@@ -1,5 +1,5 @@
+import { useState } from "react";
 import { Trip, Truck, Driver } from "@/types/trucking";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
