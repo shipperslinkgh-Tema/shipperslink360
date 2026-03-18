@@ -12,6 +12,7 @@ import {
 import { CustomerTable } from "@/components/customers/CustomerTable";
 import { CustomerDetailsPanel } from "@/components/customers/CustomerDetailsPanel";
 import { CustomerStats } from "@/components/customers/CustomerStats";
+import { AddCustomerDialog } from "@/components/customers/AddCustomerDialog";
 import { useCustomers } from "@/hooks/useCustomers";
 import { Customer } from "@/types/customer";
 import { CSVImportDialog } from "@/components/shared/CSVImportDialog";
