@@ -200,6 +200,7 @@ const Customers = () => {
         optionalFields={["company_type", "trade_name", "phone", "registration_number", "tin_number", "city", "country", "industry", "address"]}
         onImport={handleImport}
       />
+      <AddCustomerDialog open={addOpen} onOpenChange={setAddOpen} />
     </div>
   );
 };
