@@ -82,9 +82,12 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
   };
   const mutation = useMutation({
     mutationFn: async () => {
+      const selectedDriver = drivers.find((d) => d.id === form.driver_id);
       const { error } = await supabase.from("trucking_trips").insert({
         truck_id: form.truck_id,
         driver_id: form.driver_id,
+        driver_name: selectedDriver?.name || null,
+        driver_phone: selectedDriver?.phone || form.driver_phone || null,
         container_number: form.container_number || null,
         bl_number: form.bl_number || null,
         customer: form.customer || null,
