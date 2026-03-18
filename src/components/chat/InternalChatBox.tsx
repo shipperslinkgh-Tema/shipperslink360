@@ -13,14 +13,18 @@ import {
   Check,
   XCircle,
   Loader2,
+  Paperclip,
+  FileIcon,
+  Image as ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useInternalChat, ChatChannelInfo } from "@/hooks/useInternalChat";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface InternalChatBoxProps {
   isOpen: boolean;
@@ -54,6 +58,7 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
     loading,
     channels,
     sendMessage,
+    sendFileMessage,
     editMessage,
     deleteMessage,
     currentUserId,
@@ -63,12 +68,18 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
   const [showChannels, setShowChannels] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
+  const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const selectedChannel = channels.find((c) => c.id === activeChannel) || channels[0];
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   }, [messages, isOpen]);
 
   const handleSend = async () => {
@@ -83,6 +94,44 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
     await editMessage(id, editText);
     setEditingId(null);
     setEditText("");
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Maximum file size is 10MB", variant: "destructive" });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const filePath = `chat/${activeChannel}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("chat-attachments")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("chat-attachments")
+        .getPublicUrl(filePath);
+
+      await sendFileMessage(file.name, urlData.publicUrl);
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const isImageFile = (fileName: string) => {
+    return /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(fileName);
   };
 
   const formatTime = (timestamp: string) =>
@@ -110,7 +159,7 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
   return (
     <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-card border border-border rounded-xl shadow-2xl z-50 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-primary/20 bg-primary text-primary-foreground">
+      <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-primary/20 bg-primary text-primary-foreground">
         <div className="flex items-center gap-3">
           <div className="relative">
             <MessageCircle className="h-5 w-5 text-primary-foreground" />
@@ -127,7 +176,7 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
       </div>
 
       {/* Channel Selector */}
-      <div className="border-b border-border">
+      <div className="flex-shrink-0 border-b border-border">
         <button
           onClick={() => setShowChannels(!showChannels)}
           className="w-full px-4 py-2 flex items-center justify-between hover:bg-muted/50 transition-colors"
@@ -140,7 +189,7 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
         </button>
 
         {showChannels && (
-          <ScrollArea className="border-t border-border bg-muted/20 max-h-48">
+          <div className="border-t border-border bg-muted/20 max-h-48 overflow-y-auto">
             {channels.map((channel) => (
               <button
                 key={channel.id}
@@ -159,12 +208,15 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
                 </div>
               </button>
             ))}
-          </ScrollArea>
+          </div>
         )}
       </div>
 
-      {/* Messages */}
-      <ScrollArea className="flex-1 p-4">
+      {/* Messages - native scrollable div */}
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto p-4 min-h-0"
+      >
         <div className="space-y-4">
           {loading && (
             <div className="flex justify-center py-8">
@@ -228,7 +280,32 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
                       </Button>
                     </div>
                   ) : (
-                    <p className="text-sm text-foreground/90 break-words">{msg.message}</p>
+                    <>
+                      {msg.message && <p className="text-sm text-foreground/90 break-words">{msg.message}</p>}
+                      {msg.file_url && (
+                        <a
+                          href={msg.file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1 inline-block"
+                        >
+                          {msg.file_name && isImageFile(msg.file_name) ? (
+                            <img
+                              src={msg.file_url}
+                              alt={msg.file_name}
+                              className="max-w-[200px] max-h-[150px] rounded-md border border-border object-cover"
+                            />
+                          ) : (
+                            <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-md border border-border hover:bg-muted transition-colors">
+                              <FileIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                              <span className="text-xs text-primary truncate max-w-[180px]">
+                                {msg.file_name || "Attachment"}
+                              </span>
+                            </div>
+                          )}
+                        </a>
+                      )}
+                    </>
                   )}
 
                   {msg.consolidation_ref && (
@@ -268,17 +345,34 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
           })}
           <div ref={messagesEndRef} />
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-border bg-muted/20">
+      <div className="flex-shrink-0 p-3 border-t border-border bg-muted/20">
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          onChange={handleFileUpload}
+          accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt"
+        />
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSend();
           }}
-          className="flex gap-2"
+          className="flex items-center gap-2"
         >
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="h-9 w-9 flex-shrink-0 text-muted-foreground hover:text-foreground"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+          >
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
+          </Button>
           <Input
             value={messageText}
             onChange={(e) => setMessageText(e.target.value)}
@@ -289,7 +383,7 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
             type="submit"
             size="icon"
             className="h-9 w-9 flex-shrink-0 bg-primary hover:bg-primary/90"
-            disabled={!messageText.trim()}
+            disabled={!messageText.trim() || uploading}
           >
             <Send className="h-4 w-4" />
           </Button>

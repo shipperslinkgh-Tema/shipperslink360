@@ -145,6 +145,33 @@ export function useInternalChat(activeChannel: string) {
     [session, profile, activeChannel, toast]
   );
 
+  const sendFileMessage = useCallback(
+    async (fileName: string, fileUrl: string) => {
+      if (!session?.user || !profile) return;
+
+      const { error } = await supabase.from("chat_messages").insert({
+        channel: activeChannel,
+        sender_id: session.user.id,
+        sender_name: profile.full_name,
+        sender_department: profile.department,
+        message: `📎 ${fileName}`,
+        message_type: "file",
+        file_name: fileName,
+        file_url: fileUrl,
+      } as any);
+
+      if (error) {
+        console.error("Send file message error:", error);
+        toast({
+          title: "Failed to send file",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    },
+    [session, profile, activeChannel, toast]
+  );
+
   const editMessage = useCallback(
     async (messageId: string, newText: string) => {
       const { error } = await supabase
@@ -182,6 +209,7 @@ export function useInternalChat(activeChannel: string) {
     loading,
     channels: CHANNELS,
     sendMessage,
+    sendFileMessage,
     editMessage,
     deleteMessage,
     currentUserId: session?.user?.id,
