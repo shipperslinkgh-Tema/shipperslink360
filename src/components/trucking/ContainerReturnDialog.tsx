@@ -39,6 +39,7 @@ export function ContainerReturnDialog({ open, onOpenChange, trip }: ContainerRet
           container_returned: true,
           container_return_location: returnLocation || null,
           container_return_date: returnDate || null,
+          trip_cost_paid: tripCostPaid,
           notes: trip.notes ? `${trip.notes}\n[Container Return] ${notes}` : notes || null,
         })
         .eq("id", trip.id);
