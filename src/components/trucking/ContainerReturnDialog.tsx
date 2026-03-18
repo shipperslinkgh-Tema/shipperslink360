@@ -115,6 +115,16 @@ export function ContainerReturnDialog({ open, onOpenChange, trip }: ContainerRet
               rows={2}
             />
           </div>
+
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={tripCostPaid}
+              onChange={(e) => setTripCostPaid(e.target.checked)}
+              className="h-4 w-4 rounded border-input"
+            />
+            <span className="text-sm font-medium">Trip Cost Paid</span>
+          </label>
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0">
