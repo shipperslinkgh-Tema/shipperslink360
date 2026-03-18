@@ -469,13 +469,13 @@ export default function DutyEstimator() {
                 <CardContent>
                   <div className="space-y-2">
                     {[
-                      { label: "CIF Value", value: estimate.cif_value, bold: true },
-                      { label: `Import Duty (${estimate.duty_rate_percent}%)`, value: estimate.import_duty },
-                      { label: "VAT (15%)", value: estimate.vat },
-                      { label: "NHIL (2.5%)", value: estimate.nhil },
-                      { label: "GETFund Levy (2.5%)", value: estimate.getfund },
-                      { label: "EXIM Levy (0.75%)", value: estimate.exim_levy },
-                      { label: "Processing Fee (1%)", value: estimate.processing_fee },
+                      { label: "CIF Value", value: estimate.cif_value, ghsValue: ghsConversion?.ghs_cif_value, bold: true },
+                      { label: `Import Duty (${estimate.duty_rate_percent}%)`, value: estimate.import_duty, ghsValue: ghsConversion?.ghs_import_duty },
+                      { label: "VAT (15%)", value: estimate.vat, ghsValue: ghsConversion?.ghs_vat },
+                      { label: "NHIL (2.5%)", value: estimate.nhil, ghsValue: ghsConversion?.ghs_nhil },
+                      { label: "GETFund Levy (2.5%)", value: estimate.getfund, ghsValue: ghsConversion?.ghs_getfund },
+                      { label: "EXIM Levy (0.75%)", value: estimate.exim_levy, ghsValue: ghsConversion?.ghs_exim_levy },
+                      { label: "Processing Fee (1%)", value: estimate.processing_fee, ghsValue: ghsConversion?.ghs_processing_fee },
                     ].map((item, i) => (
                       <div
                         key={i}
@@ -484,26 +484,47 @@ export default function DutyEstimator() {
                         }`}
                       >
                         <span className="text-sm text-foreground">{item.label}</span>
-                        <span className="text-sm font-mono text-foreground">
-                          {estimate.currency} {fmt(item.value)}
-                        </span>
+                        <div className="text-right">
+                          <span className="text-sm font-mono text-foreground">
+                            GHS {fmt(item.ghsValue ?? item.value)}
+                          </span>
+                          {ghsConversion && estimate.currency !== "GHS" && (
+                            <p className="text-[10px] text-muted-foreground font-mono">
+                              {estimate.currency} {fmt(item.value)}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     ))}
                     <Separator />
                     <div className="flex items-center justify-between py-2 px-3 bg-primary/10 rounded-md">
                       <span className="text-sm font-bold text-primary">Total Duties Payable</span>
-                      <span className="text-sm font-bold font-mono text-primary">
-                        {estimate.currency} {fmt(estimate.total_duties)}
-                      </span>
+                      <div className="text-right">
+                        <span className="text-sm font-bold font-mono text-primary">
+                          GHS {fmt(ghsConversion?.ghs_total_duties ?? estimate.total_duties)}
+                        </span>
+                        {ghsConversion && estimate.currency !== "GHS" && (
+                          <p className="text-[10px] text-muted-foreground font-mono">
+                            {estimate.currency} {fmt(estimate.total_duties)}
+                          </p>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center justify-between py-2 px-3 bg-muted/30 rounded-md">
                       <span className="text-sm font-semibold text-foreground flex items-center gap-1">
                         <TrendingUp className="h-3.5 w-3.5" />
                         Total Landed Cost
                       </span>
-                      <span className="text-sm font-bold font-mono text-foreground">
-                        {estimate.currency} {fmt(estimate.total_landed_cost)}
-                      </span>
+                      <div className="text-right">
+                        <span className="text-sm font-bold font-mono text-foreground">
+                          GHS {fmt(ghsConversion?.ghs_total_landed_cost ?? estimate.total_landed_cost)}
+                        </span>
+                        {ghsConversion && estimate.currency !== "GHS" && (
+                          <p className="text-[10px] text-muted-foreground font-mono">
+                            {estimate.currency} {fmt(estimate.total_landed_cost)}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
