@@ -12,6 +12,7 @@ import {
 import { CustomerTable } from "@/components/customers/CustomerTable";
 import { CustomerDetailsPanel } from "@/components/customers/CustomerDetailsPanel";
 import { CustomerStats } from "@/components/customers/CustomerStats";
+import { AddCustomerDialog } from "@/components/customers/AddCustomerDialog";
 import { useCustomers } from "@/hooks/useCustomers";
 import { Customer } from "@/types/customer";
 import { CSVImportDialog } from "@/components/shared/CSVImportDialog";
@@ -44,6 +45,7 @@ const Customers = () => {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -117,7 +119,7 @@ const Customers = () => {
           <Button variant="outline" size="sm" onClick={() => setImportOpen(true)} className="gap-1.5">
             <Upload className="h-4 w-4" /> Import
           </Button>
-          <Button>
+          <Button onClick={() => setAddOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Add Customer
           </Button>
@@ -198,6 +200,7 @@ const Customers = () => {
         optionalFields={["company_type", "trade_name", "phone", "registration_number", "tin_number", "city", "country", "industry", "address"]}
         onImport={handleImport}
       />
+      <AddCustomerDialog open={addOpen} onOpenChange={setAddOpen} />
     </div>
   );
 };

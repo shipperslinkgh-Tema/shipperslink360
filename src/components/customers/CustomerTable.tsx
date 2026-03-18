@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Eye, Building2, Phone, Mail } from "lucide-react";
+import { Eye, Building2, Phone, Mail, User } from "lucide-react";
 
 interface CustomerTableProps {
   customers: Customer[];
@@ -30,24 +30,16 @@ const companyTypeLabels = {
 };
 
 export function CustomerTable({ customers, onViewCustomer }: CustomerTableProps) {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-GH", {
-      style: "currency",
-      currency: "GHS",
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
-
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Company</TableHead>
-          <TableHead>TIN Number</TableHead>
+          <TableHead>Customer ID</TableHead>
+          <TableHead>Customer Name</TableHead>
+          <TableHead>Contact Person</TableHead>
           <TableHead>Contact</TableHead>
           <TableHead>Type</TableHead>
-          <TableHead>Shipments</TableHead>
-          <TableHead>Outstanding</TableHead>
+          <TableHead>Warehouse(s)</TableHead>
           <TableHead>Status</TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
@@ -56,32 +48,47 @@ export function CustomerTable({ customers, onViewCustomer }: CustomerTableProps)
         {customers.map((customer) => (
           <TableRow key={customer.id} className="cursor-pointer hover:bg-muted/50">
             <TableCell>
+              <span className="font-mono text-sm text-primary">
+                {customer.customerCode || "—"}
+              </span>
+            </TableCell>
+            <TableCell>
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <Building2 className="h-5 w-5 text-primary" />
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+                  <Building2 className="h-4 w-4 text-primary" />
                 </div>
                 <div>
                   <p className="font-medium">{customer.companyName}</p>
-                  {customer.tradeName && (
-                    <p className="text-xs text-muted-foreground">({customer.tradeName})</p>
+                  {customer.tinNumber && (
+                    <p className="text-xs text-muted-foreground">TIN: {customer.tinNumber}</p>
                   )}
-                  <p className="text-xs text-muted-foreground">{customer.city}, {customer.country}</p>
                 </div>
               </div>
             </TableCell>
             <TableCell>
-              <span className="font-mono text-sm">{customer.tinNumber}</span>
+              {customer.contactName ? (
+                <div className="flex items-center gap-1.5 text-sm">
+                  <User className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>{customer.contactName}</span>
+                </div>
+              ) : (
+                <span className="text-muted-foreground">—</span>
+              )}
             </TableCell>
             <TableCell>
               <div className="space-y-1">
-                <div className="flex items-center gap-1.5 text-sm">
-                  <Mail className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="truncate max-w-[150px]">{customer.email}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Phone className="h-3.5 w-3.5" />
-                  <span>{customer.phone}</span>
-                </div>
+                {customer.phone && (
+                  <div className="flex items-center gap-1.5 text-sm">
+                    <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span>{customer.phone}</span>
+                  </div>
+                )}
+                {customer.email && (
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Mail className="h-3.5 w-3.5" />
+                    <span className="truncate max-w-[150px]">{customer.email}</span>
+                  </div>
+                )}
               </div>
             </TableCell>
             <TableCell>
@@ -90,12 +97,17 @@ export function CustomerTable({ customers, onViewCustomer }: CustomerTableProps)
               </Badge>
             </TableCell>
             <TableCell>
-              <span className="font-medium">{customer.totalShipments}</span>
-            </TableCell>
-            <TableCell>
-              <span className={customer.outstandingBalance > 0 ? "text-amber-600 font-medium" : "text-muted-foreground"}>
-                {formatCurrency(customer.outstandingBalance)}
-              </span>
+              {customer.warehouseDestinations?.length > 0 ? (
+                <div className="flex flex-wrap gap-1">
+                  {customer.warehouseDestinations.map((w) => (
+                    <Badge key={w} variant="secondary" className="text-xs">
+                      {w}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-muted-foreground text-sm">—</span>
+              )}
             </TableCell>
             <TableCell>
               <Badge className={statusColors[customer.status]}>
