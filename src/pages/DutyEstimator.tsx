@@ -1,125 +1,47 @@
 import { useState } from "react";
-import { Calculator, FileText, DollarSign, Globe, Package, AlertTriangle, CheckCircle2, Loader2, Info, TrendingUp, Printer, Sparkles, Search } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { Calculator, AlertTriangle, Loader2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import DutyInputForm from "@/components/duty-estimator/DutyInputForm";
+import DutyResults from "@/components/duty-estimator/DutyResults";
+import { DutyEstimate, GhsConversion, DutyFormData } from "@/components/duty-estimator/types";
 
-interface HsSuggestion {
-  hs_code: string;
-  description: string;
-  duty_rate: number;
-  confidence: string;
-}
-
-interface DutyEstimate {
-  hs_code: string;
-  hs_description: string;
-  duty_rate_percent: number;
-  cif_value: number;
-  import_duty: number;
-  vat: number;
-  nhil: number;
-  getfund: number;
-  exim_levy: number;
-  processing_fee: number;
-  total_duties: number;
-  total_landed_cost: number;
-  currency: string;
-  notes: string;
-  ecowas_applicable?: boolean;
-}
-
-interface GhsConversion {
-  exchange_rate: number;
-  rate_source: string;
-  from_currency: string;
-  ghs_cif_value: number;
-  ghs_import_duty: number;
-  ghs_vat: number;
-  ghs_nhil: number;
-  ghs_getfund: number;
-  ghs_exim_levy: number;
-  ghs_processing_fee: number;
-  ghs_total_duties: number;
-  ghs_total_landed_cost: number;
-}
-
-const currencies = ["USD", "EUR", "GBP", "GHS", "CNY"];
-
-const commonOrigins = [
-  "China", "United States", "United Kingdom", "Germany", "India",
-  "Turkey", "Japan", "South Korea", "Nigeria", "Côte d'Ivoire",
-  "Togo", "Burkina Faso", "South Africa", "Netherlands", "Italy",
-  "France", "Brazil", "UAE", "Thailand", "Malaysia",
-];
+const INITIAL_FORM: DutyFormData = {
+  hs_code: "",
+  goods_description: "",
+  fob_value: "",
+  freight_value: "",
+  insurance_value: "",
+  currency: "USD",
+  country_of_origin: "",
+  cargo_type: "general",
+  engine_capacity: "",
+};
 
 export default function DutyEstimator() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [estimate, setEstimate] = useState<DutyEstimate | null>(null);
   const [ghsConversion, setGhsConversion] = useState<GhsConversion | null>(null);
-  const [hsSuggestions, setHsSuggestions] = useState<HsSuggestion[]>([]);
-  const [suggestingHs, setSuggestingHs] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-
-  const [form, setForm] = useState({
-    hs_code: "",
-    goods_description: "",
-    fob_value: "",
-    freight_value: "",
-    insurance_value: "",
-    currency: "USD",
-    country_of_origin: "",
-  });
-
-  const cifValue = (parseFloat(form.fob_value) || 0) + (parseFloat(form.freight_value) || 0) + (parseFloat(form.insurance_value) || 0);
+  const [form, setForm] = useState<DutyFormData>({ ...INITIAL_FORM });
 
   const update = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }));
 
-  const handleSuggestHsCode = async () => {
-    if (!form.goods_description.trim()) {
-      toast({ title: "Description required", description: "Enter a goods description first.", variant: "destructive" });
-      return;
-    }
-    setSuggestingHs(true);
-    setHsSuggestions([]);
-    setShowSuggestions(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("suggest-hs-code", {
-        body: { goods_description: form.goods_description },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      setHsSuggestions(data.suggestions || []);
-    } catch (err: any) {
-      console.error("HS suggestion error:", err);
-      toast({ title: "Suggestion Failed", description: err.message || "Could not suggest HS codes.", variant: "destructive" });
-      setShowSuggestions(false);
-    } finally {
-      setSuggestingHs(false);
-    }
-  };
-
-  const selectHsCode = (suggestion: HsSuggestion) => {
-    update("hs_code", suggestion.hs_code);
-    setShowSuggestions(false);
-    toast({ title: "HS Code Selected", description: `${suggestion.hs_code} — ${suggestion.description}` });
-  };
+  const cifValue = (parseFloat(form.fob_value) || 0) + (parseFloat(form.freight_value) || 0) + (parseFloat(form.insurance_value) || 0);
 
   const handleEstimate = async () => {
-    if (!form.hs_code.trim()) {
-      toast({ title: "HS Code required", description: "Enter an HS code to estimate duties.", variant: "destructive" });
+    if (!form.hs_code.trim() && !form.goods_description.trim()) {
+      toast({ title: "Input required", description: "Enter an HS code or goods description.", variant: "destructive" });
       return;
     }
     if (cifValue <= 0) {
       toast({ title: "Invalid CIF value", description: "FOB + Freight + Insurance must be greater than zero.", variant: "destructive" });
+      return;
+    }
+    if (form.cargo_type === "vehicle" && !form.engine_capacity) {
+      toast({ title: "Engine capacity required", description: "Enter the vehicle engine capacity in cc.", variant: "destructive" });
       return;
     }
 
@@ -138,6 +60,8 @@ export default function DutyEstimator() {
           cif_value: cifValue,
           currency: form.currency,
           country_of_origin: form.country_of_origin,
+          cargo_type: form.cargo_type,
+          engine_capacity: form.engine_capacity,
         },
       });
 
@@ -155,8 +79,11 @@ export default function DutyEstimator() {
     }
   };
 
-  const fmt = (val: number) =>
-    new Intl.NumberFormat("en-GH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
+  const handleReset = () => {
+    setEstimate(null);
+    setGhsConversion(null);
+    setForm({ ...INITIAL_FORM });
+  };
 
   return (
     <div className="space-y-6">
@@ -168,7 +95,7 @@ export default function DutyEstimator() {
             SLAC AI DUTY ESTIMATOR
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Estimate Ghana import duties before ICUMS declaration — powered by AI
+            AI-driven Ghana import duty calculator — supports all cargo types with real-time exchange rates
           </p>
         </div>
         <Badge variant="outline" className="flex items-center gap-1 text-warning border-warning/40">
@@ -179,191 +106,17 @@ export default function DutyEstimator() {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Input Form */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Package className="h-4 w-4 text-primary" />
-              Import Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="goods">Goods Description</Label>
-              <Textarea
-                id="goods"
-                placeholder="e.g. Laptop computers for commercial use"
-                value={form.goods_description}
-                onChange={(e) => update("goods_description", e.target.value)}
-                rows={2}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="w-full"
-                onClick={handleSuggestHsCode}
-                disabled={suggestingHs || !form.goods_description.trim()}
-              >
-                {suggestingHs ? (
-                  <>
-                    <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                    Finding HS Codes...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-                    Suggest HS Code
-                  </>
-                )}
-              </Button>
+        <DutyInputForm form={form} onUpdate={update} onEstimate={handleEstimate} loading={loading} />
 
-              {showSuggestions && hsSuggestions.length > 0 && (
-                <div className="border border-border rounded-lg overflow-hidden bg-card">
-                  <div className="px-3 py-2 bg-muted/50 border-b border-border">
-                    <p className="text-xs font-semibold text-foreground flex items-center gap-1">
-                      <Search className="h-3 w-3" />
-                      AI Suggested HS Codes
-                    </p>
-                  </div>
-                  <div className="divide-y divide-border">
-                    {hsSuggestions.map((s, i) => (
-                      <button
-                        key={i}
-                        onClick={() => selectHsCode(s)}
-                        className="w-full text-left px-3 py-2.5 hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="font-mono text-sm font-bold text-primary">{s.hs_code}</span>
-                          <div className="flex items-center gap-1.5">
-                            <Badge variant="secondary" className="text-[10px] h-5">{s.duty_rate}%</Badge>
-                            <Badge
-                              variant="outline"
-                              className={`text-[10px] h-5 ${
-                                s.confidence === "high"
-                                  ? "border-success/40 text-success"
-                                  : s.confidence === "medium"
-                                  ? "border-warning/40 text-warning"
-                                  : "border-muted-foreground/40 text-muted-foreground"
-                              }`}
-                            >
-                              {s.confidence}
-                            </Badge>
-                          </div>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{s.description}</p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="hs_code">HS Code *</Label>
-              <Input
-                id="hs_code"
-                placeholder="e.g. 8471.30.00"
-                value={form.hs_code}
-                onChange={(e) => update("hs_code", e.target.value)}
-              />
-            </div>
-
-            <Separator />
-
-            <div className="space-y-2">
-              <Label>Currency</Label>
-              <Select value={form.currency} onValueChange={(v) => update("currency", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {currencies.map(c => (
-                    <SelectItem key={c} value={c}>{c}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="fob">FOB Value *</Label>
-                <Input
-                  id="fob"
-                  type="number"
-                  placeholder="0.00"
-                  value={form.fob_value}
-                  onChange={(e) => update("fob_value", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="freight">Freight</Label>
-                <Input
-                  id="freight"
-                  type="number"
-                  placeholder="0.00"
-                  value={form.freight_value}
-                  onChange={(e) => update("freight_value", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="insurance">Insurance</Label>
-                <Input
-                  id="insurance"
-                  type="number"
-                  placeholder="0.00"
-                  value={form.insurance_value}
-                  onChange={(e) => update("insurance_value", e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="bg-muted/50 rounded-lg p-3 text-center">
-              <p className="text-xs text-muted-foreground">Calculated CIF Value</p>
-              <p className="text-lg font-bold text-foreground">
-                {form.currency} {fmt(cifValue)}
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Country of Origin</Label>
-              <Select value={form.country_of_origin} onValueChange={(v) => update("country_of_origin", v)}>
-                <SelectTrigger><SelectValue placeholder="Select country" /></SelectTrigger>
-                <SelectContent>
-                  {commonOrigins.map(c => (
-                    <SelectItem key={c} value={c}>{c}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Button
-              className="w-full"
-              size="lg"
-              onClick={handleEstimate}
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Estimating Duties...
-                </>
-              ) : (
-                <>
-                  <Calculator className="h-4 w-4 mr-2" />
-                  Estimate Duties
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Results */}
-        <div className="lg:col-span-3 space-y-4">
+        {/* Results Panel */}
+        <div className="lg:col-span-3">
           {!estimate && !loading && (
             <Card className="border-dashed">
               <CardContent className="py-16 text-center">
                 <Calculator className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-muted-foreground">No Estimate Yet</h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Fill in the import details and click "Estimate Duties" to get an AI-powered breakdown.
+                  Fill in the import details and click "Estimate Duties" to get a transparent AI-powered breakdown.
                 </p>
               </CardContent>
             </Card>
@@ -373,214 +126,19 @@ export default function DutyEstimator() {
             <Card>
               <CardContent className="py-16 text-center">
                 <Loader2 className="h-10 w-10 text-primary animate-spin mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground">Analyzing HS Code & Computing Duties...</h3>
+                <h3 className="text-lg font-semibold text-foreground">Analyzing & Computing Duties...</h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  AI is looking up Ghana GRA tariff rates for HS {form.hs_code}
+                  AI is classifying goods and calculating Ghana GRA tariff rates
                 </p>
               </CardContent>
             </Card>
           )}
 
           {estimate && (
-            <>
-              {/* Summary Card */}
-               <Card className="border-primary/30 bg-primary/5">
-                <CardContent className="py-5">
-                  <div className="flex items-center justify-between flex-wrap gap-3">
-                    <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Estimated Duties</p>
-                      <p className="text-3xl font-bold text-primary">
-                        GHS {fmt(ghsConversion?.ghs_total_duties ?? estimate.total_duties)}
-                      </p>
-                      {ghsConversion && estimate.currency !== "GHS" && (
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {estimate.currency} {fmt(estimate.total_duties)}
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Landed Cost</p>
-                      <p className="text-xl font-semibold text-foreground">
-                        GHS {fmt(ghsConversion?.ghs_total_landed_cost ?? estimate.total_landed_cost)}
-                      </p>
-                      {ghsConversion && estimate.currency !== "GHS" && (
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {estimate.currency} {fmt(estimate.total_landed_cost)}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  {ghsConversion && estimate.currency !== "GHS" && (
-                    <div className="mt-3 pt-3 border-t border-primary/20">
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Globe className="h-3 w-3" />
-                        Exchange Rate: 1 {ghsConversion.from_currency} = GHS {fmt(ghsConversion.exchange_rate)}
-                        <Badge variant="outline" className="text-[9px] h-4 ml-1">
-                          {ghsConversion.rate_source === "live" ? "Live Rate" : "Indicative Rate"}
-                        </Badge>
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* HS Code Info */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-accent" />
-                    Tariff Classification
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-xs text-muted-foreground">HS Code</p>
-                      <p className="font-mono font-bold text-foreground">{estimate.hs_code}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Import Duty Rate</p>
-                      <Badge variant="secondary" className="text-sm">{estimate.duty_rate_percent}%</Badge>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <p className="text-xs text-muted-foreground">Tariff Description</p>
-                      <p className="text-sm text-foreground">{estimate.hs_description}</p>
-                    </div>
-                    {estimate.ecowas_applicable && (
-                      <div className="sm:col-span-2">
-                        <Badge variant="outline" className="text-success border-success/40">
-                          <Globe className="h-3 w-3 mr-1" />
-                          ECOWAS Preferential Rate May Apply
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Duty Breakdown */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-success" />
-                    Duty & Tax Breakdown
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {[
-                      { label: "CIF Value", value: estimate.cif_value, ghsValue: ghsConversion?.ghs_cif_value, bold: true },
-                      { label: `Import Duty (${estimate.duty_rate_percent}%)`, value: estimate.import_duty, ghsValue: ghsConversion?.ghs_import_duty },
-                      { label: "VAT (15%)", value: estimate.vat, ghsValue: ghsConversion?.ghs_vat },
-                      { label: "NHIL (2.5%)", value: estimate.nhil, ghsValue: ghsConversion?.ghs_nhil },
-                      { label: "GETFund Levy (2.5%)", value: estimate.getfund, ghsValue: ghsConversion?.ghs_getfund },
-                      { label: "EXIM Levy (0.75%)", value: estimate.exim_levy, ghsValue: ghsConversion?.ghs_exim_levy },
-                      { label: "Processing Fee (1%)", value: estimate.processing_fee, ghsValue: ghsConversion?.ghs_processing_fee },
-                    ].map((item, i) => (
-                      <div
-                        key={i}
-                        className={`flex items-center justify-between py-2 px-3 rounded-md ${
-                          item.bold ? "bg-muted/50 font-semibold" : ""
-                        }`}
-                      >
-                        <span className="text-sm text-foreground">{item.label}</span>
-                        <div className="text-right">
-                          <span className="text-sm font-mono text-foreground">
-                            GHS {fmt(item.ghsValue ?? item.value)}
-                          </span>
-                          {ghsConversion && estimate.currency !== "GHS" && (
-                            <p className="text-[10px] text-muted-foreground font-mono">
-                              {estimate.currency} {fmt(item.value)}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                    <Separator />
-                    <div className="flex items-center justify-between py-2 px-3 bg-primary/10 rounded-md">
-                      <span className="text-sm font-bold text-primary">Total Duties Payable</span>
-                      <div className="text-right">
-                        <span className="text-sm font-bold font-mono text-primary">
-                          GHS {fmt(ghsConversion?.ghs_total_duties ?? estimate.total_duties)}
-                        </span>
-                        {ghsConversion && estimate.currency !== "GHS" && (
-                          <p className="text-[10px] text-muted-foreground font-mono">
-                            {estimate.currency} {fmt(estimate.total_duties)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between py-2 px-3 bg-muted/30 rounded-md">
-                      <span className="text-sm font-semibold text-foreground flex items-center gap-1">
-                        <TrendingUp className="h-3.5 w-3.5" />
-                        Total Landed Cost
-                      </span>
-                      <div className="text-right">
-                        <span className="text-sm font-bold font-mono text-foreground">
-                          GHS {fmt(ghsConversion?.ghs_total_landed_cost ?? estimate.total_landed_cost)}
-                        </span>
-                        {ghsConversion && estimate.currency !== "GHS" && (
-                          <p className="text-[10px] text-muted-foreground font-mono">
-                            {estimate.currency} {fmt(estimate.total_landed_cost)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Notes */}
-              {estimate.notes && (
-                <Card className="bg-warning/5 border-warning/30">
-                  <CardContent className="py-4">
-                    <div className="flex gap-2">
-                      <Info className="h-4 w-4 text-warning mt-0.5 shrink-0" />
-                      <div>
-                        <p className="text-xs font-semibold text-warning uppercase mb-1">AI Notes & Caveats</p>
-                        <p className="text-sm text-foreground">{estimate.notes}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Actions */}
-              <div className="flex gap-3 flex-wrap">
-                <Button variant="outline" size="sm" onClick={() => window.print()}>
-                  <Printer className="h-4 w-4 mr-1" />
-                  Print Estimate
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setEstimate(null);
-                    setGhsConversion(null);
-                    setForm({ hs_code: "", goods_description: "", fob_value: "", freight_value: "", insurance_value: "", currency: "USD", country_of_origin: "" });
-                  }}
-                >
-                  New Estimate
-                </Button>
-              </div>
-            </>
+            <DutyResults estimate={estimate} ghsConversion={ghsConversion} form={form} onReset={handleReset} />
           )}
         </div>
       </div>
-
-      {/* Disclaimer */}
-      <Card className="bg-muted/30 border-muted">
-        <CardContent className="py-3 px-4">
-          <div className="flex items-start gap-2 text-xs text-muted-foreground">
-            <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-            <p>
-              <strong>Disclaimer:</strong> This is an AI-powered estimate based on Ghana GRA tariff structures.
-              Actual duties may vary based on current GRA rates, exemptions, trade agreements, exchange rates, and ICUMS assessments.
-              Always verify with Ghana Revenue Authority before making financial commitments.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
