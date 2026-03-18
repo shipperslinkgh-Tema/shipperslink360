@@ -145,6 +145,7 @@ export default function DutyEstimator() {
       if (data?.error) throw new Error(data.error);
 
       setEstimate(data.estimate);
+      setGhsConversion(data.ghs_conversion || null);
       toast({ title: "Estimate Ready", description: "Duty estimation completed successfully." });
     } catch (err: any) {
       console.error("Duty estimation error:", err);
