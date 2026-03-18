@@ -49,6 +49,9 @@ export default function DutyEstimator() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [estimate, setEstimate] = useState<DutyEstimate | null>(null);
+  const [hsSuggestions, setHsSuggestions] = useState<HsSuggestion[]>([]);
+  const [suggestingHs, setSuggestingHs] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const [form, setForm] = useState({
     hs_code: "",
