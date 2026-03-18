@@ -69,6 +69,17 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
   const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [field]: e.target.value }));
 
+  const handleDriverSelect = (driverId: string) => {
+    const driver = drivers.find((d) => d.id === driverId);
+    if (driver) {
+      setForm((f) => ({
+        ...f,
+        driver_id: driverId,
+        driver_phone: driver.phone,
+        driver_license: driver.licenseNumber,
+      }));
+    }
+  };
   const mutation = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("trucking_trips").insert({
