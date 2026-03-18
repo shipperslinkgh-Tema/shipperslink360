@@ -107,7 +107,7 @@ export default function DutyEstimator() {
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <Calculator className="h-7 w-7 text-primary" />
-            AI Duty Estimator
+            SLAC AI DUTY ESTIMATOR
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
             Estimate Ghana import duties before ICUMS declaration — powered by AI
