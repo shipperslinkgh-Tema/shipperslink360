@@ -9,6 +9,7 @@ import { TripTable } from "@/components/trucking/TripTable";
 import { TruckingStats } from "@/components/trucking/TruckingStats";
 import { NewTripDialog } from "@/components/trucking/NewTripDialog";
 import { NewDriverDialog } from "@/components/trucking/NewDriverDialog";
+import { NewTruckDialog } from "@/components/trucking/NewTruckDialog";
 import { useTrucks, useDrivers, useTrips } from "@/hooks/useTrucking";
 
 export default function Trucking() {
