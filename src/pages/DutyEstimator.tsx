@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calculator, FileText, DollarSign, Globe, Package, AlertTriangle, CheckCircle2, Loader2, Info, TrendingUp, Printer } from "lucide-react";
+import { Calculator, FileText, DollarSign, Globe, Package, AlertTriangle, CheckCircle2, Loader2, Info, TrendingUp, Printer, Sparkles, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+
+interface HsSuggestion {
+  hs_code: string;
+  description: string;
+  duty_rate: number;
+  confidence: string;
+}
 
 interface DutyEstimate {
   hs_code: string;
@@ -42,6 +49,9 @@ export default function DutyEstimator() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [estimate, setEstimate] = useState<DutyEstimate | null>(null);
+  const [hsSuggestions, setHsSuggestions] = useState<HsSuggestion[]>([]);
+  const [suggestingHs, setSuggestingHs] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const [form, setForm] = useState({
     hs_code: "",
@@ -56,6 +66,36 @@ export default function DutyEstimator() {
   const cifValue = (parseFloat(form.fob_value) || 0) + (parseFloat(form.freight_value) || 0) + (parseFloat(form.insurance_value) || 0);
 
   const update = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }));
+
+  const handleSuggestHsCode = async () => {
+    if (!form.goods_description.trim()) {
+      toast({ title: "Description required", description: "Enter a goods description first.", variant: "destructive" });
+      return;
+    }
+    setSuggestingHs(true);
+    setHsSuggestions([]);
+    setShowSuggestions(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("suggest-hs-code", {
+        body: { goods_description: form.goods_description },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setHsSuggestions(data.suggestions || []);
+    } catch (err: any) {
+      console.error("HS suggestion error:", err);
+      toast({ title: "Suggestion Failed", description: err.message || "Could not suggest HS codes.", variant: "destructive" });
+      setShowSuggestions(false);
+    } finally {
+      setSuggestingHs(false);
+    }
+  };
+
+  const selectHsCode = (suggestion: HsSuggestion) => {
+    update("hs_code", suggestion.hs_code);
+    setShowSuggestions(false);
+    toast({ title: "HS Code Selected", description: `${suggestion.hs_code} — ${suggestion.description}` });
+  };
 
   const handleEstimate = async () => {
     if (!form.hs_code.trim()) {
@@ -130,16 +170,6 @@ export default function DutyEstimator() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="hs_code">HS Code *</Label>
-              <Input
-                id="hs_code"
-                placeholder="e.g. 8471.30.00"
-                value={form.hs_code}
-                onChange={(e) => update("hs_code", e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="goods">Goods Description</Label>
               <Textarea
                 id="goods"
@@ -147,6 +177,76 @@ export default function DutyEstimator() {
                 value={form.goods_description}
                 onChange={(e) => update("goods_description", e.target.value)}
                 rows={2}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={handleSuggestHsCode}
+                disabled={suggestingHs || !form.goods_description.trim()}
+              >
+                {suggestingHs ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                    Finding HS Codes...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                    Suggest HS Code
+                  </>
+                )}
+              </Button>
+
+              {showSuggestions && hsSuggestions.length > 0 && (
+                <div className="border border-border rounded-lg overflow-hidden bg-card">
+                  <div className="px-3 py-2 bg-muted/50 border-b border-border">
+                    <p className="text-xs font-semibold text-foreground flex items-center gap-1">
+                      <Search className="h-3 w-3" />
+                      AI Suggested HS Codes
+                    </p>
+                  </div>
+                  <div className="divide-y divide-border">
+                    {hsSuggestions.map((s, i) => (
+                      <button
+                        key={i}
+                        onClick={() => selectHsCode(s)}
+                        className="w-full text-left px-3 py-2.5 hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-mono text-sm font-bold text-primary">{s.hs_code}</span>
+                          <div className="flex items-center gap-1.5">
+                            <Badge variant="secondary" className="text-[10px] h-5">{s.duty_rate}%</Badge>
+                            <Badge
+                              variant="outline"
+                              className={`text-[10px] h-5 ${
+                                s.confidence === "high"
+                                  ? "border-success/40 text-success"
+                                  : s.confidence === "medium"
+                                  ? "border-warning/40 text-warning"
+                                  : "border-muted-foreground/40 text-muted-foreground"
+                              }`}
+                            >
+                              {s.confidence}
+                            </Badge>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{s.description}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="hs_code">HS Code *</Label>
+              <Input
+                id="hs_code"
+                placeholder="e.g. 8471.30.00"
+                value={form.hs_code}
+                onChange={(e) => update("hs_code", e.target.value)}
               />
             </div>
 
