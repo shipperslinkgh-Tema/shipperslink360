@@ -61,14 +61,6 @@ export default function Dashboard() {
           value={18}
           icon={<Clock className="h-5 w-5" />}
         />
-        <MetricCard
-          title="Revenue (MTD)"
-          value="GH₵ 2.4M"
-          change={8}
-          changeLabel="vs last month"
-          icon={<DollarSign className="h-5 w-5" />}
-          variant="success"
-        />
       </div>
 
       {/* Secondary Metrics */}
