@@ -46,8 +46,8 @@ const INITIAL_FORM = {
   pickup_date: "",
   delivery_date: "",
   trip_cost: "",
-  driver_payment: "",
-  fuel_cost: "",
+  advance_deposit: "",
+  trip_cost_paid: false,
   notes: "",
 };
 
