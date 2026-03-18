@@ -52,6 +52,7 @@ export function ContainerReturnDialog({ open, onOpenChange, trip }: ContainerRet
       setReturnLocation("");
       setReturnDate(new Date().toISOString().split("T")[0]);
       setNotes("");
+      setTripCostPaid(false);
     },
     onError: (err: any) => {
       toast.error("Failed to confirm return: " + err.message);
