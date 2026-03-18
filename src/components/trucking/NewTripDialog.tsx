@@ -95,7 +95,7 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
         delivery_date: form.delivery_date || null,
         trip_cost: Number(form.trip_cost) || 0,
         advance_deposit: Number(form.advance_deposit) || 0,
-        trip_cost_paid: form.trip_cost_paid,
+        
         notes: form.notes || null,
         status: "scheduled",
       });
