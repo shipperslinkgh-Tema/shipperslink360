@@ -23,7 +23,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { TruckIcon, User, MapPin, Package, DollarSign, FileText } from "lucide-react";
+import { TruckIcon, User, MapPin, DollarSign, FileText } from "lucide-react";
 
 interface NewTripDialogProps {
   open: boolean;
@@ -48,8 +48,6 @@ const INITIAL_FORM = {
   trip_cost: "",
   driver_payment: "",
   fuel_cost: "",
-  container_return_location: "",
-  container_return_date: "",
   notes: "",
 };
 
@@ -95,11 +93,8 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
         destination: form.destination,
         pickup_date: form.pickup_date || null,
         delivery_date: form.delivery_date || null,
-        trip_cost: Number(form.trip_cost) || 0,
         driver_payment: Number(form.driver_payment) || 0,
         fuel_cost: Number(form.fuel_cost) || 0,
-        container_return_location: form.container_return_location || null,
-        container_return_date: form.container_return_date || null,
         notes: form.notes || null,
         status: "scheduled",
       });
@@ -231,21 +226,6 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
             <div className="space-y-1.5">
               <Label>Fuel Cost</Label>
               <Input type="number" value={form.fuel_cost} onChange={set("fuel_cost")} placeholder="0.00" />
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Container Return */}
-          <SectionHeader icon={Package} title="Container Return" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>Return Location</Label>
-              <Input value={form.container_return_location} onChange={set("container_return_location")} placeholder="e.g. Meridian Port" />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Return Date</Label>
-              <Input type="date" value={form.container_return_date} onChange={set("container_return_date")} />
             </div>
           </div>
 

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Trip, Truck, Driver } from "@/types/trucking";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,11 +10,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Route, Calendar, DollarSign, Container, CheckCircle2, Clock, Copy, ExternalLink, Radio, MessageCircle } from "lucide-react";
+import { Route, Calendar, DollarSign, Container, CheckCircle2, Package, Copy, ExternalLink, Radio, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useActivateTracking } from "@/hooks/useTracking";
-import { useTrackingTrips } from "@/hooks/useTracking";
+import { useActivateTracking, useTrackingTrips } from "@/hooks/useTracking";
 import { toast } from "sonner";
+import { ContainerReturnDialog } from "@/components/trucking/ContainerReturnDialog";
 
 interface TripTableProps {
   trips: Trip[];
@@ -29,6 +30,7 @@ const statusConfig = {
 };
 
 export function TripTable({ trips, trucks, drivers }: TripTableProps) {
+  const [returnTrip, setReturnTrip] = useState<Trip | null>(null);
   const getTruck = (truckId: string) => trucks.find((t) => t.id === truckId);
   const getDriver = (driverId: string) => drivers.find((d) => d.id === driverId);
   const activateTracking = useActivateTracking();
@@ -126,19 +128,26 @@ export function TripTable({ trips, trucks, drivers }: TripTableProps) {
                   <TableCell>
                     <div className="space-y-1">
                       {trip.containerReturned ? (
-                        <div className="flex items-center gap-1 text-sm text-status-success">
-                          <CheckCircle2 className="h-3 w-3" />
-                          {trip.containerReturnDate}
-                        </div>
+                        <>
+                          <div className="flex items-center gap-1 text-sm text-status-success">
+                            <CheckCircle2 className="h-3 w-3" />
+                            {trip.containerReturnDate}
+                          </div>
+                          <div className="text-xs text-muted-foreground truncate max-w-[120px]">
+                            {trip.containerReturnLocation}
+                          </div>
+                        </>
                       ) : (
-                        <div className="flex items-center gap-1 text-sm text-status-warning">
-                          <Clock className="h-3 w-3" />
-                          Pending
-                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1 text-xs"
+                          onClick={() => setReturnTrip(trip)}
+                        >
+                          <Package className="h-3 w-3" />
+                          Confirm Return
+                        </Button>
                       )}
-                      <div className="text-xs text-muted-foreground truncate max-w-[120px]">
-                        {trip.containerReturnLocation}
-                      </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
@@ -190,6 +199,11 @@ export function TripTable({ trips, trucks, drivers }: TripTableProps) {
           </TableBody>
         </Table>
       </div>
+      <ContainerReturnDialog
+        open={!!returnTrip}
+        onOpenChange={(open) => !open && setReturnTrip(null)}
+        trip={returnTrip}
+      />
     </div>
   );
 }
