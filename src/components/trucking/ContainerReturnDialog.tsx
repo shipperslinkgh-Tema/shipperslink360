@@ -28,6 +28,7 @@ export function ContainerReturnDialog({ open, onOpenChange, trip }: ContainerRet
   const [returnLocation, setReturnLocation] = useState("");
   const [returnDate, setReturnDate] = useState(new Date().toISOString().split("T")[0]);
   const [notes, setNotes] = useState("");
+  const [tripCostPaid, setTripCostPaid] = useState(false);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -38,6 +39,7 @@ export function ContainerReturnDialog({ open, onOpenChange, trip }: ContainerRet
           container_returned: true,
           container_return_location: returnLocation || null,
           container_return_date: returnDate || null,
+          trip_cost_paid: tripCostPaid,
           notes: trip.notes ? `${trip.notes}\n[Container Return] ${notes}` : notes || null,
         })
         .eq("id", trip.id);
@@ -50,6 +52,7 @@ export function ContainerReturnDialog({ open, onOpenChange, trip }: ContainerRet
       setReturnLocation("");
       setReturnDate(new Date().toISOString().split("T")[0]);
       setNotes("");
+      setTripCostPaid(false);
     },
     onError: (err: any) => {
       toast.error("Failed to confirm return: " + err.message);
@@ -112,6 +115,16 @@ export function ContainerReturnDialog({ open, onOpenChange, trip }: ContainerRet
               rows={2}
             />
           </div>
+
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={tripCostPaid}
+              onChange={(e) => setTripCostPaid(e.target.checked)}
+              className="h-4 w-4 rounded border-input"
+            />
+            <span className="text-sm font-medium">Trip Cost Paid</span>
+          </label>
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0">

@@ -47,7 +47,7 @@ const INITIAL_FORM = {
   delivery_date: "",
   trip_cost: "",
   advance_deposit: "",
-  trip_cost_paid: false,
+  
   notes: "",
 };
 
@@ -95,7 +95,7 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
         delivery_date: form.delivery_date || null,
         trip_cost: Number(form.trip_cost) || 0,
         advance_deposit: Number(form.advance_deposit) || 0,
-        trip_cost_paid: form.trip_cost_paid,
+        
         notes: form.notes || null,
         status: "scheduled",
       });
@@ -232,17 +232,6 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
             <div className="space-y-1.5">
               <Label>Advance/Deposit</Label>
               <Input type="number" value={form.advance_deposit} onChange={set("advance_deposit")} placeholder="0.00" />
-            </div>
-            <div className="space-y-1.5 flex items-end">
-              <label className="flex items-center gap-2 cursor-pointer pb-2">
-                <input
-                  type="checkbox"
-                  checked={form.trip_cost_paid}
-                  onChange={(e) => setForm((f) => ({ ...f, trip_cost_paid: e.target.checked }))}
-                  className="h-4 w-4 rounded border-input"
-                />
-                <span className="text-sm font-medium">Trip Cost Paid</span>
-              </label>
             </div>
           </div>
 
