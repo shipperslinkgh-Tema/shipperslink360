@@ -176,12 +176,12 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
       </div>
 
       {/* Channel Selector */}
-      <div className="flex-shrink-0 border-b border-border">
+      <div className="flex-shrink-0 border-b border-border relative">
         <button
           onClick={() => setShowChannels(!showChannels)}
           className="w-full px-4 py-2 flex items-center justify-between hover:bg-muted/50 transition-colors"
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-foreground">
             {getChannelIcon(selectedChannel.type)}
             <span className="font-medium text-sm">{selectedChannel.name}</span>
           </div>
@@ -189,7 +189,7 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
         </button>
 
         {showChannels && (
-          <div className="border-t border-border bg-muted/20 max-h-48 overflow-y-auto">
+          <div className="absolute left-0 right-0 top-full z-10 border border-border bg-card shadow-lg rounded-b-lg max-h-52 overflow-y-auto">
             {channels.map((channel) => (
               <button
                 key={channel.id}
@@ -198,14 +198,12 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
                   setShowChannels(false);
                 }}
                 className={cn(
-                  "w-full px-4 py-2 flex items-center justify-between hover:bg-muted/50 transition-colors text-left",
-                  activeChannel === channel.id && "bg-muted"
+                  "w-full px-4 py-2.5 flex items-center gap-2 hover:bg-muted/50 transition-colors text-left text-foreground",
+                  activeChannel === channel.id && "bg-primary/10 text-primary font-medium"
                 )}
               >
-                <div className="flex items-center gap-2">
-                  {getChannelIcon(channel.type)}
-                  <span className="text-sm">{channel.name}</span>
-                </div>
+                {getChannelIcon(channel.type)}
+                <span className="text-sm">{channel.name}</span>
               </button>
             ))}
           </div>
