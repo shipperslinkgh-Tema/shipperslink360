@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Truck, Driver } from "@/types/trucking";
 import {
@@ -63,6 +63,19 @@ function SectionHeader({ icon: Icon, title }: { icon: React.ElementType; title: 
 export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDialogProps) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState(INITIAL_FORM);
+
+  const { data: customers = [] } = useQuery({
+    queryKey: ["customers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("customers")
+        .select("id, company_name")
+        .eq("is_active", true)
+        .order("company_name");
+      if (error) throw error;
+      return data || [];
+    },
+  });
 
   const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [field]: e.target.value }));
@@ -185,7 +198,16 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="space-y-1.5">
               <Label>Customer</Label>
-              <Input value={form.customer} onChange={set("customer")} placeholder="Customer name" />
+              <Select value={form.customer} onValueChange={(v) => setForm((f) => ({ ...f, customer: v }))}>
+                <SelectTrigger><SelectValue placeholder="Select customer" /></SelectTrigger>
+                <SelectContent>
+                  {customers.map((c) => (
+                    <SelectItem key={c.id} value={c.company_name}>
+                      {c.company_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <Label>Container Number</Label>
