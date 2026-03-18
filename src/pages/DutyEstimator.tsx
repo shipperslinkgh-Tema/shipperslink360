@@ -384,22 +384,43 @@ export default function DutyEstimator() {
           {estimate && (
             <>
               {/* Summary Card */}
-              <Card className="border-primary/30 bg-primary/5">
+               <Card className="border-primary/30 bg-primary/5">
                 <CardContent className="py-5">
                   <div className="flex items-center justify-between flex-wrap gap-3">
                     <div>
                       <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Estimated Duties</p>
                       <p className="text-3xl font-bold text-primary">
-                        {estimate.currency} {fmt(estimate.total_duties)}
+                        GHS {fmt(ghsConversion?.ghs_total_duties ?? estimate.total_duties)}
                       </p>
+                      {ghsConversion && estimate.currency !== "GHS" && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {estimate.currency} {fmt(estimate.total_duties)}
+                        </p>
+                      )}
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Landed Cost</p>
                       <p className="text-xl font-semibold text-foreground">
-                        {estimate.currency} {fmt(estimate.total_landed_cost)}
+                        GHS {fmt(ghsConversion?.ghs_total_landed_cost ?? estimate.total_landed_cost)}
                       </p>
+                      {ghsConversion && estimate.currency !== "GHS" && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {estimate.currency} {fmt(estimate.total_landed_cost)}
+                        </p>
+                      )}
                     </div>
                   </div>
+                  {ghsConversion && estimate.currency !== "GHS" && (
+                    <div className="mt-3 pt-3 border-t border-primary/20">
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Globe className="h-3 w-3" />
+                        Exchange Rate: 1 {ghsConversion.from_currency} = GHS {fmt(ghsConversion.exchange_rate)}
+                        <Badge variant="outline" className="text-[9px] h-4 ml-1">
+                          {ghsConversion.rate_source === "live" ? "Live Rate" : "Indicative Rate"}
+                        </Badge>
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
