@@ -25,13 +25,11 @@ serve(async (req: Request) => {
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Verify caller identity
-    const { data: { user: caller }, error: userError } = await adminClient.auth.admin.getUserById(
-      (await createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY") || "", {
-        global: { headers: { Authorization: authHeader } },
-      }).auth.getUser()).data.user?.id || ""
-    );
-
+    // Verify caller
+    const callerClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY") || "", {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user: caller }, error: userError } = await callerClient.auth.getUser();
     if (userError || !caller) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -40,7 +38,6 @@ serve(async (req: Request) => {
     }
 
     const callerId = caller.id;
-
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
     const { data: callerRoles } = await adminClient
       .from("user_roles")
