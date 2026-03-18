@@ -48,8 +48,6 @@ const INITIAL_FORM = {
   trip_cost: "",
   driver_payment: "",
   fuel_cost: "",
-  container_return_location: "",
-  container_return_date: "",
   notes: "",
 };
 
