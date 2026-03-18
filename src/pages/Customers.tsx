@@ -45,6 +45,7 @@ const Customers = () => {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
