@@ -56,6 +56,10 @@ export default function Trucking() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setNewTruckOpen(true)}>
+            <TruckIcon className="h-4 w-4 mr-2" />
+            Add Truck
+          </Button>
           <Button variant="outline" onClick={() => setNewDriverOpen(true)}>
             <Users className="h-4 w-4 mr-2" />
             Register Driver
