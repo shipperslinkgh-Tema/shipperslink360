@@ -11,9 +11,9 @@ import {
 } from "@/components/ui/table";
 import { Route, Calendar, DollarSign, Container, CheckCircle2, Clock, Copy, ExternalLink, Radio, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useActivateTracking } from "@/hooks/useTracking";
-import { useTrackingTrips } from "@/hooks/useTracking";
+import { useActivateTracking, useTrackingTrips } from "@/hooks/useTracking";
 import { toast } from "sonner";
+import { ContainerReturnDialog } from "@/components/trucking/ContainerReturnDialog";
 
 interface TripTableProps {
   trips: Trip[];
