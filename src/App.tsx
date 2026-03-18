@@ -36,6 +36,9 @@ import ConsignmentWorkflows from "./pages/ConsignmentWorkflows";
 import LiveTracking from "./pages/LiveTracking";
 import PortCommandCenter from "./pages/PortCommandCenter";
 import TrackShipment from "./pages/TrackShipment";
+import MediaHub from "./pages/MediaHub";
+import MediaArticle from "./pages/MediaArticle";
+import MediaManagement from "./pages/MediaManagement";
 import { AppLayout } from "./components/layout/AppLayout";
 import ClientLogin from "./pages/client/ClientLogin";
 import ClientDashboard from "./pages/client/ClientDashboard";
@@ -107,6 +110,8 @@ const App = () => (
         <Routes>
           {/* Public tracking page — no auth required */}
           <Route path="/track/:token" element={<TrackShipment />} />
+          <Route path="/media-hub" element={<MediaHub />} />
+          <Route path="/media-hub/:slug" element={<MediaArticle />} />
 
           {/* Client Portal Routes */}
           <Route path="/portal/*" element={
@@ -156,6 +161,7 @@ const App = () => (
                 <Route path="/admin/client-data" element={<ProtectedRoute><WithLayout><ClientDataManagement /></WithLayout></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><WithLayout><SettingsPage /></WithLayout></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><WithLayout><StaffProfile /></WithLayout></ProtectedRoute>} />
+                <Route path="/admin/media" element={<ProtectedRoute><WithLayout><MediaManagement /></WithLayout></ProtectedRoute>} />
                 <Route path="/presentation" element={<Presentation />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
