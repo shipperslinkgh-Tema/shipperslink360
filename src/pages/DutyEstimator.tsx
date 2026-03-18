@@ -556,6 +556,7 @@ export default function DutyEstimator() {
                   size="sm"
                   onClick={() => {
                     setEstimate(null);
+                    setGhsConversion(null);
                     setForm({ hs_code: "", goods_description: "", fob_value: "", freight_value: "", insurance_value: "", currency: "USD", country_of_origin: "" });
                   }}
                 >
