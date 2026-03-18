@@ -15,39 +15,14 @@ import { CustomerStats } from "@/components/customers/CustomerStats";
 import { AddCustomerDialog } from "@/components/customers/AddCustomerDialog";
 import { useCustomers } from "@/hooks/useCustomers";
 import { Customer } from "@/types/customer";
-import { CSVImportDialog } from "@/components/shared/CSVImportDialog";
-import { exportToCSV, type ExportColumn } from "@/lib/dataExport";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Filter, Download, Upload } from "lucide-react";
-
-const CUSTOMER_EXPORT_COLUMNS: ExportColumn<Customer>[] = [
-  { header: "Company Name", accessor: "companyName" },
-  { header: "Trade Name", accessor: "tradeName" },
-  { header: "Company Type", accessor: "companyType" },
-  { header: "Email", accessor: "email" },
-  { header: "Phone", accessor: "phone" },
-  { header: "Registration No", accessor: "registrationNumber" },
-  { header: "TIN", accessor: "tinNumber" },
-  { header: "City", accessor: "city" },
-  { header: "Country", accessor: "country" },
-  { header: "Status", accessor: "status" },
-  { header: "Industry", accessor: "industry" },
-  { header: "Outstanding Balance", accessor: "outstandingBalance" },
-  { header: "Credit Limit", accessor: "creditLimit" },
-  { header: "Total Shipments", accessor: "totalShipments" },
-];
+import { Plus, Search, Filter } from "lucide-react";
 
 const Customers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [importOpen, setImportOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   const { data: customers = [], isLoading } = useCustomers();
 
@@ -73,35 +48,6 @@ const Customers = () => {
     const totalOutstanding = customers.reduce((acc, c) => acc + c.outstandingBalance, 0);
     return { totalCustomers, activeCustomers, pendingDocuments, totalOutstanding };
   }, [customers]);
-
-  const handleExport = () => {
-    exportToCSV(filteredCustomers, CUSTOMER_EXPORT_COLUMNS, "customers");
-    toast({ title: "Export complete", description: `${filteredCustomers.length} customers exported to CSV` });
-  };
-
-  const handleImport = async (rows: Record<string, string>[]) => {
-    const inserts = rows.map((r) => ({
-      company_name: r["company_name"],
-      email: r["email"],
-      company_type: r["company_type"] || "importer",
-      trade_name: r["trade_name"] || null,
-      phone: r["phone"] || null,
-      registration_number: r["registration_number"] || null,
-      tin_number: r["tin_number"] || null,
-      city: r["city"] || null,
-      country: r["country"] || "Ghana",
-      industry: r["industry"] || null,
-      address: r["address"] || null,
-    }));
-
-    const { error } = await supabase.from("customers").insert(inserts);
-    if (error) {
-      toast({ title: "Import failed", description: error.message, variant: "destructive" });
-      throw error;
-    }
-    toast({ title: "Import complete", description: `${inserts.length} customers imported` });
-    queryClient.invalidateQueries({ queryKey: ["customers"] });
-  };
 
   return (
     <div className="space-y-6">
@@ -185,15 +131,6 @@ const Customers = () => {
         />
       )}
 
-      <CSVImportDialog
-        open={importOpen}
-        onOpenChange={setImportOpen}
-        title="Import Customers"
-        description="Upload a CSV with customer data. Required: company_name, email."
-        requiredFields={["company_name", "email"]}
-        optionalFields={["company_type", "trade_name", "phone", "registration_number", "tin_number", "city", "country", "industry", "address"]}
-        onImport={handleImport}
-      />
       <AddCustomerDialog open={addOpen} onOpenChange={setAddOpen} />
     </div>
   );
