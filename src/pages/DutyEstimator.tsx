@@ -36,6 +36,21 @@ interface DutyEstimate {
   ecowas_applicable?: boolean;
 }
 
+interface GhsConversion {
+  exchange_rate: number;
+  rate_source: string;
+  from_currency: string;
+  ghs_cif_value: number;
+  ghs_import_duty: number;
+  ghs_vat: number;
+  ghs_nhil: number;
+  ghs_getfund: number;
+  ghs_exim_levy: number;
+  ghs_processing_fee: number;
+  ghs_total_duties: number;
+  ghs_total_landed_cost: number;
+}
+
 const currencies = ["USD", "EUR", "GBP", "GHS", "CNY"];
 
 const commonOrigins = [
