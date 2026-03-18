@@ -23,7 +23,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { TruckIcon, User, MapPin, Package, DollarSign, FileText } from "lucide-react";
+import { TruckIcon, User, MapPin, DollarSign, FileText } from "lucide-react";
 
 interface NewTripDialogProps {
   open: boolean;
