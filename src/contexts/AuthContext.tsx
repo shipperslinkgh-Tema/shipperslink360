@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback, ReactNode,
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 type Department = "operations" | "documentation" | "accounts" | "marketing" | "customer_service" | "warehouse" | "management" | "super_admin";
 type AppRole = "super_admin" | "admin" | "manager" | "staff";
