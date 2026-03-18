@@ -248,7 +248,7 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
           <SectionHeader icon={DollarSign} title="Financials (GHS)" />
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="space-y-1.5">
-              <Label>Trip Cost</Label>
+              <Label>Trip Cost (GHS)</Label>
               <Input type="number" value={form.trip_cost} onChange={set("trip_cost")} placeholder="0.00" />
             </div>
             <div className="space-y-1.5">
