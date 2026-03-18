@@ -111,6 +111,9 @@ export default function Trucking() {
       </Tabs>
 
       <NewTripDialog open={newTripOpen} onOpenChange={setNewTripOpen} trucks={trucks} drivers={drivers} />
+      <NewDriverDialog open={newDriverOpen} onOpenChange={setNewDriverOpen} />
     </div>
+  );
+}
   );
 }
