@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback, ReactNode,
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 type Department = "operations" | "documentation" | "accounts" | "marketing" | "customer_service" | "warehouse" | "management" | "super_admin";
 type AppRole = "super_admin" | "admin" | "manager" | "staff";
@@ -38,7 +39,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const INACTIVITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+const INACTIVITY_TIMEOUT = 30 * 1000; // 30 seconds
+const WARNING_BEFORE = 5 * 1000; // warn 5 seconds before logout
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -46,25 +48,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showWarning, setShowWarning] = useState(false);
   const inactivityTimer = useRef<NodeJS.Timeout | null>(null);
+  const warningTimer = useRef<NodeJS.Timeout | null>(null);
+  const warningShownRef = useRef(false);
 
   const resetInactivityTimer = useCallback(() => {
     if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+    if (warningTimer.current) clearTimeout(warningTimer.current);
+    setShowWarning(false);
+    warningShownRef.current = false;
+
     if (session) {
-      inactivityTimer.current = setTimeout(() => {
-        supabase.auth.signOut();
+      // Warning timer
+      warningTimer.current = setTimeout(() => {
+        setShowWarning(true);
+        warningShownRef.current = true;
+        toast.warning("You will be logged out soon due to inactivity", { duration: 4500 });
+      }, INACTIVITY_TIMEOUT - WARNING_BEFORE);
+
+      // Logout timer
+      inactivityTimer.current = setTimeout(async () => {
+        setShowWarning(false);
+        await supabase.auth.signOut();
+        toast.error("Session expired due to inactivity");
+        window.location.href = "/login";
       }, INACTIVITY_TIMEOUT);
     }
   }, [session]);
 
   // Inactivity tracker
   useEffect(() => {
-    const events = ["mousedown", "keydown", "scroll", "touchstart"];
-    events.forEach(e => window.addEventListener(e, resetInactivityTimer));
+    const events = ["mousedown", "keydown", "scroll", "touchstart", "mousemove"];
+    events.forEach(e => window.addEventListener(e, resetInactivityTimer, true));
     resetInactivityTimer();
     return () => {
-      events.forEach(e => window.removeEventListener(e, resetInactivityTimer));
+      events.forEach(e => window.removeEventListener(e, resetInactivityTimer, true));
       if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+      if (warningTimer.current) clearTimeout(warningTimer.current);
     };
   }, [resetInactivityTimer]);
 
