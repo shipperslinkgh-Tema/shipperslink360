@@ -36,6 +36,21 @@ interface DutyEstimate {
   ecowas_applicable?: boolean;
 }
 
+interface GhsConversion {
+  exchange_rate: number;
+  rate_source: string;
+  from_currency: string;
+  ghs_cif_value: number;
+  ghs_import_duty: number;
+  ghs_vat: number;
+  ghs_nhil: number;
+  ghs_getfund: number;
+  ghs_exim_levy: number;
+  ghs_processing_fee: number;
+  ghs_total_duties: number;
+  ghs_total_landed_cost: number;
+}
+
 const currencies = ["USD", "EUR", "GBP", "GHS", "CNY"];
 
 const commonOrigins = [
@@ -49,6 +64,7 @@ export default function DutyEstimator() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [estimate, setEstimate] = useState<DutyEstimate | null>(null);
+  const [ghsConversion, setGhsConversion] = useState<GhsConversion | null>(null);
   const [hsSuggestions, setHsSuggestions] = useState<HsSuggestion[]>([]);
   const [suggestingHs, setSuggestingHs] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -109,6 +125,7 @@ export default function DutyEstimator() {
 
     setLoading(true);
     setEstimate(null);
+    setGhsConversion(null);
 
     try {
       const { data, error } = await supabase.functions.invoke("duty-estimator", {
@@ -128,6 +145,7 @@ export default function DutyEstimator() {
       if (data?.error) throw new Error(data.error);
 
       setEstimate(data.estimate);
+      setGhsConversion(data.ghs_conversion || null);
       toast({ title: "Estimate Ready", description: "Duty estimation completed successfully." });
     } catch (err: any) {
       console.error("Duty estimation error:", err);
@@ -366,22 +384,43 @@ export default function DutyEstimator() {
           {estimate && (
             <>
               {/* Summary Card */}
-              <Card className="border-primary/30 bg-primary/5">
+               <Card className="border-primary/30 bg-primary/5">
                 <CardContent className="py-5">
                   <div className="flex items-center justify-between flex-wrap gap-3">
                     <div>
                       <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Estimated Duties</p>
                       <p className="text-3xl font-bold text-primary">
-                        {estimate.currency} {fmt(estimate.total_duties)}
+                        GHS {fmt(ghsConversion?.ghs_total_duties ?? estimate.total_duties)}
                       </p>
+                      {ghsConversion && estimate.currency !== "GHS" && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {estimate.currency} {fmt(estimate.total_duties)}
+                        </p>
+                      )}
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Landed Cost</p>
                       <p className="text-xl font-semibold text-foreground">
-                        {estimate.currency} {fmt(estimate.total_landed_cost)}
+                        GHS {fmt(ghsConversion?.ghs_total_landed_cost ?? estimate.total_landed_cost)}
                       </p>
+                      {ghsConversion && estimate.currency !== "GHS" && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {estimate.currency} {fmt(estimate.total_landed_cost)}
+                        </p>
+                      )}
                     </div>
                   </div>
+                  {ghsConversion && estimate.currency !== "GHS" && (
+                    <div className="mt-3 pt-3 border-t border-primary/20">
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Globe className="h-3 w-3" />
+                        Exchange Rate: 1 {ghsConversion.from_currency} = GHS {fmt(ghsConversion.exchange_rate)}
+                        <Badge variant="outline" className="text-[9px] h-4 ml-1">
+                          {ghsConversion.rate_source === "live" ? "Live Rate" : "Indicative Rate"}
+                        </Badge>
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -430,13 +469,13 @@ export default function DutyEstimator() {
                 <CardContent>
                   <div className="space-y-2">
                     {[
-                      { label: "CIF Value", value: estimate.cif_value, bold: true },
-                      { label: `Import Duty (${estimate.duty_rate_percent}%)`, value: estimate.import_duty },
-                      { label: "VAT (15%)", value: estimate.vat },
-                      { label: "NHIL (2.5%)", value: estimate.nhil },
-                      { label: "GETFund Levy (2.5%)", value: estimate.getfund },
-                      { label: "EXIM Levy (0.75%)", value: estimate.exim_levy },
-                      { label: "Processing Fee (1%)", value: estimate.processing_fee },
+                      { label: "CIF Value", value: estimate.cif_value, ghsValue: ghsConversion?.ghs_cif_value, bold: true },
+                      { label: `Import Duty (${estimate.duty_rate_percent}%)`, value: estimate.import_duty, ghsValue: ghsConversion?.ghs_import_duty },
+                      { label: "VAT (15%)", value: estimate.vat, ghsValue: ghsConversion?.ghs_vat },
+                      { label: "NHIL (2.5%)", value: estimate.nhil, ghsValue: ghsConversion?.ghs_nhil },
+                      { label: "GETFund Levy (2.5%)", value: estimate.getfund, ghsValue: ghsConversion?.ghs_getfund },
+                      { label: "EXIM Levy (0.75%)", value: estimate.exim_levy, ghsValue: ghsConversion?.ghs_exim_levy },
+                      { label: "Processing Fee (1%)", value: estimate.processing_fee, ghsValue: ghsConversion?.ghs_processing_fee },
                     ].map((item, i) => (
                       <div
                         key={i}
@@ -445,26 +484,47 @@ export default function DutyEstimator() {
                         }`}
                       >
                         <span className="text-sm text-foreground">{item.label}</span>
-                        <span className="text-sm font-mono text-foreground">
-                          {estimate.currency} {fmt(item.value)}
-                        </span>
+                        <div className="text-right">
+                          <span className="text-sm font-mono text-foreground">
+                            GHS {fmt(item.ghsValue ?? item.value)}
+                          </span>
+                          {ghsConversion && estimate.currency !== "GHS" && (
+                            <p className="text-[10px] text-muted-foreground font-mono">
+                              {estimate.currency} {fmt(item.value)}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     ))}
                     <Separator />
                     <div className="flex items-center justify-between py-2 px-3 bg-primary/10 rounded-md">
                       <span className="text-sm font-bold text-primary">Total Duties Payable</span>
-                      <span className="text-sm font-bold font-mono text-primary">
-                        {estimate.currency} {fmt(estimate.total_duties)}
-                      </span>
+                      <div className="text-right">
+                        <span className="text-sm font-bold font-mono text-primary">
+                          GHS {fmt(ghsConversion?.ghs_total_duties ?? estimate.total_duties)}
+                        </span>
+                        {ghsConversion && estimate.currency !== "GHS" && (
+                          <p className="text-[10px] text-muted-foreground font-mono">
+                            {estimate.currency} {fmt(estimate.total_duties)}
+                          </p>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center justify-between py-2 px-3 bg-muted/30 rounded-md">
                       <span className="text-sm font-semibold text-foreground flex items-center gap-1">
                         <TrendingUp className="h-3.5 w-3.5" />
                         Total Landed Cost
                       </span>
-                      <span className="text-sm font-bold font-mono text-foreground">
-                        {estimate.currency} {fmt(estimate.total_landed_cost)}
-                      </span>
+                      <div className="text-right">
+                        <span className="text-sm font-bold font-mono text-foreground">
+                          GHS {fmt(ghsConversion?.ghs_total_landed_cost ?? estimate.total_landed_cost)}
+                        </span>
+                        {ghsConversion && estimate.currency !== "GHS" && (
+                          <p className="text-[10px] text-muted-foreground font-mono">
+                            {estimate.currency} {fmt(estimate.total_landed_cost)}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -496,6 +556,7 @@ export default function DutyEstimator() {
                   size="sm"
                   onClick={() => {
                     setEstimate(null);
+                    setGhsConversion(null);
                     setForm({ hs_code: "", goods_description: "", fob_value: "", freight_value: "", insurance_value: "", currency: "USD", country_of_origin: "" });
                   }}
                 >
