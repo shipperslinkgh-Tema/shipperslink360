@@ -27,7 +27,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { hs_code, cif_value, freight_value, insurance_value, fob_value, country_of_origin, goods_description, currency, cargo_type, engine_capacity } = body;
+    const { hs_code, cif_value, freight_value, insurance_value, fob_value, country_of_origin, goods_description, currency, cargo_type, engine_capacity, exchange_rate: userExchangeRate } = body;
 
     if (!cif_value && !goods_description) {
       return new Response(JSON.stringify({ error: "CIF value or goods description is required" }),
