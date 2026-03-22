@@ -27,7 +27,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { hs_code, cif_value, freight_value, insurance_value, fob_value, country_of_origin, goods_description, currency, cargo_type, engine_capacity } = body;
+    const { hs_code, cif_value, freight_value, insurance_value, fob_value, country_of_origin, goods_description, currency, cargo_type, engine_capacity, exchange_rate: userExchangeRate } = body;
 
     if (!cif_value && !goods_description) {
       return new Response(JSON.stringify({ error: "CIF value or goods description is required" }),
@@ -40,7 +40,9 @@ serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const exchangeRatePromise = getExchangeRate(currency || "USD");
+    const exchangeRatePromise = userExchangeRate && userExchangeRate > 0
+      ? Promise.resolve({ rate: userExchangeRate, source: "manual" })
+      : getExchangeRate(currency || "USD");
 
     const cargoTypeInfo = cargo_type === "vehicle"
       ? `\nCargo Type: VEHICLE (Engine Capacity: ${engine_capacity || "Not specified"} cc)\nFor vehicles, apply the appropriate duty rate based on engine capacity and age. Ghana vehicle duty rates vary: 5%-35% import duty depending on vehicle type, plus additional levies.`

@@ -63,8 +63,12 @@ export default function DutyResults({ estimate, ghsConversion, form, onReset }: 
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <Globe className="h-3 w-3" />
                 Exchange Rate: 1 {ghsConversion.from_currency} = GHS {fmt(ghsConversion.exchange_rate)}
-                <Badge variant="outline" className="text-[9px] h-4 ml-1">
-                  {ghsConversion.rate_source === "live" ? "Live Rate" : "Indicative Rate"}
+                <Badge variant="outline" className={`text-[9px] h-4 ml-1 ${
+                  ghsConversion.rate_source === "manual" ? "border-primary/40 text-primary" 
+                    : ghsConversion.rate_source === "live" ? "border-success/40 text-success" 
+                    : "border-warning/40 text-warning"
+                }`}>
+                  {ghsConversion.rate_source === "manual" ? "Manual Rate" : ghsConversion.rate_source === "live" ? "Live Rate" : "Indicative Rate"}
                 </Badge>
               </p>
             </div>
