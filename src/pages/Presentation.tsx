@@ -17,7 +17,15 @@ import {
   CheckCircle,
   ArrowRight,
   MapPin,
-  Radio,
+  Calculator,
+  Anchor,
+  Layers,
+  FolderArchive,
+  Globe,
+  ShieldCheck,
+  Bot,
+  Newspaper,
+  ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -51,12 +59,15 @@ const slides: Slide[] = [
       features: [
         "Real-time shipment tracking across sea and air freight",
         "Automated customs declarations with ICUMS integration",
-        "Fleet and driver management with trip scheduling",
+        "AI-powered duty estimation with Ghana tariff schedules",
+        "Fleet and driver management with live GPS tracking",
         "Complete financial management with GHS currency support",
-        "Customer relationship management with document tracking",
-        "Centralized notification & alert system for all departments",
-        "Comprehensive reports & analytics with role-based access",
+        "Consignment workflow engine with stage-by-stage tracking",
+        "Consolidation portal for LCL and air groupage operations",
+        "Warehouse management with zone-based inventory",
+        "Port command center with vessel schedules and berth monitoring",
         "Secure client self-service portal for shipment & invoice visibility",
+        "Comprehensive reports, analytics & automated alerts",
       ],
     },
   },
@@ -76,6 +87,7 @@ const slides: Slide[] = [
         "Recent shipments table with quick access to details",
         "Alerts panel for urgent items requiring attention",
         "Quick action buttons for common tasks",
+        "Role-based view — each department sees relevant metrics first",
       ],
       useCases: [
         "Morning briefing: Review overnight alerts and pending tasks",
@@ -86,6 +98,37 @@ const slides: Slide[] = [
   },
   {
     id: 3,
+    title: "Consignment Workflows",
+    subtitle: "End-to-End Shipment Lifecycle Management",
+    icon: ClipboardList,
+    color: "from-teal-600 to-teal-400",
+    department: "Operations & Documentation",
+    content: {
+      description:
+        "A structured, stage-by-stage workflow engine that tracks every consignment from document receipt through customs clearance, port processing, and final delivery — with full audit trail and officer assignment.",
+      features: [
+        "7-stage pipeline: Documents Received → Documentation → Customs Declaration → Duty Payment → Port Processing → Cargo Release → Delivery",
+        "Kanban-style board view and table view for workflow management",
+        "Officer assignment with workload tracking",
+        "Stage timestamps and duration tracking for SLA monitoring",
+        "Linked to customers, consolidations, and trucking trips",
+        "CIF value calculation: FOB + Freight + Insurance",
+        "ICUMS declaration number and duty tracking per consignment",
+        "Free days monitoring with demurrage risk alerts",
+        "Urgent flag for priority consignments",
+        "Full audit trail of stage transitions and actions",
+      ],
+      useCases: [
+        "Create a new consignment when documents arrive from a client",
+        "Assign an officer and track progress through each clearance stage",
+        "Monitor which consignments are stuck or approaching demurrage",
+        "Link a consignment to a trucking trip for coordinated delivery",
+        "Review audit trail to verify compliance for completed jobs",
+      ],
+    },
+  },
+  {
+    id: 4,
     title: "Operations Module",
     subtitle: "Shipment Management & Tracking",
     icon: Package,
@@ -100,6 +143,7 @@ const slides: Slide[] = [
         "Container and cargo details management",
         "Consignee and shipper information tracking",
         "Estimated arrival dates and milestone tracking",
+        "Filter by shipment type: Sea, Air, Consolidation",
       ],
       useCases: [
         "Book new shipments and generate tracking numbers",
@@ -110,40 +154,121 @@ const slides: Slide[] = [
     },
   },
   {
-    id: 4,
-    title: "Customs & Ports",
-    subtitle: "ICUMS Declarations & Port Operations",
+    id: 5,
+    title: "Consolidation Portal",
+    subtitle: "LCL & Air Groupage Management",
+    icon: Layers,
+    color: "from-sky-600 to-sky-400",
+    department: "Operations & Documentation",
+    content: {
+      description:
+        "Manage consolidation shipments (LCL sea and air groupage) from planning through delivery. Track multiple shippers per container/flight, handle cargo receipts, tallying, customs clearance, and invoicing.",
+      features: [
+        "Create consolidations with Master BL/AWB, vessel/flight, and container details",
+        "Add multiple shippers per consolidation with House BL/AWB numbers",
+        "Cargo receipt and tallying: Record packages received, weights, and condition",
+        "Per-shipper customs status tracking with ICUMS references",
+        "HS code classification and duty/tax tracking per shipper",
+        "Charge breakdown: Freight, handling, documentation, storage per shipper",
+        "Demurrage monitoring with free-time countdown and daily rates",
+        "Consolidation-level document management: MBL, HBL, MAWB, HAWB, packing lists",
+        "Invoice generation per shipper with GHS/USD support",
+        "Container type support: 20GP, 40GP, 40HC, 45HC",
+      ],
+      useCases: [
+        "Create an LCL consolidation, add 8 shippers, and track cargo receipt for each",
+        "Monitor demurrage charges on a container nearing free-time expiry",
+        "Generate individual invoices for each shipper in a consolidation",
+        "Track customs clearance progress for all shippers in a single container",
+      ],
+    },
+  },
+  {
+    id: 6,
+    title: "Customs & ICUMS",
+    subtitle: "Declarations, Duty & Compliance",
     icon: FileCheck,
     color: "from-amber-600 to-amber-400",
     department: "Customs & Clearing Team",
     content: {
       description:
-        "Handle all customs-related activities including ICUMS declarations, shipping line DO management, and GPHA port status tracking.",
+        "Handle all customs-related activities including ICUMS declarations, duty assessment, shipping line DO management, and GPHA port status tracking.",
       features: [
         "ICUMS declaration submission and status tracking",
-        "Duty calculations with tax breakdown (Import Duty, VAT, NHIL, etc.)",
+        "Duty calculations with full tax breakdown (Import Duty, VAT, NHIL, GETFund, ECOWAS, AU, EXIM levies)",
+        "Declaration lifecycle: Draft → Submitted → Assessed → Paid → Released",
         "Shipping line integration for Delivery Order management",
         "Demurrage tracking with free days monitoring",
-        "GPHA port status and container location tracking",
+        "HS code lookup and classification support",
       ],
       useCases: [
-        "Submit new ICUMS declarations with HS codes",
-        "Track declaration status: Draft → Submitted → Assessed → Paid → Released",
+        "Submit new ICUMS declarations with HS codes and CIF values",
+        "Track declaration status through each assessment stage",
         "Monitor free days to avoid demurrage charges",
         "Coordinate container pickup with shipping lines",
       ],
     },
   },
   {
-    id: 5,
-    title: "Fleet & Logistics",
-    subtitle: "Trucking & Warehouse Management",
+    id: 7,
+    title: "Shipping Line Status",
+    subtitle: "Delivery Orders & Container Tracking",
+    icon: Anchor,
+    color: "from-blue-700 to-blue-500",
+    department: "Operations & Customs",
+    content: {
+      description:
+        "Track and manage Delivery Order (DO) status with shipping lines. Monitor container release status, terminal charges, and coordinate pickup logistics.",
+      features: [
+        "Delivery Order request and approval tracking",
+        "Shipping line charge management and payment tracking",
+        "Container release status monitoring",
+        "Terminal and depot charge tracking",
+        "Integration with consignment workflows for seamless handoff",
+      ],
+      useCases: [
+        "Request a Delivery Order from the shipping line after duty payment",
+        "Track DO approval status and terminal charges",
+        "Coordinate container release timing with trucking schedule",
+      ],
+    },
+  },
+  {
+    id: 8,
+    title: "Port Command Center",
+    subtitle: "GPHA Port Operations & Vessel Schedules",
+    icon: Globe,
+    color: "from-slate-600 to-slate-400",
+    department: "Operations & Management",
+    content: {
+      description:
+        "A centralized dashboard for monitoring port operations at Tema, Takoradi, and Kotoka. Track vessel schedules, berth assignments, container locations, and port congestion in real time.",
+      features: [
+        "Vessel arrival and departure schedules for all Ghana ports",
+        "Berth assignment and terminal monitoring",
+        "Container location tracking within port zones",
+        "Port congestion indicators and waiting time estimates",
+        "GPHA port status integration for Tema and Takoradi",
+        "Quick lookup by vessel name, voyage number, or container",
+      ],
+      useCases: [
+        "Check when a vessel is expected to berth at Tema port",
+        "Monitor port congestion before scheduling a truck for pickup",
+        "Verify container location within the port terminal",
+        "Plan operations around vessel schedules and berth availability",
+      ],
+    },
+  },
+  {
+    id: 9,
+    title: "Fleet & Trucking",
+    subtitle: "Trip Scheduling, Drivers & Cost Management",
     icon: Truck,
     color: "from-purple-600 to-purple-400",
     department: "Fleet & Logistics Team",
     content: {
       description:
-        "Manage your truck fleet, driver details, trip scheduling, and warehouse operations for efficient cargo movement. Activate live tracking and share links directly from the Trips table.",
+        "Manage your truck fleet, driver details, trip scheduling, and logistics operations. Create trips, assign drivers, track costs, and activate live GPS tracking — all from one module.",
       features: [
         "Vehicle & Driver section: Select truck type (40ft, 20ft, Towing, Cargo), enter truck number, driver name, phone, and license",
         "Customer & Cargo section: Enter customer name, container number, and BL number",
@@ -163,7 +288,7 @@ const slides: Slide[] = [
     },
   },
   {
-    id: 6,
+    id: 10,
     title: "Live Truck Tracking",
     subtitle: "Real-Time GPS Fleet Monitoring & Customer Tracking",
     icon: MapPin,
@@ -193,7 +318,34 @@ const slides: Slide[] = [
     },
   },
   {
-    id: 6,
+    id: 11,
+    title: "Warehouse Management",
+    subtitle: "Zone-Based Inventory & Cargo Tracking",
+    icon: Warehouse,
+    color: "from-yellow-700 to-yellow-500",
+    department: "Warehouse Team",
+    content: {
+      description:
+        "Track cargo across warehouse zones, manage storage allocation, monitor aging inventory, and coordinate cargo release with customs and delivery teams.",
+      features: [
+        "Zone-based storage management with occupancy tracking",
+        "Cargo receiving and tallying with condition reporting",
+        "Aging inventory alerts: 0–7, 8–14, 15–30, 30+ days",
+        "Storage charge calculation based on days and rates",
+        "Cargo release coordination with customs clearance status",
+        "Damage reporting with photo documentation",
+        "Search by BL number, container, or client name",
+      ],
+      useCases: [
+        "Receive cargo into warehouse and assign to a storage zone",
+        "Monitor aging cargo to prioritize clearance and avoid extra charges",
+        "Coordinate release of cleared cargo for customer pickup or delivery",
+        "Generate storage invoices based on days occupied",
+      ],
+    },
+  },
+  {
+    id: 12,
     title: "Finance Module",
     subtitle: "Invoicing, Expenses & Tax Compliance",
     icon: DollarSign,
@@ -201,30 +353,147 @@ const slides: Slide[] = [
     department: "Finance & Accounts Team",
     content: {
       description:
-        "Complete financial management including invoicing, expense tracking, office accounts, and GRA tax filing compliance.",
+        "Complete financial management including invoicing, expense tracking, office accounts, bank integration, and GRA tax filing compliance.",
       features: [
-        "Customer invoice generation with GHS formatting",
+        "Customer invoice generation with GHS formatting and multi-currency support",
         "Multiple office accounts: Bank, Petty Cash, Mobile Money",
         "Expense tracking with approval workflows",
         "Tax filing management: VAT, PAYE, Corporate Tax",
-        "Outstanding balance and receivables tracking",
+        "Outstanding balance and receivables tracking with aging analysis",
         "Job costing and profit & loss dashboard",
-        "Bank integration with automated reconciliation",
+        "Bank integration with automated reconciliation and alerts",
+        "Exchange rate management for USD/GHS conversions",
       ],
       useCases: [
-        "Generate invoices for cleared shipments",
-        "Approve and process expense requests",
+        "Generate invoices for cleared shipments and send to clients",
+        "Approve and process expense requests with category tracking",
         "Reconcile bank accounts with system records",
         "Prepare and track GRA tax submissions",
+        "Monitor aged receivables and escalate overdue accounts",
       ],
     },
   },
   {
-    id: 8,
+    id: 13,
+    title: "AI Duty Estimator",
+    subtitle: "Ghana Import Duty & Tax Calculator",
+    icon: Calculator,
+    color: "from-orange-600 to-orange-400",
+    department: "Customs & Finance",
+    content: {
+      description:
+        "An AI-powered import duty calculator tailored for Ghana customs (ICUMS) logic. Supports general cargo, vehicles, consolidated LCL, and air freight with real-time exchange rate conversion to GHS.",
+      features: [
+        "AI-driven HS code suggestion based on product description",
+        "Supports all cargo types: General, Vehicle (with engine capacity/age), LCL, Air Freight",
+        "Full Ghana levy breakdown: Import Duty, VAT, NHIL, GETFund, ECOWAS, AU, EXIM levies, Processing Fees",
+        "CIF value calculation with Cost, Insurance, and Freight inputs",
+        "Live exchange rate conversion — all results displayed in GHS",
+        "Duty band detection: 0%, 5%, 10%, 20%, 35% based on HS classification",
+        "Misclassification detection and cost-saving recommendations",
+        "Step-by-step transparent calculation breakdown",
+        "Export estimate to PDF for client quotations",
+        "Disclaimer: Estimates are indicative — final duty per customs assessment",
+      ],
+      useCases: [
+        "Client asks 'How much duty on electronics from China?' → enter description, get instant GHS estimate",
+        "Calculate vehicle import duty with engine capacity and age-based depreciation",
+        "Generate a duty estimate PDF to attach to a client quotation",
+        "Compare duty rates across different HS codes to find the most accurate classification",
+        "Estimate total landed cost for a consolidated LCL shipment",
+      ],
+    },
+  },
+  {
+    id: 14,
+    title: "AI Operations Assistant",
+    subtitle: "Intelligent Logistics Co-Pilot",
+    icon: Bot,
+    color: "from-violet-600 to-violet-400",
+    department: "All Departments",
+    content: {
+      description:
+        "A fully intelligent operations and knowledge assistant powered by advanced AI models with real-time access to company data. It understands natural language, queries live databases, generates documents, and provides actionable insights.",
+      features: [
+        "Natural Language Queries: Ask in plain English — 'Show containers arriving this week'",
+        "Live Data Access: Queries consignments, invoices, consolidations, trucking trips, customers in real-time",
+        "Smart Document Generation: Quotations, cargo reports, customs checklists, client emails, executive summaries",
+        "Ghana Logistics Knowledge Base: Import procedures, HS codes, duty structure, ICUMS processes",
+        "Department-Aware Context: Tailors responses based on user's department",
+        "AI Document Reader: Upload BL, invoices, packing lists to auto-extract and populate forms",
+        "Conversation Memory: Maintains context within sessions for follow-up queries",
+        "All AI interactions logged in audit trail for compliance",
+      ],
+      useCases: [
+        "Ask: 'Show containers arriving this week' → AI queries live data and presents a table",
+        "Ask: 'Generate cargo status report for client ABC' → AI creates a document instantly",
+        "Ask: 'Which shipments are close to demurrage?' → AI flags at-risk containers",
+        "Ask: 'Summarize outstanding invoices over 30 days' → AI provides aging analysis",
+        "Upload a Bill of Lading photo → AI extracts data and auto-fills the consignment form",
+      ],
+    },
+  },
+  {
+    id: 15,
+    title: "Customer Management",
+    subtitle: "Client Records, Contacts & Documents",
+    icon: Users,
+    color: "from-rose-600 to-rose-400",
+    department: "Sales & Customer Service",
+    content: {
+      description:
+        "Maintain comprehensive customer records including company details, contacts, documents, credit management, and shipment history for all clients managed by SLAC.",
+      features: [
+        "Customer directory with search, filtering, and status tracking",
+        "Company details: TIN Number, Registration, Industry, Trade Name",
+        "Contact management with multiple persons per company",
+        "Document tracking: Certificates, Licenses, Contracts with expiry alerts",
+        "Credit limit management and outstanding balance monitoring",
+        "Warehouse destination preferences per customer",
+        "Customer code generation for internal reference",
+      ],
+      useCases: [
+        "Onboard new customers with complete documentation and credit terms",
+        "Verify customer compliance before processing shipments",
+        "Monitor credit exposure and outstanding balances per client",
+        "Track document renewals and send expiry reminders",
+      ],
+    },
+  },
+  {
+    id: 16,
+    title: "Client Self-Service Portal",
+    subtitle: "Secure External Portal for Clients",
+    icon: Plane,
+    color: "from-indigo-600 to-indigo-400",
+    department: "Sales & Customer Service",
+    content: {
+      description:
+        "A secure, branded external portal at /portal/login that allows SLAC clients to independently track shipments, view documents, check invoices, and communicate with the SLAC team — without needing internal system access.",
+      features: [
+        "Secure login isolated from internal staff accounts",
+        "Dashboard with live counts: Active Shipments, Documents, Invoices, Unread Messages",
+        "Shipment Tracking: BL/container/vessel search with real-time status badges",
+        "Documents & SOPs: View and securely download shipping documents",
+        "Invoices & Payments: Outstanding balance summary, invoice history, payment status",
+        "Real-time Messaging: Direct chat with SLAC team with instant delivery",
+        "Row-Level Security: Each client sees only their own company's data",
+      ],
+      useCases: [
+        "Client logs in to track their shipment ETA without calling SLAC",
+        "Client downloads their Bill of Lading from the documents section",
+        "Client checks outstanding invoices and payment due dates",
+        "Client sends a message requesting an update on a held container",
+        "Staff creates a client portal account from Admin → User Management",
+      ],
+    },
+  },
+  {
+    id: 17,
     title: "Notifications & Alerts",
     subtitle: "Automated Real-Time Alert Engine",
     icon: Bell,
-    color: "from-orange-600 to-orange-400",
+    color: "from-orange-500 to-orange-300",
     department: "All Departments",
     content: {
       description:
@@ -245,12 +514,11 @@ const slides: Slide[] = [
         "Operations team is warned 3 days before container free time expires",
         "Management receives alerts for consignments stuck in workflow over 48 hours",
         "Finance team gets notified of receivables aging past 60 days",
-        "All users see real-time unread count update without refreshing the page",
       ],
     },
   },
   {
-    id: 9,
+    id: 18,
     title: "Reports & Analytics",
     subtitle: "Business Intelligence Across All Departments",
     icon: BarChart3,
@@ -258,121 +526,34 @@ const slides: Slide[] = [
     department: "Management",
     content: {
       description:
-        "A comprehensive reports and analytics module delivering real-time, filterable, and exportable business intelligence across Operations, Finance, Warehouse, and Client dimensions — with role-based access control.",
+        "A comprehensive reports and analytics module delivering real-time, filterable, and exportable business intelligence across Operations, Finance, Warehouse, and Client dimensions.",
       features: [
-        "Management Tab: KPI summary cards, revenue vs expense trends, department performance, AI executive summary",
-        "Operations Tab: Shipment volume by type (Bar chart), BL/AWB tracking, status distribution (Pie chart)",
+        "Management Tab: KPI summary cards, revenue vs expense trends, AI executive summary",
+        "Operations Tab: Shipment volume by type, BL/AWB tracking, status distribution",
         "Finance Tab: Revenue report, outstanding invoices, net cash position, expense analysis",
-        "Warehouse Tab: Zone occupancy utilization bars, cargo aging breakdown (0–7, 8–14, 15–30, 30+ days)",
-        "Clients Tab: Profitability table, credit exposure progress bars, active vs inactive clients",
-        "Role-based tab visibility — Accounts sees Finance/Clients; Warehouse sees Warehouse only",
+        "Warehouse Tab: Zone occupancy utilization, cargo aging breakdown",
+        "Clients Tab: Profitability table, credit exposure, active vs inactive clients",
+        "Role-based tab visibility — each department sees relevant reports only",
         "Export options: CSV, Excel, PDF",
       ],
       useCases: [
-        "Management monthly review: Open Management tab, review KPI cards and AI summary",
+        "Management monthly review: Open Management tab and review KPI cards",
         "Finance audit: Filter by date range and export outstanding invoices to Excel",
         "Warehouse planning: Check occupancy utilization and identify aging cargo",
         "Client review: Identify top revenue clients and high credit-risk accounts",
-        "Operations debrief: Review delayed shipments and clearance turnaround analysis",
       ],
     },
   },
   {
-    id: 10,
-    title: "Customer Portal",
-    subtitle: "Client Management & Documentation",
-    icon: Users,
-    color: "from-rose-600 to-rose-400",
-    department: "Sales & Customer Service",
-    content: {
-      description:
-        "Maintain comprehensive customer records including company details, contacts, documents, and shipment history for all clients managed by SLAC.",
-      features: [
-        "Customer directory with search and filtering",
-        "Company details: TIN Number, Registration, Industry",
-        "Contact management with multiple persons per company",
-        "Document tracking: Certificates, Licenses, Contracts",
-        "Expiry alerts for compliance documents",
-      ],
-      useCases: [
-        "Onboard new customers with complete documentation",
-        "Verify customer compliance before processing shipments",
-        "Update contact information and communication preferences",
-        "Track document renewals and send reminders",
-      ],
-    },
-  },
-  {
-    id: 11,
-    title: "Client Self-Service Portal",
-    subtitle: "Secure External Portal for Clients",
-    icon: Plane,
-    color: "from-indigo-600 to-indigo-400",
-    department: "Sales & Customer Service",
-    content: {
-      description:
-        "A secure, branded external portal at /portal/login that allows SLAC clients to independently track their shipments, view documents, check invoices, and communicate with the SLAC team — without needing internal system access.",
-      features: [
-        "Secure login isolated from internal staff accounts",
-        "Dashboard with live counts: Active Shipments, Documents, Invoices, Unread Messages",
-        "Shipment Tracking: BL/container/vessel search with real-time status badges",
-        "Documents & SOPs: View and securely download shipping documents",
-        "Invoices & Payments: Outstanding balance summary, invoice history, payment status",
-        "Real-time Messaging: Direct chat with SLAC team with instant delivery",
-        "Row-Level Security: Each client sees only their own company's data",
-      ],
-      useCases: [
-        "Client logs in to track their shipment ETA without calling SLAC",
-        "Client downloads their Bill of Lading or SOP from the documents section",
-        "Client checks outstanding invoices and payment due dates",
-        "Client sends a message to SLAC requesting an update on a held container",
-        "Staff creates a client portal account from Admin → User Management",
-      ],
-    },
-  },
-  {
-    id: 12,
-    title: "AI Operations Assistant",
-    subtitle: "ChatGPT-Level Intelligence for Logistics",
-    icon: Settings,
-    color: "from-violet-600 to-violet-400",
-    department: "All Departments",
-    content: {
-      description:
-        "A fully intelligent operations and knowledge assistant powered by advanced AI models with real-time access to company data. It understands natural language, queries live databases, generates documents, and provides actionable insights — functioning as a central intelligence engine for all departments.",
-      features: [
-        "Natural Language Queries: Ask in plain English — 'Show containers arriving this week' or 'Which invoices are overdue?'",
-        "Live Data Access: Queries consignments, invoices, consolidations, trucking trips, demurrage, customers, expenses, and receivables in real-time",
-        "Smart Document Generation: Create quotations, cargo reports, customs checklists, client emails, executive summaries, and invoice reminders on demand",
-        "Ghana Logistics Knowledge Base: Import procedures, customs documentation, HS code classification, duty/tax structure, ICUMS processes, and shipping terminology",
-        "Operational Decision Support: Identifies demurrage risk, flags overdue invoices, detects stalled workflows, and recommends improvements",
-        "Department-Aware Context: Automatically tailors responses based on the user's department — Operations, Documentation, Accounts, Management, Warehouse, or Customer Service",
-        "Conversation Memory: Remembers context within sessions — 'Show consignments arriving tomorrow' → 'Generate report for the first one'",
-        "AI Document Reader: Upload shipping documents (BL, invoices, packing lists) to auto-extract and populate consignment forms",
-        "SLAC AI DUTY ESTIMATOR: Calculate estimated Ghana customs duties and taxes by HS code",
-        "All AI interactions logged in audit trail for compliance",
-      ],
-      useCases: [
-        "Ask: 'Show containers arriving this week' → AI queries live data and presents a formatted table",
-        "Ask: 'Generate cargo status report for client ABC' → AI creates a professional document instantly",
-        "Ask: 'Which shipments are close to demurrage?' → AI checks free days and flags at-risk containers",
-        "Ask: 'Summarize outstanding invoices over 30 days' → AI queries receivables with aging analysis",
-        "Ask: 'What documents are required for customs clearance?' → AI provides Ghana-specific checklist",
-        "Ask: 'Give me an executive summary of this month's KPIs' → AI aggregates stats across all modules",
-        "Upload a Bill of Lading photo → AI extracts BL number, consignee, weights, and auto-fills the form",
-      ],
-    },
-  },
-  {
-    id: 13,
+    id: 19,
     title: "Office Files Portal",
     subtitle: "Secure Archive for Completed Consignments",
-    icon: FileCheck,
+    icon: FolderArchive,
     color: "from-slate-700 to-slate-500",
     department: "All Departments",
     content: {
       description:
-        "A permanent, secure digital archive for all finalized shipment documents. Once a consignment is marked 'Completed', its record and documents become read-only (locked) — only Super Admins can edit or delete locked files.",
+        "A permanent, secure digital archive for all finalized shipment documents. Once a consignment is marked 'Completed', its record and documents become read-only — only Super Admins can edit or delete locked files.",
       features: [
         "Auto-generated Consignment ID with BL/AWB, container numbers, and client details",
         "Mandatory document checklist across 5 categories: Customs, Shipping Line, Company Financial, Warehouse, and Shipping",
@@ -382,19 +563,73 @@ const slides: Slide[] = [
         "Full audit log tracking every view, download, and upload action",
         "Financial outcome summary: auto-calculated Revenue vs. Expenses per consignment",
         "Search by BL, AWB, container number, or client name",
-        "Role-based access: Staff can view/upload, Admins can edit locked files, Super Admins can delete",
+        "Role-based access: Staff can view/upload, Admins can edit, Super Admins can delete",
       ],
       useCases: [
-        "Archive a completed sea freight consignment with all customs and financial documents",
-        "Verify all required documents are uploaded before marking a consignment complete",
-        "Search for a past consignment by BL number to retrieve its Bill of Entry",
-        "Review the financial outcome of a job — total revenue vs. total expenses",
+        "Archive a completed consignment with all customs and financial documents",
+        "Verify all required documents are uploaded before marking complete",
+        "Search for a past consignment by BL number to retrieve documents",
+        "Review the financial outcome of a job — revenue vs. expenses",
         "Audit who downloaded or viewed a specific document and when",
       ],
     },
   },
   {
-    id: 14,
+    id: 20,
+    title: "Media Hub",
+    subtitle: "Industry News & Company Updates",
+    icon: Newspaper,
+    color: "from-pink-600 to-pink-400",
+    department: "All Users (Public)",
+    content: {
+      description:
+        "A public-facing media hub for publishing industry news, company announcements, and logistics insights. Accessible without login at /media-hub.",
+      features: [
+        "Publish articles with rich text content and featured images",
+        "Categorize articles by topic: Industry News, Company Updates, Logistics Insights",
+        "Public access — no login required for readers",
+        "Admin media management for creating, editing, and publishing articles",
+        "SEO-friendly article URLs with slug-based routing",
+      ],
+      useCases: [
+        "Publish a company announcement about new service routes",
+        "Share industry news about customs regulation changes",
+        "Highlight logistics insights and operational best practices",
+      ],
+    },
+  },
+  {
+    id: 21,
+    title: "Admin & Security",
+    subtitle: "User Management, Roles & Audit Trails",
+    icon: ShieldCheck,
+    color: "from-gray-700 to-gray-500",
+    department: "Super Admin / Admin",
+    content: {
+      description:
+        "Manage staff accounts, assign roles and departments, configure system settings, and maintain full audit trails across the platform. Security features include account locking, inactivity timeouts, and role-based access control.",
+      features: [
+        "User account creation with role assignment: Super Admin, Admin, Manager, Staff",
+        "Department assignment: Operations, Documentation, Accounts, Management, Warehouse, Customer Service",
+        "Client portal account creation and management",
+        "Account locking after 5 failed login attempts",
+        "15-minute staff inactivity timeout, 30-minute client timeout",
+        "Force password change on first login",
+        "Complete audit log of all system mutations",
+        "Role-based menu visibility and feature access",
+        "Staff profile management with department and contact info",
+      ],
+      useCases: [
+        "Create a new staff account and assign to the Operations department",
+        "Create a client portal account linked to a customer company",
+        "Review audit logs to investigate a data discrepancy",
+        "Unlock a staff account after too many failed login attempts",
+        "Assign admin privileges to a trusted manager",
+      ],
+    },
+  },
+  {
+    id: 22,
     title: "Getting Started",
     subtitle: "Quick Start Guide for Your Team",
     icon: CheckCircle,
@@ -409,14 +644,16 @@ const slides: Slide[] = [
         "Step 4: Configure office accounts and financial settings in Finance",
         "Step 5: Add fleet vehicles and driver profiles in the Trucking module",
         "Step 6: Create trips and activate live tracking — share links via WhatsApp",
-        "Step 7: Start creating shipments and tracking operations in real time",
-        "Step 8: Share client portal login link with customers for self-service access",
+        "Step 7: Start creating consignments and tracking workflows in real time",
+        "Step 8: Use the AI Duty Estimator for quick customs duty quotes",
+        "Step 9: Share client portal login link with customers for self-service access",
       ],
       useCases: [
         "Use the Notifications bell to stay on top of automated alerts",
         "Activate live tracking on trips and share links with customers instantly",
         "Visit Reports & Analytics for weekly management reviews",
         "Use the AI Assistant for quick answers without searching manually",
+        "Use the Duty Estimator for instant GHS duty estimates",
         "Bookmark the Client Portal link to share with new customers",
       ],
     },
@@ -541,7 +778,7 @@ export default function Presentation() {
           </Button>
 
           {/* Slide Indicators */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 flex-wrap justify-center max-w-md">
             {slides.map((_, index) => (
               <button
                 key={index}
@@ -549,7 +786,7 @@ export default function Presentation() {
                 className={cn(
                   "h-2 rounded-full transition-all",
                   index === currentSlide
-                    ? "w-8 bg-primary"
+                    ? "w-6 bg-primary"
                     : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
                 )}
               />
@@ -569,12 +806,12 @@ export default function Presentation() {
         {/* Quick Navigation */}
         <div className="mt-8">
           <h3 className="text-sm font-medium text-muted-foreground mb-4">Quick Navigation</h3>
-          <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
+          <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-11 gap-2">
             {slides.map((s, index) => {
               const SlideIcon = s.icon;
               return (
                 <button
-                  key={s.id}
+                  key={index}
                   onClick={() => goToSlide(index)}
                   className={cn(
                     "flex flex-col items-center gap-2 p-3 rounded-lg border transition-all",
