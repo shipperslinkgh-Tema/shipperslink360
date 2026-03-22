@@ -56,6 +56,7 @@ export interface DutyFormData {
   country_of_origin: string;
   cargo_type: CargoType;
   engine_capacity: string;
+  exchange_rate: string;
 }
 
 export const CURRENCIES = ["USD", "EUR", "GBP", "GHS", "CNY"];

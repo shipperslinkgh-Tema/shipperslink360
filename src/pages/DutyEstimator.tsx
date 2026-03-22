@@ -63,6 +63,7 @@ export default function DutyEstimator() {
           country_of_origin: form.country_of_origin,
           cargo_type: form.cargo_type,
           engine_capacity: form.engine_capacity,
+          exchange_rate: form.exchange_rate ? parseFloat(form.exchange_rate) : undefined,
         },
       });
 
