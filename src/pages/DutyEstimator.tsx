@@ -18,6 +18,7 @@ const INITIAL_FORM: DutyFormData = {
   country_of_origin: "",
   cargo_type: "general",
   engine_capacity: "",
+  exchange_rate: "",
 };
 
 export default function DutyEstimator() {
