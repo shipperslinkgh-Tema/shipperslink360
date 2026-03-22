@@ -223,6 +223,27 @@ export default function DutyInputForm({ form, onUpdate, onEstimate, loading }: D
           </Select>
         </div>
 
+        {/* Exchange Rate */}
+        {form.currency !== "GHS" && (
+          <div className="space-y-2 p-3 bg-muted/50 rounded-lg border border-dashed border-primary/30">
+            <Label htmlFor="exchange_rate" className="flex items-center gap-1.5">
+              <ArrowLeftRight className="h-3.5 w-3.5 text-primary" />
+              Exchange Rate ({form.currency} → GHS)
+            </Label>
+            <Input
+              id="exchange_rate"
+              type="number"
+              step="0.01"
+              placeholder="e.g. 15.50 (leave blank for live rate)"
+              value={form.exchange_rate}
+              onChange={(e) => onUpdate("exchange_rate", e.target.value)}
+            />
+            <p className="text-[10px] text-muted-foreground">
+              Enter your preferred rate or leave blank to use the current market rate automatically
+            </p>
+          </div>
+        )}
+
         <Button className="w-full" size="lg" onClick={onEstimate} disabled={loading}>
           {loading ? (
             <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Estimating Duties...</>
