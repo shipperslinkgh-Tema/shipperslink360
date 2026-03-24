@@ -22,6 +22,27 @@ async function getExchangeRate(fromCurrency: string): Promise<{ rate: number; so
   return { rate: FALLBACK_RATES[fromCurrency] ?? 15.5, source: FALLBACK_RATES[fromCurrency] ? "fallback" : "default" };
 }
 
+/** Deterministic duty calculation using Ghana GRA tax structure */
+function calculateDuties(cifValue: number, dutyRatePercent: number) {
+  const importDuty = round(cifValue * (dutyRatePercent / 100));
+  const nhil = round((cifValue + importDuty) * 0.025);
+  const getfund = round((cifValue + importDuty) * 0.025);
+  const ecowasLevy = round(cifValue * 0.005);
+  const auLevy = round(cifValue * 0.002);
+  const eximLevy = round(cifValue * 0.0075);
+  const processingFee = round(cifValue * 0.01);
+  const vatBase = cifValue + importDuty + nhil + getfund + ecowasLevy + auLevy + eximLevy;
+  const vat = round(vatBase * 0.15);
+  const totalDuties = round(importDuty + vat + nhil + getfund + ecowasLevy + auLevy + eximLevy + processingFee);
+  const totalLandedCost = round(cifValue + totalDuties);
+
+  return { importDuty, vat, nhil, getfund, ecowasLevy, auLevy, eximLevy, processingFee, totalDuties, totalLandedCost };
+}
+
+function round(val: number): number {
+  return Math.round(val * 100) / 100;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -45,57 +66,45 @@ serve(async (req) => {
       : getExchangeRate(currency || "USD");
 
     const cargoTypeInfo = cargo_type === "vehicle"
-      ? `\nCargo Type: VEHICLE (Engine Capacity: ${engine_capacity || "Not specified"} cc)\nFor vehicles, apply the appropriate duty rate based on engine capacity and age. Ghana vehicle duty rates vary: 5%-35% import duty depending on vehicle type, plus additional levies.`
+      ? `\nCargo Type: VEHICLE (Engine Capacity: ${engine_capacity || "Not specified"} cc)\nDetermine appropriate duty rate based on engine capacity and vehicle age. Ghana vehicle duty rates: 5%-35%.`
       : cargo_type === "consolidated_lcl"
-      ? `\nCargo Type: CONSOLIDATED LCL (Less than Container Load)`
+      ? `\nCargo Type: CONSOLIDATED LCL`
       : cargo_type === "air_freight"
       ? `\nCargo Type: AIR FREIGHT`
       : `\nCargo Type: ${(cargo_type || "general").toUpperCase()}`;
 
-    const systemPrompt = `You are a Ghana Customs duty estimation expert with deep knowledge of:
-- Ghana Revenue Authority (GRA) import duty rates by HS Code
-- Ghana ICUMS (Integrated Customs Management System) procedures
-- Ghana tax structure including all applicable levies
-- ECOWAS CET (Common External Tariff) rates
-- Vehicle import duties (based on engine capacity and age)
-- Preferential trade agreements affecting Ghana
+    const systemPrompt = `You are a Ghana Customs HS code classification expert. Your ONLY job is to:
+1. Determine the correct HS code for the goods
+2. Determine the correct import duty rate percentage (0%, 5%, 10%, 20%, or 35%)
+3. Flag if ECOWAS preferential rates may apply
+4. Warn about potential misclassification
 
-TAX CALCULATION RULES:
-1. Determine the correct HS code and duty rate (0%, 5%, 10%, 20%, 35%)
-2. Import Duty = CIF Value × Duty Rate
-3. NHIL (2.5%) = (CIF Value + Import Duty) × 0.025
-4. GETFund Levy (2.5%) = (CIF Value + Import Duty) × 0.025
-5. ECOWAS Levy (0.5%) = CIF Value × 0.005
-6. AU Levy (0.2%) = CIF Value × 0.002
-7. EXIM Levy (0.75%) = CIF Value × 0.0075
-8. Processing Fee (1%) = CIF Value × 0.01
-9. VAT (15%) = (CIF Value + Import Duty + NHIL + GETFund + ECOWAS Levy + AU Levy + EXIM Levy) × 0.15
-10. Total Duties = Import Duty + VAT + NHIL + GETFund + ECOWAS Levy + AU Levy + EXIM Levy + Processing Fee
-11. Total Landed Cost = CIF Value + Total Duties
+You do NOT need to calculate any duty amounts — that will be done programmatically.
 
-For VEHICLES: Consider engine capacity for duty classification. Vehicles over 10 years may attract higher rates.
-For ECOWAS origin goods: May qualify for reduced or zero duty rates.
+For VEHICLES: duty rate depends on engine capacity and age:
+- Engine ≤1000cc: 5%
+- Engine 1001-2000cc: 10%  
+- Engine 2001-3000cc: 20%
+- Engine >3000cc: 35%
+- Vehicles over 10 years old may attract additional levies
 
-Always provide your best estimate. If unsure, use the most common rate for the HS chapter and note the uncertainty.
-Include cost-saving recommendations where applicable (e.g., ECOWAS preferential rates, consolidation benefits).`;
+For ECOWAS origin goods: May qualify for 0% duty rate.
 
-    const userPrompt = `Estimate Ghana customs duties for this import:
+Always provide your best classification. If unsure, use the most common rate for the HS chapter.`;
 
-- HS Code: ${hs_code || "AUTO-DETERMINE from description"}
+    const userPrompt = `Classify this import and determine the duty rate:
+
+- HS Code provided: ${hs_code || "NONE - determine from description"}
 - Goods Description: ${goods_description || "Not provided"}
-- FOB Value: ${currency || "USD"} ${fob_value || "N/A"}
-- Freight: ${currency || "USD"} ${freight_value || "0"}
-- Insurance: ${currency || "USD"} ${insurance_value || "0"}
-- CIF Value: ${currency || "USD"} ${cif_value}
 - Country of Origin: ${country_of_origin || "Not specified"}${cargoTypeInfo}
 
-Return your response using the suggest_duties tool. If no HS code was provided, determine the best one from the description.`;
+Return your classification using the classify_goods tool.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
@@ -103,42 +112,25 @@ Return your response using the suggest_duties tool. If no HS code was provided, 
         tools: [{
           type: "function",
           function: {
-            name: "suggest_duties",
-            description: "Return structured duty estimation breakdown for Ghana customs",
+            name: "classify_goods",
+            description: "Return HS code classification and duty rate for Ghana customs",
             parameters: {
               type: "object",
               properties: {
-                hs_code: { type: "string", description: "The HS code used" },
+                hs_code: { type: "string", description: "The determined HS code (e.g. 8703.23)" },
                 hs_description: { type: "string", description: "Description of the HS code tariff heading" },
-                duty_rate_percent: { type: "number", description: "Import duty rate percentage applied" },
-                cif_value: { type: "number", description: "CIF value in the given currency" },
-                import_duty: { type: "number", description: "Import Duty amount" },
-                vat: { type: "number", description: "VAT (15%) amount" },
-                nhil: { type: "number", description: "NHIL (2.5%) amount" },
-                getfund: { type: "number", description: "GETFund Levy (2.5%) amount" },
-                ecowas_levy: { type: "number", description: "ECOWAS Levy (0.5%) amount" },
-                au_levy: { type: "number", description: "AU Levy (0.2%) amount" },
-                exim_levy: { type: "number", description: "EXIM Levy (0.75%) amount" },
-                processing_fee: { type: "number", description: "Processing Fee (1%) amount" },
-                total_duties: { type: "number", description: "Total estimated duties payable" },
-                total_landed_cost: { type: "number", description: "CIF + Total Duties" },
-                currency: { type: "string", description: "Currency of all amounts" },
-                notes: { type: "string", description: "Any caveats, uncertainties, or special notes" },
-                ecowas_applicable: { type: "boolean", description: "Whether ECOWAS preferential rate may apply" },
+                duty_rate_percent: { type: "number", description: "Import duty rate percentage (0, 5, 10, 20, or 35)" },
+                ecowas_applicable: { type: "boolean", description: "Whether ECOWAS preferential rate may apply based on origin" },
+                notes: { type: "string", description: "Classification notes, caveats, or uncertainties" },
                 recommendations: { type: "string", description: "Cost-saving recommendations if any" },
                 misclassification_warning: { type: "string", description: "Warning if the HS code might be misclassified" },
               },
-              required: [
-                "hs_code", "hs_description", "duty_rate_percent", "cif_value",
-                "import_duty", "vat", "nhil", "getfund", "ecowas_levy", "au_levy",
-                "exim_levy", "processing_fee", "total_duties", "total_landed_cost",
-                "currency", "notes"
-              ],
+              required: ["hs_code", "hs_description", "duty_rate_percent", "notes"],
               additionalProperties: false,
             },
           },
         }],
-        tool_choice: { type: "function", function: { name: "suggest_duties" } },
+        tool_choice: { type: "function", function: { name: "classify_goods" } },
       }),
     });
 
@@ -160,15 +152,44 @@ Return your response using the suggest_duties tool. If no HS code was provided, 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
 
-    if (!toolCall || toolCall.function.name !== "suggest_duties") {
-      return new Response(JSON.stringify({ error: "Failed to get structured estimate from AI" }),
+    if (!toolCall || toolCall.function.name !== "classify_goods") {
+      return new Response(JSON.stringify({ error: "Failed to get classification from AI" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const estimate = JSON.parse(toolCall.function.arguments);
-    const { rate: exchangeRate, source: rateSource } = await exchangeRatePromise;
+    const classification = JSON.parse(toolCall.function.arguments);
+    const cifVal = cif_value || 0;
+    
+    // Apply ECOWAS zero rate if applicable
+    const effectiveDutyRate = classification.ecowas_applicable ? 0 : classification.duty_rate_percent;
+    
+    // Calculate all duties deterministically
+    const calc = calculateDuties(cifVal, effectiveDutyRate);
 
-    const convert = (val: number) => Math.round((val || 0) * exchangeRate * 100) / 100;
+    const estimate = {
+      hs_code: classification.hs_code,
+      hs_description: classification.hs_description,
+      duty_rate_percent: effectiveDutyRate,
+      cif_value: cifVal,
+      import_duty: calc.importDuty,
+      vat: calc.vat,
+      nhil: calc.nhil,
+      getfund: calc.getfund,
+      ecowas_levy: calc.ecowasLevy,
+      au_levy: calc.auLevy,
+      exim_levy: calc.eximLevy,
+      processing_fee: calc.processingFee,
+      total_duties: calc.totalDuties,
+      total_landed_cost: calc.totalLandedCost,
+      currency: currency || "USD",
+      notes: classification.notes,
+      ecowas_applicable: classification.ecowas_applicable || false,
+      recommendations: classification.recommendations || "",
+      misclassification_warning: classification.misclassification_warning || "",
+    };
+
+    const { rate: exchangeRate, source: rateSource } = await exchangeRatePromise;
+    const convert = (val: number) => round((val || 0) * exchangeRate);
 
     const ghsConversion = {
       exchange_rate: exchangeRate,
@@ -179,8 +200,8 @@ Return your response using the suggest_duties tool. If no HS code was provided, 
       ghs_vat: convert(estimate.vat),
       ghs_nhil: convert(estimate.nhil),
       ghs_getfund: convert(estimate.getfund),
-      ghs_ecowas_levy: convert(estimate.ecowas_levy || 0),
-      ghs_au_levy: convert(estimate.au_levy || 0),
+      ghs_ecowas_levy: convert(estimate.ecowas_levy),
+      ghs_au_levy: convert(estimate.au_levy),
       ghs_exim_levy: convert(estimate.exim_levy),
       ghs_processing_fee: convert(estimate.processing_fee),
       ghs_total_duties: convert(estimate.total_duties),
