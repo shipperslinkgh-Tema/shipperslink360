@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ConsignmentList } from "@/components/office-files/ConsignmentList";
 import { ConsignmentDetail } from "@/components/office-files/ConsignmentDetail";
 import { NewConsignmentForm } from "@/components/office-files/NewConsignmentForm";
+import { DocumentScanUpload } from "@/components/office-files/DocumentScanUpload";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const OfficeFilesPortal = () => {
