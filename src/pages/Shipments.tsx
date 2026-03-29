@@ -413,6 +413,7 @@ export default function Shipments() {
           </div>
         </div>
       </div>
+      <NewShipmentDialog open={showNewShipment} onOpenChange={setShowNewShipment} />
     </div>
   );
 }
