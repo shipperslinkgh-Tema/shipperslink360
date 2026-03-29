@@ -209,7 +209,7 @@ export default function Shipments() {
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
-          <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
+          <Button className="bg-accent hover:bg-accent/90 text-accent-foreground" onClick={() => setShowNewShipment(true)}>
             <Plus className="mr-2 h-4 w-4" />
             New Shipment
           </Button>
