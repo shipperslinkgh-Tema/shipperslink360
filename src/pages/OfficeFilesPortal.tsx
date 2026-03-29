@@ -113,9 +113,8 @@ const OfficeFilesPortal = () => {
         </div>
       </div>
 
-      {/* Document Scanner */}
-      <DocumentScanUpload />
-
+      {/* Document Scanner - toggled by button */}
+      {showScanner && <DocumentScanUpload />}
 
       {/* List */}
       <ConsignmentList
