@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { NewShipmentDialog } from "@/components/shipments/NewShipmentDialog";
 import {
   Search,
   Filter,
@@ -185,6 +186,7 @@ export default function Shipments() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [showNewShipment, setShowNewShipment] = useState(false);
 
   const filteredShipments = shipments.filter((shipment) => {
     const matchesSearch =
@@ -208,7 +210,7 @@ export default function Shipments() {
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
-          <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
+          <Button className="bg-accent hover:bg-accent/90 text-accent-foreground" onClick={() => setShowNewShipment(true)}>
             <Plus className="mr-2 h-4 w-4" />
             New Shipment
           </Button>
@@ -412,6 +414,7 @@ export default function Shipments() {
           </div>
         </div>
       </div>
+      <NewShipmentDialog open={showNewShipment} onOpenChange={setShowNewShipment} />
     </div>
   );
 }
