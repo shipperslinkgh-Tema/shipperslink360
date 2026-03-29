@@ -44,21 +44,27 @@ const OfficeFilesPortal = () => {
             Permanent digital archive of completed consignment documents
           </p>
         </div>
-        {isAdmin && (
-          <Dialog open={showNew} onOpenChange={setShowNew}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" /> New Consignment
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle>Archive New Consignment</DialogTitle>
-              </DialogHeader>
-              <NewConsignmentForm onSuccess={() => setShowNew(false)} />
-            </DialogContent>
-          </Dialog>
-        )}
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-2" onClick={() => setShowScanner(!showScanner)}>
+            <ScanLine className="h-4 w-4" />
+            Scan Document
+          </Button>
+          {isAdmin && (
+            <Dialog open={showNew} onOpenChange={setShowNew}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" /> New Consignment
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Archive New Consignment</DialogTitle>
+                </DialogHeader>
+                <NewConsignmentForm onSuccess={() => setShowNew(false)} />
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
       </div>
 
       {/* Search & Filter Bar */}
