@@ -15,6 +15,7 @@ const OfficeFilesPortal = () => {
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showNew, setShowNew] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const { isAdmin } = useAuth();
   const { data: consignments = [], isLoading } = useCompletedConsignments(search || undefined);
