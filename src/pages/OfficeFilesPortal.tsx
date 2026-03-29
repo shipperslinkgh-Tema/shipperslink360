@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Plus, FileArchive, Filter } from "lucide-react";
+import { Search, Plus, FileArchive, Filter, ScanLine } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -15,6 +15,7 @@ const OfficeFilesPortal = () => {
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showNew, setShowNew] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const { isAdmin } = useAuth();
   const { data: consignments = [], isLoading } = useCompletedConsignments(search || undefined);
@@ -43,21 +44,27 @@ const OfficeFilesPortal = () => {
             Permanent digital archive of completed consignment documents
           </p>
         </div>
-        {isAdmin && (
-          <Dialog open={showNew} onOpenChange={setShowNew}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" /> New Consignment
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle>Archive New Consignment</DialogTitle>
-              </DialogHeader>
-              <NewConsignmentForm onSuccess={() => setShowNew(false)} />
-            </DialogContent>
-          </Dialog>
-        )}
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-2" onClick={() => setShowScanner(!showScanner)}>
+            <ScanLine className="h-4 w-4" />
+            Scan Document
+          </Button>
+          {isAdmin && (
+            <Dialog open={showNew} onOpenChange={setShowNew}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" /> New Consignment
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Archive New Consignment</DialogTitle>
+                </DialogHeader>
+                <NewConsignmentForm onSuccess={() => setShowNew(false)} />
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
       </div>
 
       {/* Search & Filter Bar */}
@@ -106,9 +113,8 @@ const OfficeFilesPortal = () => {
         </div>
       </div>
 
-      {/* Document Scanner */}
-      <DocumentScanUpload />
-
+      {/* Document Scanner - toggled by button */}
+      {showScanner && <DocumentScanUpload />}
 
       {/* List */}
       <ConsignmentList
