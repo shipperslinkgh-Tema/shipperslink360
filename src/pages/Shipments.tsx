@@ -186,6 +186,7 @@ export default function Shipments() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [showNewShipment, setShowNewShipment] = useState(false);
 
   const filteredShipments = shipments.filter((shipment) => {
     const matchesSearch =
