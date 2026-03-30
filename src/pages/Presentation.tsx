@@ -617,7 +617,7 @@ const slides: Slide[] = [
         "Department assignment: Operations, Documentation, Accounts, Management, Warehouse, Customer Service",
         "Client portal account creation and management",
         "Account locking after 5 failed login attempts",
-        "15-minute staff inactivity timeout, 30-minute client timeout",
+        "1-minute staff inactivity timeout with 'Session expired' warning and auto-logout",
         "Force password change on first login",
         "Complete audit log of all system mutations",
         "Role-based menu visibility and feature access",
