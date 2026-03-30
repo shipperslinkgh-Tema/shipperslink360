@@ -649,7 +649,7 @@ const slides: Slide[] = [
         "Step 5: Add fleet vehicles and driver profiles in the Trucking module",
         "Step 6: Create trips and activate live tracking — share links via WhatsApp",
         "Step 7: Start creating consignments and tracking workflows in real time",
-        "Step 8: Use the AI Duty Estimator for quick customs duty quotes",
+        "Step 8: Use the SLAC AI Duty Estimator for quick customs duty quotes in GHS",
         "Step 9: Share client portal login link with customers for self-service access",
       ],
       useCases: [
