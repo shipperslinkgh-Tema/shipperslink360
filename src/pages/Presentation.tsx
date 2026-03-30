@@ -659,7 +659,7 @@ const slides: Slide[] = [
         "Activate live tracking on trips and share links with customers instantly",
         "Visit Reports & Analytics for weekly management reviews",
         "Use the AI Assistant for quick answers without searching manually",
-        "Use the Duty Estimator for instant GHS duty estimates",
+        "Use the SLAC AI Duty Estimator for instant GHS duty estimates",
         "Bookmark the Client Portal link to share with new customers",
       ],
     },
