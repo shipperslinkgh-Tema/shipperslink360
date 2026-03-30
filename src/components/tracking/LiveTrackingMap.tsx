@@ -97,8 +97,14 @@ export function LiveTrackingMap({
 
   const center = allPoints.length > 0 ? allPoints[0] : GHANA_CENTER;
 
+  const googleMapsUrl = truckPos
+    ? `https://www.google.com/maps?q=${truckPos[0]},${truckPos[1]}`
+    : fleetPositions && fleetPositions.length > 0
+    ? `https://www.google.com/maps?q=${fleetPositions[0].lat},${fleetPositions[0].lng}`
+    : null;
+
   return (
-    <div className={className}>
+    <div className={`${className} relative`}>
       <MapContainer
         center={center}
         zoom={12}
@@ -121,6 +127,14 @@ export function LiveTrackingMap({
               <div className="text-sm">
                 <p className="font-semibold">{fp.label}</p>
                 <p className="text-muted-foreground capitalize">{fp.status.replace(/_|-/g, " ")}</p>
+                <a
+                  href={`https://www.google.com/maps?q=${fp.lat},${fp.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline text-xs mt-1 inline-block"
+                >
+                  Open in Google Maps
+                </a>
               </div>
             </Popup>
           </Marker>
@@ -154,6 +168,14 @@ export function LiveTrackingMap({
                         {latestGps.speed > 0 && <p>Speed: {latestGps.speed.toFixed(0)} km/h</p>}
                       </>
                     )}
+                    <a
+                      href={`https://www.google.com/maps?q=${truckPos[0]},${truckPos[1]}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline text-xs mt-1 inline-block"
+                    >
+                      Open in Google Maps
+                    </a>
                   </div>
                 </Popup>
               </Marker>
@@ -175,6 +197,19 @@ export function LiveTrackingMap({
           </>
         )}
       </MapContainer>
+
+      {/* Google Maps button overlay */}
+      {googleMapsUrl && (
+        <a
+          href={googleMapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute top-2 right-2 z-[1000] flex items-center gap-1.5 bg-white text-sm font-medium text-gray-700 px-3 py-1.5 rounded-md shadow-md hover:bg-gray-50 transition-colors border"
+        >
+          <ExternalLink className="h-3.5 w-3.5" />
+          Google Maps
+        </a>
+      )}
     </div>
   );
 }
