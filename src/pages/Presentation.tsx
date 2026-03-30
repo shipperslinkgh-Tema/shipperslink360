@@ -290,15 +290,16 @@ const slides: Slide[] = [
   {
     id: 10,
     title: "Live Truck Tracking",
-    subtitle: "Real-Time GPS Fleet Monitoring & Customer Tracking",
+    subtitle: "Real-Time GPS Fleet Monitoring with Google Maps",
     icon: MapPin,
     color: "from-red-600 to-red-400",
     department: "Fleet & Operations Team",
     content: {
       description:
-        "A complete real-time GPS tracking system with interactive maps, fleet overview, driver mobile interface, and customer-facing tracking portal — no app installation required.",
+        "A complete real-time GPS tracking system with interactive maps, Google Maps integration, fleet overview, driver mobile interface, and customer-facing tracking portal — no app installation required.",
       features: [
         "Interactive OpenStreetMap with live truck positions, route trails, and custom markers",
+        "Google Maps integration: Open any truck's live position directly in Google Maps for navigation",
         "Fleet Overview tab: Monitor all active trucks on a single map with real-time status",
         "All Trips tab: Full trip table with status, route, driver, and tracking controls",
         "Activate tracking from the Trucking page or Live Tracking page — generates unique URL & OTP",
@@ -310,6 +311,7 @@ const slides: Slide[] = [
       ],
       useCases: [
         "Activate tracking on a trip → copy link → WhatsApp it to the customer instantly",
+        "Click 'Open in Google Maps' to navigate to a truck's live location",
         "Monitor fleet overview map to see all in-transit trucks at a glance",
         "Customer opens tracking link in browser to see live map and ETA — no app needed",
         "Driver uses mobile interface to record arrival, start trip, and confirm delivery with OTP",
