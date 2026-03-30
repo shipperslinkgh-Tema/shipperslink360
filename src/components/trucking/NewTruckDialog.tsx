@@ -55,7 +55,7 @@ export function NewTruckDialog({ open, onOpenChange }: NewTruckDialogProps) {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["trucking-trucks"] });
+      queryClient.invalidateQueries({ queryKey: ["trucks"] });
       toast.success("Truck added successfully");
       onOpenChange(false);
       setForm({ registration_number: "", make: "", model: "", type: "", capacity: "" });
