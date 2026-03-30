@@ -290,15 +290,16 @@ const slides: Slide[] = [
   {
     id: 10,
     title: "Live Truck Tracking",
-    subtitle: "Real-Time GPS Fleet Monitoring & Customer Tracking",
+    subtitle: "Real-Time GPS Fleet Monitoring with Google Maps",
     icon: MapPin,
     color: "from-red-600 to-red-400",
     department: "Fleet & Operations Team",
     content: {
       description:
-        "A complete real-time GPS tracking system with interactive maps, fleet overview, driver mobile interface, and customer-facing tracking portal — no app installation required.",
+        "A complete real-time GPS tracking system with interactive maps, Google Maps integration, fleet overview, driver mobile interface, and customer-facing tracking portal — no app installation required.",
       features: [
         "Interactive OpenStreetMap with live truck positions, route trails, and custom markers",
+        "Google Maps integration: Open any truck's live position directly in Google Maps for navigation",
         "Fleet Overview tab: Monitor all active trucks on a single map with real-time status",
         "All Trips tab: Full trip table with status, route, driver, and tracking controls",
         "Activate tracking from the Trucking page or Live Tracking page — generates unique URL & OTP",
@@ -310,6 +311,7 @@ const slides: Slide[] = [
       ],
       useCases: [
         "Activate tracking on a trip → copy link → WhatsApp it to the customer instantly",
+        "Click 'Open in Google Maps' to navigate to a truck's live location",
         "Monitor fleet overview map to see all in-transit trucks at a glance",
         "Customer opens tracking link in browser to see live map and ETA — no app needed",
         "Driver uses mobile interface to record arrival, start trip, and confirm delivery with OTP",
@@ -375,30 +377,32 @@ const slides: Slide[] = [
   },
   {
     id: 13,
-    title: "AI Duty Estimator",
-    subtitle: "Ghana Import Duty & Tax Calculator",
+    title: "SLAC AI Duty Estimator",
+    subtitle: "Ghana Import Duty & Tax Calculator (GHS)",
     icon: Calculator,
     color: "from-orange-600 to-orange-400",
     department: "Customs & Finance",
     content: {
       description:
-        "An AI-powered import duty calculator tailored for Ghana customs (ICUMS) logic. Supports general cargo, vehicles, consolidated LCL, and air freight with real-time exchange rate conversion to GHS.",
+        "The SLAC AI Duty Estimator is an AI-powered import duty calculator tailored for Ghana customs (ICUMS) logic. Supports general cargo, vehicles, consolidated LCL, and air freight — with built-in exchange rate entry and all final estimates displayed in Ghana Cedis (GHS).",
       features: [
-        "AI-driven HS code suggestion based on product description",
+        "AI-driven HS code suggestion based on product description with confidence scoring",
         "Supports all cargo types: General, Vehicle (with engine capacity/age), LCL, Air Freight",
-        "Full Ghana levy breakdown: Import Duty, VAT, NHIL, GETFund, ECOWAS, AU, EXIM levies, Processing Fees",
-        "CIF value calculation with Cost, Insurance, and Freight inputs",
-        "Live exchange rate conversion — all results displayed in GHS",
+        "Full Ghana levy breakdown: Import Duty, VAT (15%), NHIL (2.5%), GETFund (2.5%), ECOWAS (0.5%), AU (0.2%), EXIM (0.75%), Processing Fee (1%)",
+        "CIF value calculation with separate Cost, Insurance, and Freight inputs",
+        "Exchange rate input section — enter current USD/GHS rate for real-time conversion",
+        "All final duty payable amounts displayed in Ghana Cedis (GHS)",
         "Duty band detection: 0%, 5%, 10%, 20%, 35% based on HS classification",
         "Misclassification detection and cost-saving recommendations",
-        "Step-by-step transparent calculation breakdown",
+        "Step-by-step transparent calculation breakdown with GHS equivalents",
         "Export estimate to PDF for client quotations",
         "Disclaimer: Estimates are indicative — final duty per customs assessment",
       ],
       useCases: [
         "Client asks 'How much duty on electronics from China?' → enter description, get instant GHS estimate",
+        "Enter exchange rate and CIF value → see total duty payable in Ghana Cedis immediately",
         "Calculate vehicle import duty with engine capacity and age-based depreciation",
-        "Generate a duty estimate PDF to attach to a client quotation",
+        "Generate a duty estimate PDF with GHS amounts to attach to a client quotation",
         "Compare duty rates across different HS codes to find the most accurate classification",
         "Estimate total landed cost for a consolidated LCL shipment",
       ],
@@ -547,14 +551,15 @@ const slides: Slide[] = [
   {
     id: 19,
     title: "Office Files Portal",
-    subtitle: "Secure Archive for Completed Consignments",
+    subtitle: "Secure Archive, Document Scanning & Storage",
     icon: FolderArchive,
     color: "from-slate-700 to-slate-500",
     department: "All Departments",
     content: {
       description:
-        "A permanent, secure digital archive for all finalized shipment documents. Once a consignment is marked 'Completed', its record and documents become read-only — only Super Admins can edit or delete locked files.",
+        "A permanent, secure digital archive for all finalized shipment documents with built-in document scanning. Once a consignment is marked 'Completed', its record and documents become read-only — only Super Admins can edit or delete locked files.",
       features: [
+        "Document Scanner: Scan and upload physical documents directly from the portal",
         "Auto-generated Consignment ID with BL/AWB, container numbers, and client details",
         "Mandatory document checklist across 5 categories: Customs, Shipping Line, Company Financial, Warehouse, and Shipping",
         "Drag & drop multi-file upload with automatic timestamps and uploader tracking",
@@ -566,6 +571,7 @@ const slides: Slide[] = [
         "Role-based access: Staff can view/upload, Admins can edit, Super Admins can delete",
       ],
       useCases: [
+        "Scan physical documents (receipts, customs forms) and save them to a consignment",
         "Archive a completed consignment with all customs and financial documents",
         "Verify all required documents are uploaded before marking complete",
         "Search for a past consignment by BL number to retrieve documents",
@@ -613,7 +619,7 @@ const slides: Slide[] = [
         "Department assignment: Operations, Documentation, Accounts, Management, Warehouse, Customer Service",
         "Client portal account creation and management",
         "Account locking after 5 failed login attempts",
-        "15-minute staff inactivity timeout, 30-minute client timeout",
+        "1-minute staff inactivity timeout with 'Session expired' warning and auto-logout",
         "Force password change on first login",
         "Complete audit log of all system mutations",
         "Role-based menu visibility and feature access",
@@ -645,7 +651,7 @@ const slides: Slide[] = [
         "Step 5: Add fleet vehicles and driver profiles in the Trucking module",
         "Step 6: Create trips and activate live tracking — share links via WhatsApp",
         "Step 7: Start creating consignments and tracking workflows in real time",
-        "Step 8: Use the AI Duty Estimator for quick customs duty quotes",
+        "Step 8: Use the SLAC AI Duty Estimator for quick customs duty quotes in GHS",
         "Step 9: Share client portal login link with customers for self-service access",
       ],
       useCases: [
@@ -653,7 +659,7 @@ const slides: Slide[] = [
         "Activate live tracking on trips and share links with customers instantly",
         "Visit Reports & Analytics for weekly management reviews",
         "Use the AI Assistant for quick answers without searching manually",
-        "Use the Duty Estimator for instant GHS duty estimates",
+        "Use the SLAC AI Duty Estimator for instant GHS duty estimates",
         "Bookmark the Client Portal link to share with new customers",
       ],
     },
