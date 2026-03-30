@@ -547,14 +547,15 @@ const slides: Slide[] = [
   {
     id: 19,
     title: "Office Files Portal",
-    subtitle: "Secure Archive for Completed Consignments",
+    subtitle: "Secure Archive, Document Scanning & Storage",
     icon: FolderArchive,
     color: "from-slate-700 to-slate-500",
     department: "All Departments",
     content: {
       description:
-        "A permanent, secure digital archive for all finalized shipment documents. Once a consignment is marked 'Completed', its record and documents become read-only — only Super Admins can edit or delete locked files.",
+        "A permanent, secure digital archive for all finalized shipment documents with built-in document scanning. Once a consignment is marked 'Completed', its record and documents become read-only — only Super Admins can edit or delete locked files.",
       features: [
+        "Document Scanner: Scan and upload physical documents directly from the portal",
         "Auto-generated Consignment ID with BL/AWB, container numbers, and client details",
         "Mandatory document checklist across 5 categories: Customs, Shipping Line, Company Financial, Warehouse, and Shipping",
         "Drag & drop multi-file upload with automatic timestamps and uploader tracking",
@@ -566,6 +567,7 @@ const slides: Slide[] = [
         "Role-based access: Staff can view/upload, Admins can edit, Super Admins can delete",
       ],
       useCases: [
+        "Scan physical documents (receipts, customs forms) and save them to a consignment",
         "Archive a completed consignment with all customs and financial documents",
         "Verify all required documents are uploaded before marking complete",
         "Search for a past consignment by BL number to retrieve documents",
