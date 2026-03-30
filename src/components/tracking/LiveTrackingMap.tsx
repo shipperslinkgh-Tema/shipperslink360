@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { GpsLog } from "@/types/tracking";
+import { ExternalLink } from "lucide-react";
 
 // Fix default marker icons in bundled environments
 delete (L.Icon.Default.prototype as any)._getIconUrl;
