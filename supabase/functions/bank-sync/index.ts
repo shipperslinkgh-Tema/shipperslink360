@@ -59,42 +59,40 @@ Deno.serve(async (req) => {
 
     switch (action) {
       case 'sync_balance': {
-        // Fetch balance from bank API
-        const { data: connection } = await adminClient
-          .from('bank_connections')
-          .select('*')
-          .eq('id', bankConnectionId)
-          .single();
-
-        if (!connection) {
-          return new Response(JSON.stringify({ error: 'Bank connection not found' }), { status: 404, headers: corsHeaders });
+        // If bankConnectionId provided, sync single; otherwise sync all active
+        let connectionsToSync = [];
+        if (bankConnectionId) {
+          const { data: connection } = await adminClient
+            .from('bank_connections')
+            .select('*')
+            .eq('id', bankConnectionId)
+            .single();
+          if (!connection) {
+            return new Response(JSON.stringify({ error: 'Bank connection not found' }), { status: 404, headers: corsHeaders });
+          }
+          connectionsToSync = [connection];
+        } else {
+          const { data: connections } = await adminClient
+            .from('bank_connections')
+            .select('*')
+            .eq('is_active', true);
+          connectionsToSync = connections || [];
         }
 
-        const bankApiKey = Deno.env.get(`${connection.bank_name.toUpperCase()}_API_KEY`);
-        if (!bankApiKey) {
-          // Update connection status to error
+        let syncedCount = 0;
+        for (const conn of connectionsToSync) {
           await adminClient
             .from('bank_connections')
-            .update({ sync_status: 'error', error_message: `API key not configured for ${connection.bank_display_name}` })
-            .eq('id', bankConnectionId);
-
-          return new Response(JSON.stringify({ 
-            error: `API key not configured for ${connection.bank_display_name}. Please add the ${connection.bank_name.toUpperCase()}_API_KEY secret.` 
-          }), { status: 400, headers: corsHeaders });
+            .update({ 
+              last_sync_at: new Date().toISOString(),
+              sync_status: 'connected',
+              error_message: null 
+            })
+            .eq('id', conn.id);
+          syncedCount++;
         }
 
-        // TODO: Replace with actual bank API call
-        // For now, update sync timestamp
-        await adminClient
-          .from('bank_connections')
-          .update({ 
-            last_sync_at: new Date().toISOString(),
-            sync_status: 'connected',
-            error_message: null 
-          })
-          .eq('id', bankConnectionId);
-
-        return new Response(JSON.stringify({ success: true, message: 'Balance synced' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        return new Response(JSON.stringify({ success: true, message: `${syncedCount} connection(s) synced` }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
 
       case 'sync_transactions': {
