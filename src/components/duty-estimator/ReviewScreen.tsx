@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { Car, AlertTriangle, Calculator, ArrowLeft, Edit3 } from "lucide-react";
+import { Car, AlertTriangle, Calculator, ArrowLeft, Edit3, Globe } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { VinDecodedVehicle, calculateDuty, DutyCalculation, fmt } from "./types";
+import { COUNTRIES } from "./countries";
 
 interface Props {
   vehicle: VinDecodedVehicle;
