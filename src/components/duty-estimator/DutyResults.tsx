@@ -39,7 +39,7 @@ export default function DutyResults({ estimate, ghsConversion, form, onReset }: 
     { label: "GETFund Levy", rate: "2.5%", base: `VAT Base ${curr} ${fmt(vatBase)}`, usd: estimate.getfund, ghs: ghsConversion?.ghs_getfund ?? toGhs(estimate.getfund) },
   ];
 
-  const allItems = [...breakdownItems, { label: "VAT Base", rate: "", base: "CIF + All Levies", usd: vatBase, ghs: ghsVatBase, isSummary: true }, ...taxItems];
+  const allItems: { label: string; rate: string; base: string; usd: number; ghs: number; isSummary?: boolean }[] = [...breakdownItems, { label: "VAT Base", rate: "", base: "CIF + All Levies", usd: vatBase, ghs: ghsVatBase, isSummary: true }, ...taxItems];
 
   const totalDutiesGhs = ghsConversion?.ghs_total_duties ?? toGhs(estimate.total_duties);
   const totalLandedGhs = ghsConversion?.ghs_total_landed_cost ?? toGhs(estimate.total_landed_cost);
