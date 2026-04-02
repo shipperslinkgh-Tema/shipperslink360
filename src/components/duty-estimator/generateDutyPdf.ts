@@ -1,298 +1,204 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { DutyEstimate, GhsConversion, DutyFormData, fmt } from "./types";
+import { VinDecodedVehicle, DutyCalculation, fmt } from "./types";
 
-export function generateDutyPdf(
-  estimate: DutyEstimate,
-  ghsConversion: GhsConversion | null,
-  form: DutyFormData
-) {
-  const doc = new jsPDF("p", "mm", "a4");
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const margin = 15;
-  const contentWidth = pageWidth - margin * 2;
-  let y = 15;
+export function generateVinDutyPdf(vehicle: VinDecodedVehicle, calc: DutyCalculation) {
+  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  const pw = 210;
+  const mx = 15;
+  const cw = pw - 2 * mx;
+  let y = 8;
 
-  const darkBlue = [30, 58, 95] as [number, number, number];
-  const gold = [180, 155, 80] as [number, number, number];
-  const white = [255, 255, 255] as [number, number, number];
-  const lightGray = [245, 245, 248] as [number, number, number];
-  const green = [34, 139, 34] as [number, number, number];
-  const red = [200, 50, 50] as [number, number, number];
+  const DARK_BLUE: [number, number, number] = [26, 58, 92];
+  const MID_BLUE: [number, number, number] = [46, 109, 164];
+  const LIGHT_BLUE: [number, number, number] = [220, 232, 245];
+  const LIGHT_GRAY: [number, number, number] = [245, 245, 245];
+  const YELLOW_BG: [number, number, number] = [255, 243, 205];
+  const GREEN_BG: [number, number, number] = [212, 237, 218];
+  const WHITE: [number, number, number] = [255, 255, 255];
 
-  const curr = estimate.currency || form.currency;
-  const isGhs = curr === "GHS";
-  const exchangeRate = ghsConversion?.exchange_rate ?? 1;
-  const toGhs = (v: number) => ghsConversion ? v * exchangeRate : v;
+  const today = new Date();
+  const refNo = `SLAC-DE-${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, "0")}${String(today.getDate()).padStart(2, "0")}-${Math.floor(Math.random() * 9000 + 1000)}`;
 
-  // Helper: section header
-  const sectionHeader = (title: string) => {
-    if (y > 265) { doc.addPage(); y = 15; }
-    doc.setFillColor(...darkBlue);
-    doc.rect(margin, y, contentWidth, 8, "F");
+  // Header
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(...DARK_BLUE);
+  doc.text("SHIPPERS LINK AGENCIES CO., LTD", pw / 2, y + 5, { align: "center" });
+  doc.setFontSize(9.5);
+  doc.setTextColor(...MID_BLUE);
+  doc.text("CUSTOMS DUTY ESTIMATE REPORT", pw / 2, y + 11, { align: "center" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 100, 100);
+  doc.text("Freight Forwarding & Customs Clearance Specialists | Tema Port, Ghana", pw / 2, y + 16, { align: "center" });
+  y += 19;
+  doc.setDrawColor(...DARK_BLUE);
+  doc.setLineWidth(0.7);
+  doc.line(mx, y, pw - mx, y);
+  y += 3;
+
+  // Ref Table
+  autoTable(doc, {
+    startY: y,
+    margin: { left: mx, right: mx },
+    theme: "plain",
+    styles: { fontSize: 7, cellPadding: 1.5, textColor: [60, 60, 60] },
+    columnStyles: { 0: { fontStyle: "bold", cellWidth: 25 }, 1: { cellWidth: cw / 2 - 25 }, 2: { fontStyle: "bold", cellWidth: 22 }, 3: { cellWidth: cw / 2 - 22 } },
+    body: [
+      ["Report Ref:", refNo, "Prepared by:", "SLAC Duty Desk"],
+      ["Date:", today.toLocaleDateString("en-GB"), "Validity:", "24 hours"],
+    ],
+  });
+  y = (doc as any).lastAutoTable.finalY + 3;
+
+  const sectionLabel = (text: string) => {
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.setTextColor(...white);
-    doc.text(title, margin + 4, y + 5.5);
-    y += 12;
+    doc.setFontSize(7.5);
+    doc.setTextColor(...DARK_BLUE);
+    doc.text(text, mx, y);
+    y += 3;
   };
 
-  // === HEADER ===
-  doc.setFillColor(...darkBlue);
-  doc.rect(0, 0, pageWidth, 28, "F");
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.setTextColor(...white);
-  doc.text("SHIPPERS LINK AGENCIES CO., LTD", margin, 12);
-
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(8);
-  doc.setTextColor(...gold);
-  doc.text("FREIGHT FORWARDING & CUSTOMS CLEARING", pageWidth - margin, 10, { align: "right" });
-  doc.text("Tema Port, Ghana", pageWidth - margin, 15, { align: "right" });
-
-  y = 35;
-
-  // === TITLE ===
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.setTextColor(...darkBlue);
-  doc.text("ESTIMATED CUSTOMS DUTY ASSESSMENT", pageWidth / 2, y, { align: "center" });
-  y += 6;
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(9);
-  doc.setTextColor(120, 120, 120);
-  doc.text("Pre-Arrival Duty Estimate — For Client Reference Only", pageWidth / 2, y, { align: "center" });
-  y += 10;
-
-  // Reference info
-  const refNo = `SLAC/DA/${new Date().getFullYear()}/${String(Math.floor(Math.random() * 999) + 1).padStart(3, "0")}`;
-  const dateStr = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
-
+  // Vehicle Details
+  sectionLabel("VEHICLE DETAILS");
   autoTable(doc, {
     startY: y,
-    margin: { left: margin, right: margin },
-    theme: "grid",
-    styles: { fontSize: 8, cellPadding: 2 },
-    headStyles: { fillColor: lightGray, textColor: darkBlue, fontStyle: "bold" },
-    body: [
-      [{ content: "Prepared by:", styles: { fontStyle: "bold" } }, "Shippers Link Agencies Co., Ltd", { content: "Date Issued:", styles: { fontStyle: "bold" } }, dateStr],
-      [{ content: "Port of Entry:", styles: { fontStyle: "bold" } }, "Tema, Ghana", { content: "Goods:", styles: { fontStyle: "bold" } }, form.goods_description || "—"],
-    ],
-    columnStyles: { 0: { cellWidth: 25 }, 1: { cellWidth: 55 }, 2: { cellWidth: 25 }, 3: { cellWidth: 55 } },
-  });
-  y = (doc as any).lastAutoTable.finalY + 6;
-
-  // === SECTION 1: TARIFF CLASSIFICATION ===
-  sectionHeader("1. TARIFF CLASSIFICATION & DUTY RATE");
-
-  autoTable(doc, {
-    startY: y,
-    margin: { left: margin, right: margin },
-    theme: "grid",
-    headStyles: { fillColor: darkBlue, textColor: white, fontStyle: "bold", fontSize: 8 },
-    styles: { fontSize: 9, cellPadding: 3 },
-    head: [["HS Code", "Description", "Import Duty Rate"]],
-    body: [[
-      estimate.hs_code,
-      estimate.hs_description,
-      `${estimate.duty_rate_percent}%${estimate.duty_rate_percent === 0 ? " — ZERO RATED" : ""}`,
-    ]],
+    margin: { left: mx, right: mx },
+    theme: "plain",
+    styles: { fontSize: 7, cellPadding: { top: 1.5, bottom: 1.5, left: 3, right: 3 } },
     columnStyles: {
-      0: { cellWidth: 25, fontStyle: "bold" },
-      2: {
-        cellWidth: 40,
-        fontStyle: "bold",
-        textColor: estimate.duty_rate_percent === 0 ? green : darkBlue,
-      },
+      0: { fontStyle: "bold", fillColor: LIGHT_BLUE, cellWidth: cw * 0.15 },
+      1: { cellWidth: cw * 0.35 },
+      2: { fontStyle: "bold", fillColor: LIGHT_BLUE, cellWidth: cw * 0.15 },
+      3: { cellWidth: cw * 0.35 },
     },
-  });
-  y = (doc as any).lastAutoTable.finalY + 6;
-
-  // === SECTION 2: VALUATION BASIS ===
-  sectionHeader("2. VALUATION BASIS (GRA CIF Methodology)");
-
-  const fob = parseFloat(form.fob_value) || 0;
-  const freight = parseFloat(form.freight_value) || 0;
-  const insurance = parseFloat(form.insurance_value) || 0;
-
-  autoTable(doc, {
-    startY: y,
-    margin: { left: margin, right: margin },
-    theme: "grid",
-    headStyles: { fillColor: darkBlue, textColor: white, fontStyle: "bold", fontSize: 8 },
-    styles: { fontSize: 9, cellPadding: 3 },
-    head: [["Parameter", "Detail", `Amount (${curr})`]],
     body: [
-      ["FOB Value", "Declared FOB value", `$ ${fmt(fob)}`],
-      ["Freight", `${form.country_of_origin || "Origin"} → Tema Port`, `$ ${fmt(freight)}`],
-      ["Insurance (est.)", "Based on FOB value", `$ ${fmt(insurance)}`],
-      [
-        { content: "CIF Value (Customs Base)", styles: { fontStyle: "bold", textColor: darkBlue } },
-        { content: "Cost + Insurance + Freight", styles: { fontStyle: "bold" } },
-        { content: `$ ${fmt(estimate.cif_value)}`, styles: { fontStyle: "bold", textColor: darkBlue } },
-      ],
+      ["Make", vehicle.make, "Model", vehicle.model],
+      ["Year", String(vehicle.modelYear), "Engine", vehicle.displacementL !== "—" ? `${vehicle.displacementL}L` : "—"],
+      ["Fuel", vehicle.fuelType, "Transmission", vehicle.transmissionStyle],
+      ["Drive Type", vehicle.driveType, "Body Class", vehicle.bodyClass],
+      ["VIN", vehicle.vin, "Vehicle Age", `${calc.vehicle_age} years${calc.is_over_10_years ? " (PENALTY)" : ""}`],
     ],
-    columnStyles: { 0: { cellWidth: 45 }, 2: { cellWidth: 35, halign: "right" } },
-  });
-  y = (doc as any).lastAutoTable.finalY + 6;
-
-  // === SECTION 3: DUTY BREAKDOWN ===
-  if (y > 200) { doc.addPage(); y = 15; }
-  sectionHeader("3. ESTIMATED DUTY & LEVY BREAKDOWN (2026 GRA / ICUMS Rates)");
-
-  const vatBase = estimate.cif_value + estimate.import_duty + (estimate.ecowas_levy || 0) + (estimate.au_levy || 0) + estimate.exim_levy + estimate.processing_fee;
-
-  const breakdownBody: any[][] = [
-    [`Import Duty (HS ${estimate.hs_code})`, `${estimate.duty_rate_percent}%`, `CIF $${fmt(estimate.cif_value)}`, `$ ${fmt(estimate.import_duty)}`, `GHS ${fmt(ghsConversion?.ghs_import_duty ?? toGhs(estimate.import_duty))}`],
-    ["ECOWAS Community Levy", "0.5%", `CIF $${fmt(estimate.cif_value)}`, `$ ${fmt(estimate.ecowas_levy || 0)}`, `GHS ${fmt(ghsConversion?.ghs_ecowas_levy ?? toGhs(estimate.ecowas_levy || 0))}`],
-    ["EXIM / AU Levy", "0.75%", `CIF $${fmt(estimate.cif_value)}`, `$ ${fmt(estimate.exim_levy + (estimate.au_levy || 0))}`, `GHS ${fmt((ghsConversion?.ghs_exim_levy ?? toGhs(estimate.exim_levy)) + (ghsConversion?.ghs_au_levy ?? toGhs(estimate.au_levy || 0)))}`],
-    ["Examination / Processing Fee", "1%", `CIF $${fmt(estimate.cif_value)}`, `$ ${fmt(estimate.processing_fee)}`, `GHS ${fmt(ghsConversion?.ghs_processing_fee ?? toGhs(estimate.processing_fee))}`],
-    [
-      { content: "VAT Base", styles: { fontStyle: "bold" } },
-      { content: "", styles: {} },
-      { content: "CIF + All Levies", styles: { fontStyle: "bold" } },
-      { content: `$ ${fmt(vatBase)}`, styles: { fontStyle: "bold" } },
-      { content: `GHS ${fmt(toGhs(vatBase))}`, styles: { fontStyle: "bold", textColor: darkBlue } },
-    ],
-    ["VAT", "15%", `VAT Base $${fmt(vatBase)}`, `$ ${fmt(estimate.vat)}`, `GHS ${fmt(ghsConversion?.ghs_vat ?? toGhs(estimate.vat))}`],
-    ["NHIL (National Health Insurance Levy)", "2.5%", `VAT Base $${fmt(vatBase)}`, `$ ${fmt(estimate.nhil)}`, `GHS ${fmt(ghsConversion?.ghs_nhil ?? toGhs(estimate.nhil))}`],
-    ["GETFund Levy", "2.5%", `VAT Base $${fmt(vatBase)}`, `$ ${fmt(estimate.getfund)}`, `GHS ${fmt(ghsConversion?.ghs_getfund ?? toGhs(estimate.getfund))}`],
-  ];
-
-  const headCols = ["Charge", "Rate", "Base", curr, "GHS"];
-  if (isGhs) {
-    breakdownBody.forEach(row => row.splice(3, 1));
-    headCols.splice(3, 1);
-  }
-
-  autoTable(doc, {
-    startY: y,
-    margin: { left: margin, right: margin },
-    theme: "grid",
-    headStyles: { fillColor: darkBlue, textColor: white, fontStyle: "bold", fontSize: 7 },
-    styles: { fontSize: 8, cellPadding: 2.5 },
-    head: [headCols],
-    body: breakdownBody,
-    columnStyles: isGhs
-      ? { 0: { cellWidth: 55 }, 3: { halign: "right" } }
-      : { 0: { cellWidth: 50 }, 3: { halign: "right" }, 4: { halign: "right" } },
-    didParseCell: (data: any) => {
-      // Color zero values green
-      if (data.section === "body" && data.cell.text[0]?.includes("$ 0.00")) {
-        data.cell.styles.textColor = green;
-      }
-      if (data.section === "body" && data.cell.text[0]?.includes("GHS 0.00")) {
-        data.cell.styles.textColor = green;
-      }
-    },
+    alternateRowStyles: { fillColor: LIGHT_GRAY },
   });
   y = (doc as any).lastAutoTable.finalY + 4;
 
-  // Total duty box
-  const totalDutiesGhs = ghsConversion?.ghs_total_duties ?? toGhs(estimate.total_duties);
-
-  doc.setDrawColor(...darkBlue);
-  doc.setLineWidth(0.6);
-  doc.rect(margin, y, contentWidth, 18);
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(...darkBlue);
-  doc.text("ESTIMATED TOTAL CUSTOMS DUTY PAYABLE", margin + 4, y + 6);
-
-  if (!isGhs) {
-    doc.setFontSize(11);
-    doc.text(`≈ ${curr} ${fmt(estimate.total_duties)}`, pageWidth - margin - 4, y + 6, { align: "right" });
-  }
-
-  // GHS total
-  doc.setFontSize(8);
-  doc.setTextColor(120, 120, 120);
-  if (ghsConversion && !isGhs) {
-    doc.text(`Exchange Rate: GHS ${fmt(exchangeRate)} / ${ghsConversion.from_currency} (${ghsConversion.rate_source === "live" ? "Live" : ghsConversion.rate_source === "manual" ? "Manual" : "Indicative"} Rate)`, margin + 4, y + 14);
-  }
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.setTextColor(0, 120, 0);
-  doc.text(`≈ GHS ${fmt(totalDutiesGhs)}`, pageWidth - margin - 4, y + 14, { align: "right" });
-
-  y += 24;
-
-  // === SECTION 4: KEY FLAGS ===
-  if (estimate.recommendations || estimate.notes) {
-    if (y > 240) { doc.addPage(); y = 15; }
-    sectionHeader("4. KEY FLAGS & NOTES");
-
-    const flagRows: any[][] = [];
-    if (estimate.recommendations) {
-      flagRows.push([{ content: "COST-SAVING", styles: { fontStyle: "bold", textColor: green } }, estimate.recommendations]);
-    }
-    if (estimate.notes) {
-      flagRows.push([{ content: "AI NOTES", styles: { fontStyle: "bold", textColor: darkBlue } }, estimate.notes]);
-    }
-    if (estimate.misclassification_warning) {
-      flagRows.push([{ content: "CLASSIFICATION ALERT", styles: { fontStyle: "bold", textColor: red } }, estimate.misclassification_warning]);
-    }
-
-    autoTable(doc, {
-      startY: y,
-      margin: { left: margin, right: margin },
-      theme: "grid",
-      styles: { fontSize: 8, cellPadding: 3 },
-      body: flagRows,
-      columnStyles: { 0: { cellWidth: 35 } },
-    });
-    y = (doc as any).lastAutoTable.finalY + 6;
-  }
-
-  // === SECTION 5: VERIFICATION TOOLS ===
-  if (y > 240) { doc.addPage(); y = 15; }
-  sectionHeader(`${estimate.recommendations || estimate.notes ? "5" : "4"}. RECOMMENDED VERIFICATION TOOLS`);
-
+  // Valuation Basis
+  sectionLabel("VALUATION BASIS");
   autoTable(doc, {
     startY: y,
-    margin: { left: margin, right: margin },
-    theme: "grid",
-    styles: { fontSize: 8, cellPadding: 2.5 },
+    margin: { left: mx, right: mx },
+    theme: "plain",
+    styles: { fontSize: 7.5, cellPadding: { top: 2, bottom: 2, left: 3, right: 3 } },
+    columnStyles: {
+      0: { fontStyle: "bold", fillColor: LIGHT_BLUE, cellWidth: cw * 0.5 },
+      1: { halign: "right", cellWidth: cw * 0.5 },
+    },
     body: [
-      [{ content: "ICUMS Official Calculator", styles: { fontStyle: "bold", textColor: darkBlue } }, "https://external.unipassghana.com", "Official GRA duty estimate"],
-      [{ content: "AutoDutyChecker", styles: { fontStyle: "bold", textColor: darkBlue } }, "https://autodutychecker.com", "GRA-aligned duty estimates"],
-      [{ content: "Kitannex.com", styles: { fontStyle: "bold", textColor: darkBlue } }, "https://kitannex.com", "ICUMS-flow calculator with live rates"],
-      [{ content: "GRA Vehicle Importation", styles: { fontStyle: "bold", textColor: darkBlue } }, "https://gra.gov.gh/customs/vehicle-importation", "Official GRA vehicle import guide"],
+      ["CIF Value (USD)", `$ ${fmt(calc.cif_usd)}`],
+      [
+        { content: "Exchange Rate (GHS/USD)", styles: { fillColor: YELLOW_BG, fontStyle: "bold", textColor: [122, 92, 0] as [number, number, number] } },
+        { content: `1 USD = ${fmt(calc.exchange_rate)} GHS`, styles: { fillColor: YELLOW_BG, fontStyle: "bold", textColor: [122, 92, 0] as [number, number, number], halign: "right" as const } },
+      ],
+      ["GHS Equivalent Value", `GHS ${fmt(calc.cif_ghs)}`],
     ],
-    columnStyles: { 0: { cellWidth: 40 }, 1: { cellWidth: 55 } },
   });
-  y = (doc as any).lastAutoTable.finalY + 6;
+  y = (doc as any).lastAutoTable.finalY + 4;
 
-  // === DISCLAIMER ===
-  if (y > 260) { doc.addPage(); y = 15; }
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(6.5);
-  doc.setTextColor(120, 120, 120);
-  const disclaimer = "DISCLAIMER: This document is a pre-arrival duty estimate prepared for client planning purposes only. All figures are based on publicly available GRA/ICUMS rates and indicative valuations. The final assessed duty is determined solely by the Ghana Revenue Authority (GRA) Customs Division through the ICUMS/Publican AI System. Shippers Link Agencies Co., Ltd assumes no liability for discrepancies between this estimate and the official GRA assessment. Clients are advised to obtain a formal CCVR from ICUMS before making any financial commitments.";
-  const disclaimerLines = doc.splitTextToSize(disclaimer, contentWidth);
-  doc.text(disclaimerLines, margin, y);
-  y += disclaimerLines.length * 3 + 6;
+  // Duty Breakdown
+  sectionLabel("ESTIMATED DUTY BREAKDOWN");
+  autoTable(doc, {
+    startY: y,
+    margin: { left: mx, right: mx },
+    head: [["#", "Charge Component", "Basis / Notes", "Amount (GHS)"]],
+    body: [
+      ["1", "Import Duty", "20% on CIF Value", `GHS ${fmt(calc.import_duty)}`],
+      ["2", "Value Added Tax (VAT)", "15% VAT-inclusive formula", `GHS ${fmt(calc.vat)}`],
+      ["3", "NHIL + GETFund Levy", "2.5% + 2.5% on CIF", `GHS ${fmt(calc.nhil_getfund)}`],
+      ["4", "Other Statutory Charges", "ECOWAS Levy, EXIM, SRIC etc.", `GHS ${fmt(calc.statutory_charges)}`],
+      ["5", "Age/Depreciation Penalty", calc.is_over_10_years ? `Vehicle ${calc.vehicle_age} yrs old` : "N/A", `GHS ${fmt(calc.age_penalty)}`],
+    ],
+    theme: "grid",
+    headStyles: { fillColor: DARK_BLUE, textColor: WHITE, fontStyle: "bold", fontSize: 7.5, cellPadding: 2 },
+    styles: { fontSize: 7, cellPadding: { top: 1.8, bottom: 1.8, left: 3, right: 3 } },
+    columnStyles: { 0: { cellWidth: 8, halign: "center" }, 3: { halign: "right", fontStyle: "bold" } },
+    alternateRowStyles: { fillColor: LIGHT_GRAY },
+  });
+  y = (doc as any).lastAutoTable.finalY;
 
-  // === FOOTER ===
-  if (y > 270) { doc.addPage(); y = 15; }
-  doc.setFillColor(...darkBlue);
-  doc.rect(0, doc.internal.pageSize.getHeight() - 18, pageWidth, 18, "F");
+  // Total + Range rows
+  autoTable(doc, {
+    startY: y,
+    margin: { left: mx, right: mx },
+    theme: "grid",
+    styles: { fontSize: 8, cellPadding: { top: 2.5, bottom: 2.5, left: 3, right: 3 }, lineColor: DARK_BLUE, lineWidth: 0.4 },
+    body: [
+      [
+        { content: "", styles: { cellWidth: 8 } },
+        { content: "TOTAL ESTIMATED DUTY", colSpan: 2, styles: { fontStyle: "bold", fillColor: YELLOW_BG, textColor: [92, 61, 0] as [number, number, number] } },
+        { content: `GHS ${fmt(calc.total_duty)}`, styles: { halign: "right" as const, fontStyle: "bold", fillColor: YELLOW_BG, textColor: [92, 61, 0] as [number, number, number] } },
+      ],
+      [
+        { content: "", styles: { cellWidth: 8 } },
+        { content: "ESTIMATED NEGOTIABLE RANGE", colSpan: 2, styles: { fontStyle: "bold", fillColor: GREEN_BG, textColor: [21, 87, 36] as [number, number, number] } },
+        { content: `GHS ${fmt(calc.negotiable_min)} – ${fmt(calc.negotiable_max)}`, styles: { halign: "right" as const, fontStyle: "bold", fillColor: GREEN_BG, textColor: [21, 87, 36] as [number, number, number] } },
+      ],
+    ],
+  });
+  y = (doc as any).lastAutoTable.finalY + 3;
 
+  // Notes
+  doc.setDrawColor(180, 180, 180);
+  doc.setLineWidth(0.3);
+  doc.line(mx, y, pw - mx, y);
+  y += 3;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
-  doc.setTextColor(...white);
-  doc.text("Shippers Link Agencies Co., Ltd (SLAC) — Tema Port, Ghana", margin, doc.internal.pageSize.getHeight() - 10);
-  doc.text("Customs Clearing & Freight Forwarding", margin, doc.internal.pageSize.getHeight() - 6);
+  doc.setTextColor(...DARK_BLUE);
+  doc.text("IMPORTANT NOTES", mx, y);
+  y += 3;
 
+  const notes = [
+    `1. Exchange rate used: 1 USD = ${fmt(calc.exchange_rate)} GHS. Final duty is determined by ICUMS/Publican AI at time of declaration.`,
+    "2. GRA applies additional penalties for vehicles over 10 years old under the depreciation and age assessment policy.",
+    "3. Negotiable range is estimated at 56.5%–75.8% of total duty based on historical settlement patterns.",
+    "4. Percentage-based charges are computed on GHS CIF value; flat charges are scaled to CIF bracket.",
+    "5. This estimate is for planning purposes only. SLAC is not liable for differences from GRA final assessment.",
+    "6. As of March 2026, all customs declarations must be processed through the Publican AI System (ICUMS replacement).",
+  ];
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(...gold);
-  doc.text(`Generated: ${dateStr}`, pageWidth - margin, doc.internal.pageSize.getHeight() - 10, { align: "right" });
-  doc.text(`Exchange Rate: GHS ${fmt(exchangeRate)}/${ghsConversion?.from_currency || curr}`, pageWidth - margin, doc.internal.pageSize.getHeight() - 6, { align: "right" });
+  doc.setFontSize(6.5);
+  doc.setTextColor(80, 80, 80);
+  notes.forEach((note) => {
+    const lines = doc.splitTextToSize(note, cw);
+    doc.text(lines, mx, y);
+    y += lines.length * 3 + 1.5;
+  });
 
-  // Save
-  const filename = `SLAC_Duty_Estimate_${estimate.hs_code.replace(/\./g, "")}_${new Date().toISOString().slice(0, 10)}.pdf`;
-  doc.save(filename);
+  // Footer
+  y = 280;
+  doc.setDrawColor(180, 180, 180);
+  doc.setLineWidth(0.3);
+  doc.line(mx, y, pw - mx, y);
+  y += 3;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7);
+  doc.setTextColor(...DARK_BLUE);
+  doc.text("SHIPPERS LINK AGENCIES CO., LTD", pw / 2, y, { align: "center" });
+  y += 3;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(6.5);
+  doc.setTextColor(100, 100, 100);
+  doc.text("GIFF Secretariat Ext. Room 4, Meridian Rd, Tema Harbour", pw / 2, y, { align: "center" });
+  y += 2.5;
+  doc.text("Tel: 0209116560 | 0245525968", pw / 2, y, { align: "center" });
+  y += 2.5;
+  doc.text("www.shipperslinkgh.com | info@shipperslinkgh.com", pw / 2, y, { align: "center" });
+  y += 3;
+  doc.setFontSize(6);
+  doc.setTextColor(150, 150, 150);
+  doc.text("This document is confidential and intended for the named recipient only.", pw / 2, y, { align: "center" });
+
+  doc.save(`SLAC_Duty_Estimate_${vehicle.make}_${vehicle.model}_${vehicle.modelYear}.pdf`);
 }
