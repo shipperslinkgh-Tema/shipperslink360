@@ -36,15 +36,25 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-pro",
         messages: [
           {
             role: "system",
-            content: `You are a Ghana customs HS code classification expert. Given a goods description, suggest the most likely HS codes (up to 5) that match. Use the Harmonized System (HS) nomenclature used by Ghana Revenue Authority and ECOWAS CET. For each suggestion, provide the HS code (at least 6 digits), a short description of the tariff heading, and the typical Ghana import duty rate percentage.`,
+            content: `You are a senior Ghana customs tariff classification expert with comprehensive knowledge of the Harmonized System (HS), Ghana Revenue Authority (GRA) tariff schedule, and ECOWAS Common External Tariff (CET).
+
+Given a goods description, suggest up to 5 most likely HS codes. Rank by likelihood, with the most probable first.
+
+IMPORTANT RULES:
+- Use 6-10 digit HS codes as used by Ghana Customs/ICUMS
+- Duty rates must be from Ghana's actual tariff bands: 0%, 5%, 10%, 20%, or 35%
+- Consider the specific form, material, and end-use of the goods
+- If the description is vague, suggest codes for the most common interpretations
+- Mark confidence as "high" only when you are very certain of the classification
+- Always consider whether the goods might fall under a more specific subheading`,
           },
           {
             role: "user",
-            content: `Suggest HS codes for the following goods: "${goods_description}"`,
+            content: `Suggest the most accurate HS codes for Ghana customs classification of: "${goods_description}"`,
           },
         ],
         tools: [
@@ -52,7 +62,7 @@ serve(async (req) => {
             type: "function",
             function: {
               name: "suggest_hs_codes",
-              description: "Return a list of suggested HS codes for the given goods description",
+              description: "Return a ranked list of suggested HS codes for the given goods description",
               parameters: {
                 type: "object",
                 properties: {
@@ -61,10 +71,10 @@ serve(async (req) => {
                     items: {
                       type: "object",
                       properties: {
-                        hs_code: { type: "string", description: "HS code (6-10 digits with dots)" },
-                        description: { type: "string", description: "Short tariff heading description" },
-                        duty_rate: { type: "number", description: "Typical Ghana import duty rate %" },
-                        confidence: { type: "string", enum: ["high", "medium", "low"], description: "Confidence level of the suggestion" },
+                        hs_code: { type: "string", description: "HS code (6-10 digits with dots, e.g. 8471.30.00)" },
+                        description: { type: "string", description: "Tariff heading description as it appears in Ghana's schedule" },
+                        duty_rate: { type: "number", description: "Ghana import duty rate % (0, 5, 10, 20, or 35)" },
+                        confidence: { type: "string", enum: ["high", "medium", "low"], description: "Classification confidence level" },
                       },
                       required: ["hs_code", "description", "duty_rate", "confidence"],
                       additionalProperties: false,
