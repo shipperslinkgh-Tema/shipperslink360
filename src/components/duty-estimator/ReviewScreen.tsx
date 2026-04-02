@@ -19,6 +19,7 @@ interface Props {
 export default function ReviewScreen({ vehicle, onBack, onCalculated }: Props) {
   const [cifUsd, setCifUsd] = useState("");
   const [exchangeRate, setExchangeRate] = useState("16.50");
+  const [countryOfOrigin, setCountryOfOrigin] = useState("");
   const currentYear = new Date().getFullYear();
   const vehicleAge = currentYear - vehicle.modelYear;
   const isOld = vehicleAge > 10;
