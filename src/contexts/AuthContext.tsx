@@ -192,8 +192,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: null };
   };
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
+  const signOut = async (scope: "local" | "global" = "local") => {
+    // Log the sign-out action
+    if (user) {
+      await supabase.from("audit_logs").insert({
+        user_id: user.id,
+        action: "logout",
+        resource_type: "auth",
+        resource_id: user.id,
+        details: { scope },
+      }).catch(() => {});
+    }
+    await supabase.auth.signOut({ scope });
     setProfile(null);
     setRoles([]);
   };
