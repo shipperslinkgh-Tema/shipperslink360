@@ -120,7 +120,7 @@ export function generateGoodsDutyPdf(estimate: any, ghsConversion: any, currency
   y = (doc as any).lastAutoTable.finalY;
 
   // Totals
-  const totalBody = hasGhs
+  const totalBody: any[][] = hasGhs
     ? [
         [
           { content: "", styles: { cellWidth: 8 } },
