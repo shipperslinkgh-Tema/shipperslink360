@@ -32,7 +32,7 @@ interface AuthContextType {
   roles: AppRole[];
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signOut: () => Promise<void>;
+  signOut: (scope?: "local" | "global") => Promise<void>;
   isAdmin: boolean;
   department: Department | null;
 }
