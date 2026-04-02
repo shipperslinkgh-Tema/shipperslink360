@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { fmt } from "./types";
 import { generateGoodsDutyPdf } from "./generateGoodsDutyPdf";
+import { COUNTRIES } from "./countries";
 
 interface HsSuggestion {
   hs_code: string;
