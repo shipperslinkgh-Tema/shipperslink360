@@ -139,11 +139,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      // Track failed login - try to find user by email
-      return { error: error.message };
+      // Try to increment failed login attempts via edge function
+      try {
+        await supabase.functions.invoke("track-failed-login", {
+          body: { email },
+        });
+      } catch (_) {
+        // Silently fail - don't reveal user existence
+      }
+      return { error: "Invalid email or password." };
     }
 
     if (data.user) {
+      // Check if account is locked
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("is_locked, is_active")
+        .eq("user_id", data.user.id)
+        .single();
+
+      if (profileData?.is_locked) {
+        await supabase.auth.signOut();
+        return { error: "Your account has been locked due to too many failed login attempts. Contact an administrator." };
+      }
+
+      if (profileData && !profileData.is_active) {
+        await supabase.auth.signOut();
+        return { error: "Your account has been deactivated. Contact an administrator." };
+      }
+
       // Reset failed attempts and update last login
       await supabase.rpc("reset_failed_login", { _user_id: data.user.id });
 
@@ -153,6 +177,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ip_address: "browser",
         user_agent: navigator.userAgent,
         success: true,
+      });
+
+      // Log audit trail
+      await supabase.from("audit_logs").insert({
+        user_id: data.user.id,
+        action: "login",
+        resource_type: "auth",
+        resource_id: data.user.id,
+        details: { user_agent: navigator.userAgent },
       });
     }
 
