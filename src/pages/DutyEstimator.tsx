@@ -1,33 +1,35 @@
 import { useState } from "react";
-import { Calculator, AlertTriangle } from "lucide-react";
+import { Calculator, AlertTriangle, Car, Package } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VinEntryScreen from "@/components/duty-estimator/VinEntryScreen";
 import ReviewScreen from "@/components/duty-estimator/ReviewScreen";
 import ResultsScreen from "@/components/duty-estimator/ResultsScreen";
 import ManualEntryScreen from "@/components/duty-estimator/ManualEntryScreen";
+import GoodsEstimator from "@/components/duty-estimator/GoodsEstimator";
 import { VinDecodedVehicle, DutyCalculation } from "@/components/duty-estimator/types";
 
-type Screen = "vin" | "manual" | "review" | "results";
+type VehicleScreen = "vin" | "manual" | "review" | "results";
 
 export default function DutyEstimator() {
-  const [screen, setScreen] = useState<Screen>("vin");
+  const [vehicleScreen, setVehicleScreen] = useState<VehicleScreen>("vin");
   const [vehicle, setVehicle] = useState<VinDecodedVehicle | null>(null);
   const [calc, setCalc] = useState<DutyCalculation | null>(null);
 
   const handleDecoded = (v: VinDecodedVehicle) => {
     setVehicle(v);
-    setScreen("review");
+    setVehicleScreen("review");
   };
 
   const handleCalculated = (c: DutyCalculation) => {
     setCalc(c);
-    setScreen("results");
+    setVehicleScreen("results");
   };
 
-  const handleReset = () => {
+  const handleVehicleReset = () => {
     setVehicle(null);
     setCalc(null);
-    setScreen("vin");
+    setVehicleScreen("vin");
   };
 
   return (
@@ -39,7 +41,7 @@ export default function DutyEstimator() {
             SLAC AI DUTY ESTIMATOR
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            VIN-verified Ghana customs duty calculator with PDF export
+            AI-driven Ghana import duty calculator — vehicles &amp; general goods
           </p>
         </div>
         <Badge variant="outline" className="flex items-center gap-1 text-warning border-warning/40">
@@ -48,18 +50,37 @@ export default function DutyEstimator() {
         </Badge>
       </div>
 
-      {screen === "vin" && (
-        <VinEntryScreen onDecoded={handleDecoded} onManualEntry={() => setScreen("manual")} />
-      )}
-      {screen === "manual" && (
-        <ManualEntryScreen onSubmit={handleDecoded} onBack={() => setScreen("vin")} />
-      )}
-      {screen === "review" && vehicle && (
-        <ReviewScreen vehicle={vehicle} onBack={() => setScreen("vin")} onCalculated={handleCalculated} />
-      )}
-      {screen === "results" && vehicle && calc && (
-        <ResultsScreen vehicle={vehicle} calc={calc} onBack={() => setScreen("review")} onReset={handleReset} />
-      )}
+      <Tabs defaultValue="vehicles" className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="vehicles" className="flex items-center gap-2">
+            <Car className="h-4 w-4" />
+            Vehicles
+          </TabsTrigger>
+          <TabsTrigger value="goods" className="flex items-center gap-2">
+            <Package className="h-4 w-4" />
+            General Goods
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="vehicles" className="mt-6">
+          {vehicleScreen === "vin" && (
+            <VinEntryScreen onDecoded={handleDecoded} onManualEntry={() => setVehicleScreen("manual")} />
+          )}
+          {vehicleScreen === "manual" && (
+            <ManualEntryScreen onSubmit={handleDecoded} onBack={() => setVehicleScreen("vin")} />
+          )}
+          {vehicleScreen === "review" && vehicle && (
+            <ReviewScreen vehicle={vehicle} onBack={() => setVehicleScreen("vin")} onCalculated={handleCalculated} />
+          )}
+          {vehicleScreen === "results" && vehicle && calc && (
+            <ResultsScreen vehicle={vehicle} calc={calc} onBack={() => setVehicleScreen("review")} onReset={handleVehicleReset} />
+          )}
+        </TabsContent>
+
+        <TabsContent value="goods" className="mt-6">
+          <GoodsEstimator />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
