@@ -282,6 +282,10 @@ export function TopBar() {
               <span>Account Settings</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
+            <DropdownMenuItem className="cursor-pointer text-muted-foreground" onClick={() => signOut("global")}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out all devices</span>
+            </DropdownMenuItem>
             <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive" onClick={() => signOut()}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
