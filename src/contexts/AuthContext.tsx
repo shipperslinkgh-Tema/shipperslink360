@@ -195,13 +195,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async (scope: "local" | "global" = "local") => {
     // Log the sign-out action
     if (user) {
-      await supabase.from("audit_logs").insert({
-        user_id: user.id,
-        action: "logout",
-        resource_type: "auth",
-        resource_id: user.id,
-        details: { scope },
-      }).catch(() => {});
+      try {
+        await supabase.from("audit_logs").insert({
+          user_id: user.id,
+          action: "logout",
+          resource_type: "auth",
+          resource_id: user.id,
+          details: { scope } as any,
+        });
+      } catch (_) {}
     }
     await supabase.auth.signOut({ scope });
     setProfile(null);
