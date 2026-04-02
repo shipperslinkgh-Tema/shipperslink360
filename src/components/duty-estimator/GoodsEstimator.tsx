@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { fmt } from "./types";
 import { generateGoodsDutyPdf } from "./generateGoodsDutyPdf";
+import { COUNTRIES } from "./countries";
 
 interface HsSuggestion {
   hs_code: string;
@@ -53,12 +54,7 @@ interface GhsConversion {
 }
 
 const CURRENCIES = ["USD", "EUR", "GBP", "GHS", "CNY"];
-const COMMON_ORIGINS = [
-  "China", "United States", "United Kingdom", "Germany", "India",
-  "Turkey", "Japan", "South Korea", "Nigeria", "Côte d'Ivoire",
-  "Togo", "South Africa", "Netherlands", "Italy", "France",
-  "Brazil", "UAE", "Thailand", "Malaysia",
-];
+const COMMON_ORIGINS = COUNTRIES;
 
 const CARGO_TYPES = [
   { value: "general", label: "General Cargo" },

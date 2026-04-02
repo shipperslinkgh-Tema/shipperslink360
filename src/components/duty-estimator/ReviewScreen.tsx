@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { Car, AlertTriangle, Calculator, ArrowLeft, Edit3 } from "lucide-react";
+import { Car, AlertTriangle, Calculator, ArrowLeft, Edit3, Globe } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { VinDecodedVehicle, calculateDuty, DutyCalculation, fmt } from "./types";
+import { COUNTRIES } from "./countries";
 
 interface Props {
   vehicle: VinDecodedVehicle;
@@ -17,6 +19,7 @@ interface Props {
 export default function ReviewScreen({ vehicle, onBack, onCalculated }: Props) {
   const [cifUsd, setCifUsd] = useState("");
   const [exchangeRate, setExchangeRate] = useState("16.50");
+  const [countryOfOrigin, setCountryOfOrigin] = useState("");
   const currentYear = new Date().getFullYear();
   const vehicleAge = currentYear - vehicle.modelYear;
   const isOld = vehicleAge > 10;
@@ -111,6 +114,19 @@ export default function ReviewScreen({ vehicle, onBack, onCalculated }: Props) {
               />
               <p className="text-[10px] text-muted-foreground">Default: current approximate rate</p>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5">
+              <Globe className="h-3.5 w-3.5 text-primary" />
+              Country of Origin
+            </Label>
+            <Select value={countryOfOrigin} onValueChange={setCountryOfOrigin}>
+              <SelectTrigger><SelectValue placeholder="Select country of origin" /></SelectTrigger>
+              <SelectContent>
+                {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
 
           {cifUsd && parseFloat(cifUsd) > 0 && exchangeRate && (
