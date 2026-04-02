@@ -54,12 +54,7 @@ interface GhsConversion {
 }
 
 const CURRENCIES = ["USD", "EUR", "GBP", "GHS", "CNY"];
-const COMMON_ORIGINS = [
-  "China", "United States", "United Kingdom", "Germany", "India",
-  "Turkey", "Japan", "South Korea", "Nigeria", "Côte d'Ivoire",
-  "Togo", "South Africa", "Netherlands", "Italy", "France",
-  "Brazil", "UAE", "Thailand", "Malaysia",
-];
+const COMMON_ORIGINS = COUNTRIES;
 
 const CARGO_TYPES = [
   { value: "general", label: "General Cargo" },

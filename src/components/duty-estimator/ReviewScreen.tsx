@@ -116,6 +116,19 @@ export default function ReviewScreen({ vehicle, onBack, onCalculated }: Props) {
             </div>
           </div>
 
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5">
+              <Globe className="h-3.5 w-3.5 text-primary" />
+              Country of Origin
+            </Label>
+            <Select value={countryOfOrigin} onValueChange={setCountryOfOrigin}>
+              <SelectTrigger><SelectValue placeholder="Select country of origin" /></SelectTrigger>
+              <SelectContent>
+                {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+
           {cifUsd && parseFloat(cifUsd) > 0 && exchangeRate && (
             <div className="bg-muted/50 rounded-lg p-3 text-center">
               <p className="text-xs text-muted-foreground">GHS Equivalent</p>
