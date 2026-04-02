@@ -3054,6 +3054,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_view_delivery_otp: { Args: { _user_id: string }; Returns: boolean }
       get_client_customer_id: { Args: { _user_id: string }; Returns: string }
       get_user_department: {
         Args: { _user_id: string }
