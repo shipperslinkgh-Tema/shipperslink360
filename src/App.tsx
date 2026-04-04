@@ -107,8 +107,6 @@ const App = () => (
         <Routes>
           {/* Public tracking page — no auth required */}
           <Route path="/track/:token" element={<TrackShipment />} />
-          <Route path="/media-hub" element={<MediaHub />} />
-          <Route path="/media-hub/:slug" element={<MediaArticle />} />
 
           {/* Client Portal Routes */}
           <Route path="/portal/*" element={
