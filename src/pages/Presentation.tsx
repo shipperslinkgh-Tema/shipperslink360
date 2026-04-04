@@ -584,30 +584,6 @@ const slides: Slide[] = [
     },
   },
   {
-    id: 20,
-    title: "Media Hub",
-    subtitle: "Industry News & Company Updates",
-    icon: Newspaper,
-    color: "from-pink-600 to-pink-400",
-    department: "All Users (Public)",
-    content: {
-      description:
-        "A public-facing media hub for publishing industry news, company announcements, and logistics insights. Accessible without login at /media-hub.",
-      features: [
-        "Publish articles with rich text content and featured images",
-        "Categorize articles by topic: Industry News, Company Updates, Logistics Insights",
-        "Public access — no login required for readers",
-        "Admin media management for creating, editing, and publishing articles",
-        "SEO-friendly article URLs with slug-based routing",
-      ],
-      useCases: [
-        "Publish a company announcement about new service routes",
-        "Share industry news about customs regulation changes",
-        "Highlight logistics insights and operational best practices",
-      ],
-    },
-  },
-  {
     id: 21,
     title: "Admin & Security",
     subtitle: "Advanced Security, User Management & Audit Trails",
