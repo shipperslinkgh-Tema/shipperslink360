@@ -620,7 +620,7 @@ const slides: Slide[] = [
     },
   },
   {
-    id: 22,
+    id: 21,
     title: "Getting Started",
     subtitle: "Quick Start Guide for Your Team",
     icon: CheckCircle,
