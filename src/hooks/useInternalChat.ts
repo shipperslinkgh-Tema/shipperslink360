@@ -30,7 +30,7 @@ const CHANNELS: ChatChannelInfo[] = [
   { id: "general", name: "General", type: "department", unreadCount: 0 },
   { id: "operations", name: "Operations", type: "department", unreadCount: 0 },
   { id: "finance", name: "Finance", type: "department", unreadCount: 0 },
-  { id: "customs", name: "Customs", type: "department", unreadCount: 0 },
+  { id: "documentation", name: "Documentation", type: "department", unreadCount: 0 },
   { id: "management", name: "Management", type: "department", unreadCount: 0 },
   { id: "warehouse", name: "Warehouse", type: "department", unreadCount: 0 },
 ];
