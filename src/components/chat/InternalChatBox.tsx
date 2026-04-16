@@ -37,7 +37,7 @@ const departmentColors: Record<string, string> = {
   finance: "bg-success",
   trucking: "bg-warning",
   management: "bg-primary",
-  customs: "bg-destructive",
+  
   warehouse: "bg-secondary",
 };
 
@@ -47,7 +47,7 @@ const departmentLabels: Record<string, string> = {
   finance: "FIN",
   trucking: "TRK",
   management: "MGT",
-  customs: "CUS",
+  
   warehouse: "WHS",
 };
 
