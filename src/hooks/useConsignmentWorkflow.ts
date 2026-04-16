@@ -355,12 +355,36 @@ export function useAdvanceWorkflowStage() {
         } as any);
       }
 
+      // Cross-department sync: auto-create finance records on key stages
+      if (nextStage === "duty_payment" && wf.duty_amount) {
+        // Create payable for duty payment
+        const year = new Date().getFullYear();
+        const { count } = await supabase.from("finance_payables").select("*", { count: "exact", head: true });
+        const payRef = `PAY-${year}-${String((count || 0) + 1).padStart(4, "0")}`;
+        await supabase.from("finance_payables").insert({
+          payable_ref: payRef,
+          vendor: "Ghana Revenue Authority",
+          vendor_category: "customs",
+          description: `Customs duty for ${wf.consignment_ref}`,
+          amount: wf.duty_amount,
+          currency: "GHS",
+          exchange_rate: 1,
+          ghs_equivalent: wf.duty_amount,
+          due_date: new Date().toISOString().split("T")[0],
+          job_ref: wf.consignment_ref,
+          shipment_ref: wf.bl_number || wf.awb_number || "",
+          created_by: profile?.full_name || "System",
+        });
+      }
+
       return workflow as unknown as ConsignmentWorkflow;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["consignment-workflows"] });
       queryClient.invalidateQueries({ queryKey: ["workflow-timeline"] });
       queryClient.invalidateQueries({ queryKey: ["workflow-notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["finance-payables"] });
+      queryClient.invalidateQueries({ queryKey: ["job-profitability"] });
       toast.success("Stage advanced successfully");
     },
     onError: (e: Error) => toast.error(e.message),
