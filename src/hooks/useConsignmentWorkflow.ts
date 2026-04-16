@@ -219,10 +219,28 @@ export function useCreateConsignment() {
         performed_by_name: profile?.full_name || "System",
       } as any);
 
+      // Cross-department sync: create job cost skeleton in finance
+      const wf = workflow as any;
+      await supabase.from("finance_job_costs").insert({
+        job_ref: ref,
+        job_type: "shipment",
+        customer: wf.client_name,
+        customer_id: wf.client_id || "",
+        cost_category: "agency_fee",
+        description: `Job cost tracking for consignment ${ref}`,
+        amount: 0,
+        currency: "GHS",
+        exchange_rate: 1,
+        ghs_equivalent: 0,
+        shipment_ref: wf.bl_number || wf.awb_number || "",
+        created_by: profile?.full_name || "System",
+      });
+
       return workflow as unknown as ConsignmentWorkflow;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["consignment-workflows"] });
+      queryClient.invalidateQueries({ queryKey: ["job-profitability"] });
       toast.success("Consignment created successfully");
     },
     onError: (e: Error) => toast.error(e.message),
