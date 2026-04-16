@@ -40,6 +40,16 @@ export function useCreateInvoice() {
         issue_date: data.issue_date,
         due_date: data.due_date,
       });
+      // Cross-department sync: create client portal invoice
+      await supabase.from("client_invoices").insert({
+        invoice_number: data.invoice_number,
+        customer_id: data.customer_id,
+        amount: data.total_amount,
+        currency: data.currency,
+        due_date: data.due_date,
+        description: data.description || `Invoice ${data.invoice_number}`,
+        status: "pending",
+      });
     },
     onSuccess: () => { invalidate(); toast.success("Invoice created successfully"); },
     onError: (e: any) => toast.error("Failed to create invoice: " + e.message),
