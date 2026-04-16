@@ -291,9 +291,26 @@ export function useUpdateReceivable() {
 }
 
 // ── Ref Generators ───────────────────────────────────
-export async function generateRef(prefix: string, table: string, column: string): Promise<string> {
+export async function generateInvoiceRef(): Promise<string> {
   const year = new Date().getFullYear();
-  const { count } = await supabase.from(table).select("*", { count: "exact", head: true });
-  const num = (count || 0) + 1;
-  return `${prefix}-${year}-${String(num).padStart(4, "0")}`;
+  const { count } = await supabase.from("finance_invoices").select("*", { count: "exact", head: true });
+  return `INV-${year}-${String((count || 0) + 1).padStart(4, "0")}`;
+}
+
+export async function generatePayableRef(): Promise<string> {
+  const year = new Date().getFullYear();
+  const { count } = await supabase.from("finance_payables").select("*", { count: "exact", head: true });
+  return `PAY-${year}-${String((count || 0) + 1).padStart(4, "0")}`;
+}
+
+export async function generateExpenseRef(): Promise<string> {
+  const year = new Date().getFullYear();
+  const { count } = await supabase.from("finance_expenses").select("*", { count: "exact", head: true });
+  return `EXP-${year}-${String((count || 0) + 1).padStart(4, "0")}`;
+}
+
+export async function generatePaymentRef(): Promise<string> {
+  const year = new Date().getFullYear();
+  const { count } = await supabase.from("finance_payments").select("*", { count: "exact", head: true });
+  return `PMT-${year}-${String((count || 0) + 1).padStart(4, "0")}`;
 }
