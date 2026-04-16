@@ -22,7 +22,7 @@ export function PaymentFormDialog({ open, onOpenChange, userName, defaultType = 
     invoice_id: "", invoice_number: "", payable_id: "", payable_ref: "", bank_account: "",
   });
 
-  useEffect(() => { if (open) { generatePaymentRef().then(setRef); setForm(f => ({ ...f, type: defaultType })); } }, [open, defaultType]);
+  useEffect(() => { if (open) { generatePaymentRef().then(setRef); setForm(f => ({ ...f, type: defaultType as "incoming" | "outgoing" })); } }, [open, defaultType]);
 
   const handleInvoiceSelect = (id: string) => {
     const inv = invoices.find(i => i.id === id);
