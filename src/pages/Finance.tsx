@@ -24,6 +24,13 @@ import { ExpensesTable } from "@/components/finance/ExpensesTable";
 import { TaxFilingTable } from "@/components/finance/TaxFilingTable";
 import { DirectorTaxTable } from "@/components/finance/DirectorTaxTable";
 import { RegistrarRenewalTable } from "@/components/finance/RegistrarRenewalTable";
+import { InvoiceFormDialog } from "@/components/finance/InvoiceFormDialog";
+import { PayableFormDialog } from "@/components/finance/PayableFormDialog";
+import { ExpenseFormDialog } from "@/components/finance/ExpenseFormDialog";
+import { TaxFilingFormDialog } from "@/components/finance/TaxFilingFormDialog";
+import { RenewalFormDialog } from "@/components/finance/RenewalFormDialog";
+import { PaymentFormDialog } from "@/components/finance/PaymentFormDialog";
+import { JobCostFormDialog } from "@/components/finance/JobCostFormDialog";
 import { usePLData } from "@/hooks/usePLData";
 import {
   useFinanceInvoices,
@@ -37,6 +44,15 @@ import {
   useTaxFilings,
   useRegistrarRenewals,
 } from "@/hooks/useFinanceData";
+import {
+  useUpdateInvoiceStatus,
+  useUpdatePayableStatus,
+  useUpdateExpenseStatus,
+  useUpdateTaxFiling,
+  useUpdateRenewal,
+  useUpdateCustomerCredit,
+  useUpdateReceivable,
+} from "@/hooks/useFinanceMutations";
 
 import {
   Plus,
@@ -68,6 +84,16 @@ const Finance = () => {
   const [invoiceStatusFilter, setInvoiceStatusFilter] = useState<string>("all");
   const [payableStatusFilter, setPayableStatusFilter] = useState<string>("all");
 
+  // Dialog states
+  const [showInvoiceForm, setShowInvoiceForm] = useState(false);
+  const [showPayableForm, setShowPayableForm] = useState(false);
+  const [showExpenseForm, setShowExpenseForm] = useState(false);
+  const [showTaxForm, setShowTaxForm] = useState(false);
+  const [showRenewalForm, setShowRenewalForm] = useState(false);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [showJobCostForm, setShowJobCostForm] = useState(false);
+  const [paymentType, setPaymentType] = useState<"incoming" | "outgoing">("incoming");
+
   // Live data from database
   const { data: invoices = [] } = useFinanceInvoices();
   const { data: jobProfitability = [] } = useJobProfitability();
@@ -80,8 +106,18 @@ const Finance = () => {
   const { data: taxFilings = [] } = useTaxFilings();
   const { data: registrarRenewals = [] } = useRegistrarRenewals();
 
+  // Mutations
+  const updateInvoiceStatus = useUpdateInvoiceStatus();
+  const updatePayableStatus = useUpdatePayableStatus();
+  const updateExpenseStatus = useUpdateExpenseStatus();
+  const updateTaxFiling = useUpdateTaxFiling();
+  const updateRenewal = useUpdateRenewal();
+
   // Live P&L data from database
   const { metrics: liveMetrics, agingSummary: liveAgingSummary, revenueByService, costBreakdown, expenseBreakdown, isLoading: plLoading } = usePLData();
+
+  // TODO: Get from auth context
+  const userName = "Accountant";
 
   const filteredInvoices = useMemo(() => {
     return invoices.filter((invoice) => {
@@ -95,7 +131,7 @@ const Finance = () => {
         invoiceStatusFilter === "all" || invoice.status === invoiceStatusFilter;
       return matchesSearch && matchesType && matchesStatus;
     });
-  }, [searchTerm, invoiceTypeFilter, invoiceStatusFilter]);
+  }, [invoices, searchTerm, invoiceTypeFilter, invoiceStatusFilter]);
 
   const filteredPayables = useMemo(() => {
     return payables.filter((payable) => {
@@ -106,30 +142,34 @@ const Finance = () => {
         payableStatusFilter === "all" || payable.status === payableStatusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [searchTerm, payableStatusFilter]);
+  }, [payables, searchTerm, payableStatusFilter]);
 
-  const handleNewInvoice = () => {
-    toast.info("Opening new invoice form...");
+  const handleNewInvoice = () => setShowInvoiceForm(true);
+  const handleRecordPayment = () => { setPaymentType("incoming"); setShowPaymentForm(true); };
+  const handleRecordReceipt = () => { setPaymentType("incoming"); setShowPaymentForm(true); };
+  const handleNewPayable = () => setShowPayableForm(true);
+  const handleRecordDuty = () => setShowPayableForm(true);
+  const handleExportReport = () => toast.success("Generating financial report...");
+
+  // Invoice actions
+  const handleSendInvoice = (invoiceId: string) => {
+    updateInvoiceStatus.mutate({ id: invoiceId, status: "sent" });
+  };
+  const handleApproveInvoice = (invoiceId: string) => {
+    updateInvoiceStatus.mutate({ id: invoiceId, status: "sent", approved_by: userName });
   };
 
-  const handleRecordPayment = () => {
-    toast.info("Opening payment recorder...");
+  // Payable actions
+  const handleApprovePayable = (id: string) => {
+    updatePayableStatus.mutate({ id, status: "approved", approved_by: userName });
+  };
+  const handlePayPayable = (id: string) => {
+    updatePayableStatus.mutate({ id, status: "paid", paid_date: new Date().toISOString().split("T")[0] });
   };
 
-  const handleRecordReceipt = () => {
-    toast.info("Opening receipt generator...");
-  };
-
-  const handleNewPayable = () => {
-    toast.info("Opening payable form...");
-  };
-
-  const handleRecordDuty = () => {
-    toast.info("Opening ICUMS duty payment form...");
-  };
-
-  const handleExportReport = () => {
-    toast.success("Generating financial report...");
+  // Expense actions
+  const handleApproveExpense = (id: string) => {
+    updateExpenseStatus.mutate({ id, status: "approved", approved_by: userName });
   };
 
   // Calculate alerts for display
@@ -138,7 +178,6 @@ const Finance = () => {
     (liveMetrics.overduePayables > 0 ? 1 : 0) +
     taxFilings.filter(t => t.status === "overdue").length +
     registrarRenewals.filter(r => r.status === "expired" || r.status === "expiring_soon").length;
-
 
   return (
     <div className="space-y-6">
@@ -164,7 +203,7 @@ const Finance = () => {
               {alertsCount} Alerts
             </Button>
           )}
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleExportReport}>
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
@@ -241,7 +280,6 @@ const Finance = () => {
           />
         </TabsContent>
 
-
         <TabsContent value="invoices">
           <Card>
             <CardHeader>
@@ -253,9 +291,9 @@ const Finance = () => {
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <FileCheck className="h-4 w-4 mr-2" />
-                    Batch Actions
+                  <Button variant="outline" size="sm" onClick={() => { setPaymentType("incoming"); setShowPaymentForm(true); }}>
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Record Payment
                   </Button>
                   <Button size="sm" onClick={handleNewInvoice}>
                     <Plus className="h-4 w-4 mr-2" />
@@ -302,7 +340,10 @@ const Finance = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <EnhancedInvoicesTable invoices={filteredInvoices} />
+              <EnhancedInvoicesTable 
+                invoices={filteredInvoices}
+                onSend={handleSendInvoice}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -310,10 +351,18 @@ const Finance = () => {
         <TabsContent value="job-costing">
           <Card>
             <CardHeader>
-              <CardTitle>Job Profitability & Costing</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Track revenue, costs, and margins per shipment, consolidation, or container
-              </p>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <CardTitle>Job Profitability & Costing</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Track revenue, costs, and margins per shipment, consolidation, or container
+                  </p>
+                </div>
+                <Button size="sm" onClick={() => setShowJobCostForm(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Cost
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <JobCostingTable jobs={jobProfitability} />
@@ -332,9 +381,9 @@ const Finance = () => {
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <FileCheck className="h-4 w-4 mr-2" />
-                    Approve Selected
+                  <Button variant="outline" size="sm" onClick={() => { setPaymentType("outgoing"); setShowPaymentForm(true); }}>
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Record Payment
                   </Button>
                   <Button size="sm" onClick={handleNewPayable}>
                     <Plus className="h-4 w-4 mr-2" />
@@ -371,8 +420,8 @@ const Finance = () => {
               </div>
               <PayablesTable 
                 payables={filteredPayables}
-                onApprove={(id) => toast.success(`Payable ${id} approved`)}
-                onPay={(id) => toast.info(`Processing payment for ${id}`)}
+                onApprove={handleApprovePayable}
+                onPay={handlePayPayable}
               />
             </CardContent>
           </Card>
@@ -381,13 +430,25 @@ const Finance = () => {
         <TabsContent value="receivables">
           <Card>
             <CardHeader>
-              <CardTitle>Accounts Receivable & Aging</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Track outstanding invoices and aging analysis for collection management
-              </p>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <CardTitle>Accounts Receivable & Aging</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Track outstanding invoices and aging analysis for collection management
+                  </p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => { setPaymentType("incoming"); setShowPaymentForm(true); }}>
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Record Payment
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <ReceivablesTable receivables={receivables} />
+              <ReceivablesTable 
+                receivables={receivables}
+                onRecordPayment={(invoiceId) => { setPaymentType("incoming"); setShowPaymentForm(true); }}
+                onContactCustomer={(customerId) => toast.info(`Opening contact for customer ${customerId}`)}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -418,7 +479,6 @@ const Finance = () => {
         </TabsContent>
 
         <TabsContent value="accounts">
-
           <Card>
             <CardHeader>
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -450,7 +510,7 @@ const Finance = () => {
                     Track rent, utilities, supplies, maintenance, and other operational costs
                   </p>
                 </div>
-                <Button size="sm">
+                <Button size="sm" onClick={() => setShowExpenseForm(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   New Expense
                 </Button>
@@ -465,10 +525,18 @@ const Finance = () => {
         <TabsContent value="taxes">
           <Card>
             <CardHeader>
-              <CardTitle>Tax Filings & Compliance</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                GRA tax filings including VAT, PAYE, Corporate, Withholding, and Customs Duty
-              </p>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <CardTitle>Tax Filings & Compliance</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    GRA tax filings including VAT, PAYE, Corporate, Withholding, and Customs Duty
+                  </p>
+                </div>
+                <Button size="sm" onClick={() => setShowTaxForm(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Filing
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <TaxFilingTable filings={taxFilings} />
@@ -494,13 +562,21 @@ const Finance = () => {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ClipboardList className="h-5 w-5" />
-                  Registrar Renewals
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Business registrations, licenses, and compliance certificates
-                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <ClipboardList className="h-5 w-5" />
+                      Registrar Renewals
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Business registrations, licenses, and compliance certificates
+                    </p>
+                  </div>
+                  <Button size="sm" onClick={() => setShowRenewalForm(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <RegistrarRenewalTable renewals={registrarRenewals} />
@@ -509,6 +585,15 @@ const Finance = () => {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Dialog Forms */}
+      <InvoiceFormDialog open={showInvoiceForm} onOpenChange={setShowInvoiceForm} userName={userName} />
+      <PayableFormDialog open={showPayableForm} onOpenChange={setShowPayableForm} userName={userName} />
+      <ExpenseFormDialog open={showExpenseForm} onOpenChange={setShowExpenseForm} userName={userName} />
+      <TaxFilingFormDialog open={showTaxForm} onOpenChange={setShowTaxForm} />
+      <RenewalFormDialog open={showRenewalForm} onOpenChange={setShowRenewalForm} />
+      <PaymentFormDialog open={showPaymentForm} onOpenChange={setShowPaymentForm} userName={userName} defaultType={paymentType} />
+      <JobCostFormDialog open={showJobCostForm} onOpenChange={setShowJobCostForm} userName={userName} />
     </div>
   );
 };
