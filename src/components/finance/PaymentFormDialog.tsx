@@ -51,7 +51,7 @@ export function PaymentFormDialog({ open, onOpenChange, userName, defaultType = 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Type</Label>
-            <Select value={form.type} onValueChange={v => setForm(f => ({ ...f, type: v }))}>
+            <Select value={form.type} onValueChange={v => setForm(f => ({ ...f, type: v as "incoming" | "outgoing" }))}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="incoming">Incoming (Receipt)</SelectItem>
