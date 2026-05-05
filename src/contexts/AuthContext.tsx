@@ -31,6 +31,7 @@ interface AuthContextType {
   profile: Profile | null;
   roles: AppRole[];
   loading: boolean;
+  profileLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: (scope?: "local" | "global") => Promise<void>;
   isAdmin: boolean;
@@ -48,6 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [showWarning, setShowWarning] = useState(false);
   const inactivityTimer = useRef<NodeJS.Timeout | null>(null);
   const warningTimer = useRef<NodeJS.Timeout | null>(null);
@@ -90,12 +92,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [resetInactivityTimer]);
 
   const fetchProfile = async (userId: string) => {
+    setProfileLoading(true);
     const { data } = await supabase
       .from("profiles")
       .select("*")
       .eq("user_id", userId)
       .single();
     setProfile(data as Profile | null);
+    setProfileLoading(false);
   };
 
   const fetchRoles = async (userId: string) => {
@@ -119,6 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setProfile(null);
         setRoles([]);
+        setProfileLoading(false);
       }
       setLoading(false);
     });
@@ -129,6 +134,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session?.user) {
         fetchProfile(session.user.id);
         fetchRoles(session.user.id);
+      } else {
+        setProfileLoading(false);
       }
       setLoading(false);
     });
@@ -219,6 +226,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profile,
       roles,
       loading,
+      profileLoading,
       signIn,
       signOut,
       isAdmin,
