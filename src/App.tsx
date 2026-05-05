@@ -90,7 +90,7 @@ function ClientProtectedRoute({ children }: { children: React.ReactNode }) {
 function ClientAuthRoute({ children }: { children: React.ReactNode }) {
   const { session, loading, clientProfile } = useClientAuth();
   if (loading) return null;
-  if (session && clientProfile) return <Navigate to="/portal" replace />;
+  if (session && clientProfile) return <Navigate to="/portal/invoices" replace />;
   return <>{children}</>;
 }
 
