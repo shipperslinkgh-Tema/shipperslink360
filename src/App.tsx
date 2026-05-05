@@ -113,11 +113,10 @@ const App = () => (
             <ClientAuthProvider>
               <Routes>
                 <Route path="/login" element={<ClientAuthRoute><ClientLogin /></ClientAuthRoute>} />
-                <Route path="/" element={<ClientProtectedRoute><ClientDashboard /></ClientProtectedRoute>} />
-                <Route path="/shipments" element={<ClientProtectedRoute><ClientShipments /></ClientProtectedRoute>} />
+                <Route path="/" element={<Navigate to="/portal/invoices" replace />} />
                 <Route path="/documents" element={<ClientProtectedRoute><ClientDocuments /></ClientProtectedRoute>} />
                 <Route path="/invoices" element={<ClientProtectedRoute><ClientInvoices /></ClientProtectedRoute>} />
-                <Route path="/messages" element={<ClientProtectedRoute><ClientMessages /></ClientProtectedRoute>} />
+                <Route path="*" element={<Navigate to="/portal/invoices" replace />} />
               </Routes>
             </ClientAuthProvider>
           } />
