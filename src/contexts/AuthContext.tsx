@@ -31,6 +31,7 @@ interface AuthContextType {
   profile: Profile | null;
   roles: AppRole[];
   loading: boolean;
+  profileLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: (scope?: "local" | "global") => Promise<void>;
   isAdmin: boolean;
