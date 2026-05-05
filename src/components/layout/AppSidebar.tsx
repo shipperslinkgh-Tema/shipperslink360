@@ -156,6 +156,8 @@ export function AppSidebar() {
     { title: "Software Guide", icon: BookOpen, href: "/presentation" },
     ...(isAdmin ? [
       { title: "User Management", icon: Shield, href: "/admin/users" },
+    ] : []),
+    ...(isAdmin || department === "accounts" || department === "management" ? [
       { title: "Client Data", icon: Users, href: "/admin/client-data" },
       { title: "Client Documents", icon: FileText, href: "/admin/client-documents" },
     ] : []),

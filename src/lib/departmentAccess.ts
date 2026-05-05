@@ -17,6 +17,7 @@ const departmentPaths: Record<Department, string[]> = {
   accounts: [
     "/", "/consignments", "/finance", "/finance/invoices", "/finance/payments", "/finance/reports",
     "/customers", "/ai-assistant", "/reports",
+    "/admin/client-data", "/admin/client-documents",
   ],
   marketing: [
     "/", "/customers", "/reports",
