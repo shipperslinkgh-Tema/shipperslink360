@@ -48,9 +48,9 @@ import { ClientPortalLayout } from "./components/layout/ClientPortalLayout";
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { session, loading, profile } = useAuth();
+  const { session, loading, profile, profileLoading } = useAuth();
 
-  if (loading) {
+  if (loading || (session && profileLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-pulse text-muted-foreground">Loading...</div>
@@ -59,6 +59,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!session) return <Navigate to="/login" replace />;
+  // If logged-in user has no staff profile, they're a client — send to portal
+  if (!profile) return <Navigate to="/portal/invoices" replace />;
   if (profile?.must_change_password) return <Navigate to="/change-password" replace />;
 
   return <>{children}</>;
