@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Lock, Mail, Eye, EyeOff, Globe } from "lucide-react";
+import { Lock, Mail, Eye, EyeOff, Globe, Shield, Users } from "lucide-react";
+import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
 export default function ClientLogin() {
@@ -45,10 +46,18 @@ export default function ClientLogin() {
         </div>
 
         <Card className="shadow-xl border-border/50">
-          <CardHeader className="pb-4 pt-6 text-center">
+          <CardHeader className="pb-4 pt-6 text-center space-y-3">
             <div className="flex items-center justify-center gap-2 text-primary">
               <Globe className="h-5 w-5" />
               <span className="text-sm font-semibold uppercase tracking-wider">Client Access</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 pt-2">
+              <Link to="/login" className="flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+                <Shield className="h-4 w-4" /> Staff
+              </Link>
+              <button type="button" className="flex items-center justify-center gap-2 rounded-lg border-2 border-primary bg-primary/5 px-3 py-2 text-sm font-medium text-primary">
+                <Users className="h-4 w-4" /> Client
+              </button>
             </div>
           </CardHeader>
           <CardContent className="pb-8">
