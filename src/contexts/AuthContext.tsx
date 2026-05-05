@@ -92,12 +92,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [resetInactivityTimer]);
 
   const fetchProfile = async (userId: string) => {
+    setProfileLoading(true);
     const { data } = await supabase
       .from("profiles")
       .select("*")
       .eq("user_id", userId)
       .single();
     setProfile(data as Profile | null);
+    setProfileLoading(false);
   };
 
   const fetchRoles = async (userId: string) => {
