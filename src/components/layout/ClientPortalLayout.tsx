@@ -1,17 +1,14 @@
 import { ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useClientAuth } from "@/contexts/ClientAuthContext";
-import { Ship, FileText, DollarSign, MessageSquare, LayoutDashboard, LogOut } from "lucide-react";
+import { FileText, DollarSign, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
-  { title: "Dashboard", href: "/portal", icon: LayoutDashboard },
-  { title: "Shipments", href: "/portal/shipments", icon: Ship },
+  { title: "Financial Statements", href: "/portal/invoices", icon: DollarSign },
   { title: "Documents", href: "/portal/documents", icon: FileText },
-  { title: "Invoices", href: "/portal/invoices", icon: DollarSign },
-  { title: "Messages", href: "/portal/messages", icon: MessageSquare },
 ];
 
 export function ClientPortalLayout({ children }: { children: ReactNode }) {
