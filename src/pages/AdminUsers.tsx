@@ -199,13 +199,14 @@ export default function AdminUsers() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Staff ID</TableHead><TableHead>Full Name</TableHead><TableHead>Department</TableHead>
+                    <TableHead>Portal Access</TableHead>
                     <TableHead>Role</TableHead><TableHead>Email</TableHead><TableHead>Status</TableHead>
                     <TableHead>Last Login</TableHead><TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {users.length === 0 ? (
-                    <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">No users created yet.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">No users created yet.</TableCell></TableRow>
                   ) : users.map(u => (
                     <TableRow key={u.id}>
                       <TableCell className="font-mono text-sm">{u.staff_id}</TableCell>
@@ -217,6 +218,11 @@ export default function AdminUsers() {
                             {DEPARTMENTS.map(d => <SelectItem key={d} value={d}>{DEPT_LABELS[d]}</SelectItem>)}
                           </SelectContent>
                         </Select>
+                      </TableCell>
+                      <TableCell>
+                        {u.is_active
+                          ? <Badge className="bg-success/10 text-success border border-success/20 gap-1"><UserCheck className="h-3 w-3" /> Allowed</Badge>
+                          : <Badge variant="destructive" className="gap-1"><UserX className="h-3 w-3" /> Removed</Badge>}
                       </TableCell>
                       <TableCell className="capitalize">{u.user_roles?.[0]?.role?.replace("_", " ") || "—"}</TableCell>
                       <TableCell className="text-sm">{u.email}</TableCell>
