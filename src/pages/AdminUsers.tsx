@@ -123,6 +123,23 @@ export default function AdminUsers() {
     fetchUsers();
   };
 
+  const updateRole = async (userId: string, role: string) => {
+    // Replace existing role(s) with the new single role
+    const { error: delErr } = await supabase
+      .from("user_roles")
+      .delete()
+      .eq("user_id", userId);
+    if (delErr) return toast.error(delErr.message);
+    const { error: insErr } = await supabase
+      .from("user_roles")
+      .insert({ user_id: userId, role: role as any });
+    if (insErr) return toast.error(insErr.message);
+    // Keep profile.role in sync for display
+    await supabase.from("profiles").update({ role: role as any }).eq("user_id", userId);
+    toast.success(`Role updated to ${role.replace("_", " ")}`);
+    fetchUsers();
+  };
+
   const toggleActive = async (userId: string, isActive: boolean) => {
     const { error } = await supabase
       .from("profiles")
