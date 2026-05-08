@@ -241,7 +241,14 @@ export default function AdminUsers() {
                           ? <Badge className="bg-success/10 text-success border border-success/20 gap-1"><UserCheck className="h-3 w-3" /> Allowed</Badge>
                           : <Badge variant="destructive" className="gap-1"><UserX className="h-3 w-3" /> Removed</Badge>}
                       </TableCell>
-                      <TableCell className="capitalize">{u.user_roles?.[0]?.role?.replace("_", " ") || "—"}</TableCell>
+                      <TableCell>
+                        <Select value={u.user_roles?.[0]?.role || "staff"} onValueChange={(v) => updateRole(u.user_id, v)}>
+                          <SelectTrigger className="h-8 w-[140px] capitalize"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {ROLES.map(r => <SelectItem key={r} value={r} className="capitalize">{r.replace("_", " ")}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
                       <TableCell className="text-sm">{u.email}</TableCell>
                       <TableCell>
                         {u.is_locked ? <Badge variant="destructive">Locked</Badge> : u.is_active ? <Badge className="bg-success/10 text-success border-0">Active</Badge> : <Badge variant="secondary">Removed</Badge>}
