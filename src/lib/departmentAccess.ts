@@ -44,16 +44,30 @@ export const departmentRedirect: Record<Department, string> = {
   warehouse: "/trucking",
 };
 
-export function canAccessPath(department: Department | null, path: string): boolean {
-  if (!department) return false;
-  const allowed = departmentPaths[department];
+type AppRole = "super_admin" | "admin" | "manager" | "staff";
+
+const FINANCE_PATHS = ["/finance", "/finance/invoices", "/finance/payments", "/finance/reports"];
+
+function getAllowedPaths(department: Department | null, roles: AppRole[] = []): string[] {
+  if (!department) return [];
+  const base = [...(departmentPaths[department] || [])];
+  // Operations director / manager gets accounting portal access
+  if (department === "operations" && roles.includes("manager")) {
+    for (const p of FINANCE_PATHS) if (!base.includes(p)) base.push(p);
+  }
+  return base;
+}
+
+export function canAccessPath(department: Department | null, path: string, roles: AppRole[] = []): boolean {
+  const allowed = getAllowedPaths(department, roles);
+  if (!allowed.length) return false;
   if (allowed.includes("*")) return true;
   return allowed.some(p => path === p || path.startsWith(p + "/"));
 }
 
-export function filterNavItems(department: Department | null, items: any[]): any[] {
-  if (!department) return [];
-  const allowed = departmentPaths[department];
+export function filterNavItems(department: Department | null, items: any[], roles: AppRole[] = []): any[] {
+  const allowed = getAllowedPaths(department, roles);
+  if (!allowed.length) return [];
   if (allowed.includes("*")) return items;
 
   return items.filter(item => {
