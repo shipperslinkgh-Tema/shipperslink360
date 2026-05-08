@@ -113,6 +113,26 @@ export default function AdminUsers() {
     toast.success(isLocked ? "User unlocked" : "User locked");
   };
 
+  const updateDepartment = async (userId: string, department: string) => {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ department: department as any })
+      .eq("user_id", userId);
+    if (error) return toast.error(error.message);
+    toast.success(`Department portal updated to ${DEPT_LABELS[department]}`);
+    fetchUsers();
+  };
+
+  const toggleActive = async (userId: string, isActive: boolean) => {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ is_active: !isActive })
+      .eq("user_id", userId);
+    if (error) return toast.error(error.message);
+    toast.success(isActive ? "Portal access removed" : "Portal access restored");
+    fetchUsers();
+  };
+
   const portalUrl = `${window.location.origin}/portal/login`;
 
   if (!isAdmin) {
