@@ -134,8 +134,8 @@ export default function AdminUsers() {
       .from("user_roles")
       .insert({ user_id: userId, role: role as any });
     if (insErr) return toast.error(insErr.message);
-    // Keep profile.role in sync for display
-    await supabase.from("profiles").update({ role: role as any }).eq("user_id", userId);
+    // Keep profile in sync — role is tracked via user_roles table
+    await supabase.from("profiles").update({ updated_at: new Date().toISOString() } as any).eq("user_id", userId);
     toast.success(`Role updated to ${role.replace("_", " ")}`);
     fetchUsers();
   };
