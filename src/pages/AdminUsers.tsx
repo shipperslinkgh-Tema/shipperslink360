@@ -210,18 +210,31 @@ export default function AdminUsers() {
                     <TableRow key={u.id}>
                       <TableCell className="font-mono text-sm">{u.staff_id}</TableCell>
                       <TableCell className="font-medium">{u.full_name}</TableCell>
-                      <TableCell><Badge variant="secondary" className="capitalize">{DEPT_LABELS[u.department] || u.department}</Badge></TableCell>
+                      <TableCell>
+                        <Select value={u.department} onValueChange={(v) => updateDepartment(u.user_id, v)}>
+                          <SelectTrigger className="h-8 w-[160px] capitalize"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {DEPARTMENTS.map(d => <SelectItem key={d} value={d}>{DEPT_LABELS[d]}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
                       <TableCell className="capitalize">{u.user_roles?.[0]?.role?.replace("_", " ") || "—"}</TableCell>
                       <TableCell className="text-sm">{u.email}</TableCell>
                       <TableCell>
-                        {u.is_locked ? <Badge variant="destructive">Locked</Badge> : u.is_active ? <Badge className="bg-success/10 text-success border-0">Active</Badge> : <Badge variant="secondary">Inactive</Badge>}
+                        {u.is_locked ? <Badge variant="destructive">Locked</Badge> : u.is_active ? <Badge className="bg-success/10 text-success border-0">Active</Badge> : <Badge variant="secondary">Removed</Badge>}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{u.last_login_at ? new Date(u.last_login_at).toLocaleDateString() : "Never"}</TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm" onClick={() => toggleLock(u.user_id, u.is_locked)}>
-                          {u.is_locked ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="sm" title={u.is_locked ? "Unlock" : "Lock"} onClick={() => toggleLock(u.user_id, u.is_locked)}>
+                            {u.is_locked ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                          </Button>
+                          <Button variant="ghost" size="sm" title={u.is_active ? "Remove portal access" : "Restore portal access"} onClick={() => toggleActive(u.user_id, u.is_active)}>
+                            {u.is_active ? <UserX className="h-4 w-4 text-destructive" /> : <UserCheck className="h-4 w-4 text-success" />}
+                          </Button>
+                        </div>
                       </TableCell>
+
                     </TableRow>
                   ))}
                 </TableBody>
