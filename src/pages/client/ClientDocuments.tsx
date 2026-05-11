@@ -1,14 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useClientAuth } from "@/contexts/ClientAuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Search, Download, FolderOpen, File, FileCheck } from "lucide-react";
+import { FileText, Search, Download, FolderOpen, File, FileCheck, Upload, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+
+const UPLOAD_TYPES = [
+  { value: "bill_of_lading", label: "Bill of Lading" },
+  { value: "packing_list", label: "Packing List" },
+  { value: "invoice", label: "Commercial Invoice" },
+  { value: "certificate_of_origin", label: "Certificate of Origin" },
+  { value: "customs_declaration", label: "Customs Declaration" },
+  { value: "delivery_order", label: "Delivery Order" },
+  { value: "other", label: "Other" },
+];
 
 const TYPE_LABELS: Record<string, string> = {
   sop: "SOP",
@@ -36,19 +49,28 @@ export default function ClientDocuments() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("all");
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadType, setUploadType] = useState("other");
+  const [uploadName, setUploadName] = useState("");
+  const [uploadNotes, setUploadNotes] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const fetchDocs = async () => {
+    if (!clientProfile) return;
+    setLoading(true);
+    const { data } = await supabase
+      .from("client_documents")
+      .select("*")
+      .eq("customer_id", clientProfile.customer_id)
+      .order("created_at", { ascending: false });
+    setDocuments(data || []);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    if (!clientProfile) return;
-    const fetch = async () => {
-      const { data } = await supabase
-        .from("client_documents")
-        .select("*")
-        .eq("customer_id", clientProfile.customer_id)
-        .order("created_at", { ascending: false });
-      setDocuments(data || []);
-      setLoading(false);
-    };
-    fetch();
+    fetchDocs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientProfile]);
 
   const filtered = documents.filter(d => {
@@ -59,9 +81,54 @@ export default function ClientDocuments() {
     return matchesSearch && matchesCategory;
   });
 
+  const handleUpload = async () => {
+    if (!clientProfile || !uploadFile) {
+      toast.error("Please choose a file to share");
+      return;
+    }
+    if (uploadFile.size > 20 * 1024 * 1024) {
+      toast.error("File must be 20MB or smaller");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = uploadFile.name.split(".").pop();
+      const path = `${clientProfile.customer_id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("client-documents")
+        .upload(path, uploadFile, { contentType: uploadFile.type, upsert: false });
+      if (upErr) throw upErr;
+
+      const sizeKb = Math.round(uploadFile.size / 1024);
+      const { error: insErr } = await supabase.from("client_documents").insert({
+        customer_id: clientProfile.customer_id,
+        document_name: uploadName.trim() || uploadFile.name,
+        document_type: uploadType,
+        file_url: path,
+        file_size: sizeKb >= 1024 ? `${(sizeKb / 1024).toFixed(1)} MB` : `${sizeKb} KB`,
+        notes: uploadNotes.trim() || null,
+        status: "active",
+      });
+      if (insErr) throw insErr;
+
+      toast.success("Document shared with our team");
+      setUploadFile(null);
+      setUploadName("");
+      setUploadNotes("");
+      setUploadType("other");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      fetchDocs();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.message || "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleDownload = async (doc: any) => {
     if (!doc.file_url) return;
-    const { data, error } = await supabase.storage
+    const { data } = await supabase.storage
       .from("client-documents")
       .createSignedUrl(doc.file_url, 60);
     if (data?.signedUrl) window.open(data.signedUrl, "_blank");
@@ -78,6 +145,70 @@ export default function ClientDocuments() {
           Access your shipping documents and standard operating procedures
         </p>
       </div>
+
+      {/* Share Documents */}
+      <Card className="border-primary/20">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Upload className="h-5 w-5 text-primary" /> Share Documents With Us
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Upload new documents you'd like our team to work on (max 20MB per file).
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="upload-file" className="text-xs">File</Label>
+              <Input
+                id="upload-file"
+                ref={fileInputRef}
+                type="file"
+                onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.csv,.txt"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="upload-type" className="text-xs">Document type</Label>
+              <Select value={uploadType} onValueChange={setUploadType}>
+                <SelectTrigger id="upload-type"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {UPLOAD_TYPES.map(t => (
+                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="upload-name" className="text-xs">Document name (optional)</Label>
+            <Input
+              id="upload-name"
+              placeholder="e.g. Invoice for Shipment #1234"
+              value={uploadName}
+              maxLength={150}
+              onChange={(e) => setUploadName(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="upload-notes" className="text-xs">Notes for our team (optional)</Label>
+            <Textarea
+              id="upload-notes"
+              placeholder="Add any context or instructions..."
+              value={uploadNotes}
+              maxLength={1000}
+              rows={2}
+              onChange={(e) => setUploadNotes(e.target.value)}
+            />
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={handleUpload} disabled={uploading || !uploadFile} className="gap-2">
+              <Send className="h-4 w-4" />
+              {uploading ? "Sharing..." : "Share Document"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Category Tabs */}
       <Tabs value={activeCategory} onValueChange={setActiveCategory}>
