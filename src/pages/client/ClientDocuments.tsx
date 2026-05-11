@@ -1,14 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useClientAuth } from "@/contexts/ClientAuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Search, Download, FolderOpen, File, FileCheck } from "lucide-react";
+import { FileText, Search, Download, FolderOpen, File, FileCheck, Upload, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+
+const UPLOAD_TYPES = [
+  { value: "bill_of_lading", label: "Bill of Lading" },
+  { value: "packing_list", label: "Packing List" },
+  { value: "invoice", label: "Commercial Invoice" },
+  { value: "certificate_of_origin", label: "Certificate of Origin" },
+  { value: "customs_declaration", label: "Customs Declaration" },
+  { value: "delivery_order", label: "Delivery Order" },
+  { value: "other", label: "Other" },
+];
 
 const TYPE_LABELS: Record<string, string> = {
   sop: "SOP",
