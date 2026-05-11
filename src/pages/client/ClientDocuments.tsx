@@ -214,10 +214,11 @@ export default function ClientDocuments() {
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <FileText className="h-6 w-6 text-primary" /> Documents & SOPs
+          <FileText className="h-6 w-6 text-primary" /> Completed Job Documents
         </h1>
         <p className="text-muted-foreground text-sm">
-          Access your shipping documents and standard operating procedures
+          Documents shared by our team for your completed jobs and SOPs
+
         </p>
       </div>
 
@@ -342,6 +343,12 @@ export default function ClientDocuments() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Documents from SLAC for completed jobs */}
+      <div className="pt-2">
+        <h2 className="text-lg font-semibold">Documents from SLAC</h2>
+        <p className="text-xs text-muted-foreground">Files our team has shared with you for completed jobs.</p>
+      </div>
 
       {/* Category Tabs */}
       <Tabs value={activeCategory} onValueChange={setActiveCategory}>
