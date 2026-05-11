@@ -79,7 +79,7 @@ serve(async (req: Request) => {
     }
 
     // Create profile
-    await adminClient.from("profiles").insert({
+    const { error: profileError } = await adminClient.from("profiles").insert({
       user_id: newUser.user.id,
       full_name,
       staff_id,
@@ -90,11 +90,29 @@ serve(async (req: Request) => {
       must_change_password: true,
     });
 
+    if (profileError) {
+      // Roll back auth user so admin can retry with corrected fields
+      await adminClient.auth.admin.deleteUser(newUser.user.id);
+      return new Response(JSON.stringify({ error: `Profile creation failed: ${profileError.message}` }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Assign role
-    await adminClient.from("user_roles").insert({
+    const { error: roleError } = await adminClient.from("user_roles").insert({
       user_id: newUser.user.id,
       role,
     });
+
+    if (roleError) {
+      await adminClient.from("profiles").delete().eq("user_id", newUser.user.id);
+      await adminClient.auth.admin.deleteUser(newUser.user.id);
+      return new Response(JSON.stringify({ error: `Role assignment failed: ${roleError.message}` }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Audit log
     await adminClient.from("audit_logs").insert({
