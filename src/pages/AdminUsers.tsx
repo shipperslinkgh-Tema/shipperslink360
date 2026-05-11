@@ -87,21 +87,54 @@ export default function AdminUsers() {
     setLoading(true);
 
     try {
+      const staffForm = {
+        ...form,
+        full_name: form.full_name.trim(),
+        staff_id: form.staff_id.trim(),
+        email: form.email.trim().toLowerCase(),
+        phone: form.phone.trim(),
+        username: form.username.trim(),
+      };
+      const duplicate = users.find((user) =>
+        user.staff_id?.toLowerCase() === staffForm.staff_id.toLowerCase()
+        || user.email?.toLowerCase() === staffForm.email.toLowerCase()
+        || user.username?.toLowerCase() === staffForm.username.toLowerCase()
+      );
+
+      if (duplicate) {
+        const field = duplicate.staff_id?.toLowerCase() === staffForm.staff_id.toLowerCase()
+          ? "Staff ID"
+          : duplicate.email?.toLowerCase() === staffForm.email.toLowerCase()
+            ? "email"
+            : "username";
+        toast.error(`This ${field} is already in use.`);
+        return;
+      }
+
       const res = await supabase.functions.invoke("admin-create-user", {
-        body: form,
+        body: staffForm,
       });
 
-      if (res.error) throw new Error(res.error.message);
-      if (res.data?.error) throw new Error(res.data.error);
+      if (res.error) {
+        const context = "context" in res.error ? (res.error.context as Response | undefined) : undefined;
+        const details = context ? await context.json().catch(() => null) : null;
+        toast.error(details?.error || res.error.message || "Failed to create user");
+        return;
+      }
+      if (res.data?.error) {
+        toast.error(res.data.error);
+        return;
+      }
 
-      toast.success(`User ${form.full_name} created successfully`);
+      toast.success(`User ${staffForm.full_name} created successfully`);
       setOpen(false);
       setForm({ full_name: "", staff_id: "", department: "operations", role: "staff", email: "", phone: "", username: "", password: "" });
       fetchUsers();
     } catch (err: any) {
       toast.error(err.message || "Failed to create user");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleCreateClient = async (e: React.FormEvent) => {
