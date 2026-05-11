@@ -285,6 +285,64 @@ export default function ClientDocuments() {
         </CardContent>
       </Card>
 
+      {/* New Shipment Documents */}
+      <Card className="border-primary/20">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <FileCheck className="h-5 w-5 text-primary" /> Submit New Shipment Documents
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Attach the Bill of Lading, Packing List and Commercial Invoice for a new shipment (max 20MB each).
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="shipment-ref" className="text-xs">Shipment reference (optional)</Label>
+            <Input
+              id="shipment-ref"
+              placeholder="e.g. PO-2026-0042 or Booking #ABC123"
+              value={shipmentRef}
+              maxLength={100}
+              onChange={(e) => setShipmentRef(e.target.value)}
+            />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="bol-file" className="text-xs">Bill of Lading</Label>
+              <Input id="bol-file" ref={bolRef} type="file"
+                onChange={(e) => setBolFile(e.target.files?.[0] || null)}
+                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="packing-file" className="text-xs">Packing List</Label>
+              <Input id="packing-file" ref={packingRef} type="file"
+                onChange={(e) => setPackingFile(e.target.files?.[0] || null)}
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="invoice-file" className="text-xs">Commercial Invoice</Label>
+              <Input id="invoice-file" ref={invoiceRef} type="file"
+                onChange={(e) => setInvoiceFile(e.target.files?.[0] || null)}
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="shipment-notes" className="text-xs">Notes for our team (optional)</Label>
+            <Textarea id="shipment-notes" placeholder="Any special instructions for this shipment..."
+              value={shipmentNotes} maxLength={1000} rows={2}
+              onChange={(e) => setShipmentNotes(e.target.value)} />
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={handleSubmitShipmentDocs}
+              disabled={submittingShipment || (!bolFile && !packingFile && !invoiceFile)}
+              className="gap-2">
+              <Send className="h-4 w-4" />
+              {submittingShipment ? "Submitting..." : "Submit Shipment Documents"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Category Tabs */}
       <Tabs value={activeCategory} onValueChange={setActiveCategory}>
         <TabsList className="flex-wrap h-auto gap-1">
