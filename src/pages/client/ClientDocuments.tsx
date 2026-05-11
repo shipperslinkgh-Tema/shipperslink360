@@ -56,6 +56,17 @@ export default function ClientDocuments() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // New Shipment Documents (BOL, Packing List, Commercial Invoice)
+  const [shipmentRef, setShipmentRef] = useState("");
+  const [bolFile, setBolFile] = useState<File | null>(null);
+  const [packingFile, setPackingFile] = useState<File | null>(null);
+  const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
+  const [shipmentNotes, setShipmentNotes] = useState("");
+  const [submittingShipment, setSubmittingShipment] = useState(false);
+  const bolRef = useRef<HTMLInputElement>(null);
+  const packingRef = useRef<HTMLInputElement>(null);
+  const invoiceRef = useRef<HTMLInputElement>(null);
+
   const fetchDocs = async () => {
     if (!clientProfile) return;
     setLoading(true);
@@ -123,6 +134,70 @@ export default function ClientDocuments() {
       toast.error(err?.message || "Upload failed");
     } finally {
       setUploading(false);
+    }
+  };
+
+  const uploadOne = async (file: File, docType: string, label: string) => {
+    const ext = file.name.split(".").pop();
+    const path = `${clientProfile!.customer_id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from("client-documents")
+      .upload(path, file, { contentType: file.type, upsert: false });
+    if (upErr) throw upErr;
+    const sizeKb = Math.round(file.size / 1024);
+    const docName = shipmentRef.trim()
+      ? `${label} - ${shipmentRef.trim()}`
+      : `${label} - ${file.name}`;
+    const { error: insErr } = await supabase.from("client_documents").insert({
+      customer_id: clientProfile!.customer_id,
+      document_name: docName,
+      document_type: docType,
+      file_url: path,
+      file_size: sizeKb >= 1024 ? `${(sizeKb / 1024).toFixed(1)} MB` : `${sizeKb} KB`,
+      notes: shipmentNotes.trim() || null,
+      status: "active",
+    });
+    if (insErr) throw insErr;
+  };
+
+  const handleSubmitShipmentDocs = async () => {
+    if (!clientProfile) return;
+    const items: Array<[File | null, string, string]> = [
+      [bolFile, "bill_of_lading", "Bill of Lading"],
+      [packingFile, "packing_list", "Packing List"],
+      [invoiceFile, "invoice", "Commercial Invoice"],
+    ];
+    const queued = items.filter(([f]) => !!f);
+    if (queued.length === 0) {
+      toast.error("Attach at least one document");
+      return;
+    }
+    for (const [f] of queued) {
+      if (f && f.size > 20 * 1024 * 1024) {
+        toast.error(`${f.name} exceeds 20MB`);
+        return;
+      }
+    }
+    setSubmittingShipment(true);
+    try {
+      for (const [f, t, l] of queued) {
+        if (f) await uploadOne(f, t, l);
+      }
+      toast.success(`${queued.length} document(s) submitted to our team`);
+      setShipmentRef("");
+      setShipmentNotes("");
+      setBolFile(null);
+      setPackingFile(null);
+      setInvoiceFile(null);
+      if (bolRef.current) bolRef.current.value = "";
+      if (packingRef.current) packingRef.current.value = "";
+      if (invoiceRef.current) invoiceRef.current.value = "";
+      fetchDocs();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.message || "Submission failed");
+    } finally {
+      setSubmittingShipment(false);
     }
   };
 
@@ -205,6 +280,64 @@ export default function ClientDocuments() {
             <Button onClick={handleUpload} disabled={uploading || !uploadFile} className="gap-2">
               <Send className="h-4 w-4" />
               {uploading ? "Sharing..." : "Share Document"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* New Shipment Documents */}
+      <Card className="border-primary/20">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <FileCheck className="h-5 w-5 text-primary" /> Submit New Shipment Documents
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Attach the Bill of Lading, Packing List and Commercial Invoice for a new shipment (max 20MB each).
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="shipment-ref" className="text-xs">Shipment reference (optional)</Label>
+            <Input
+              id="shipment-ref"
+              placeholder="e.g. PO-2026-0042 or Booking #ABC123"
+              value={shipmentRef}
+              maxLength={100}
+              onChange={(e) => setShipmentRef(e.target.value)}
+            />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="bol-file" className="text-xs">Bill of Lading</Label>
+              <Input id="bol-file" ref={bolRef} type="file"
+                onChange={(e) => setBolFile(e.target.files?.[0] || null)}
+                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="packing-file" className="text-xs">Packing List</Label>
+              <Input id="packing-file" ref={packingRef} type="file"
+                onChange={(e) => setPackingFile(e.target.files?.[0] || null)}
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="invoice-file" className="text-xs">Commercial Invoice</Label>
+              <Input id="invoice-file" ref={invoiceRef} type="file"
+                onChange={(e) => setInvoiceFile(e.target.files?.[0] || null)}
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="shipment-notes" className="text-xs">Notes for our team (optional)</Label>
+            <Textarea id="shipment-notes" placeholder="Any special instructions for this shipment..."
+              value={shipmentNotes} maxLength={1000} rows={2}
+              onChange={(e) => setShipmentNotes(e.target.value)} />
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={handleSubmitShipmentDocs}
+              disabled={submittingShipment || (!bolFile && !packingFile && !invoiceFile)}
+              className="gap-2">
+              <Send className="h-4 w-4" />
+              {submittingShipment ? "Submitting..." : "Submit Shipment Documents"}
             </Button>
           </div>
         </CardContent>
