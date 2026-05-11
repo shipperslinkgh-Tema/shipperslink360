@@ -137,6 +137,70 @@ export default function ClientDocuments() {
     }
   };
 
+  const uploadOne = async (file: File, docType: string, label: string) => {
+    const ext = file.name.split(".").pop();
+    const path = `${clientProfile!.customer_id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from("client-documents")
+      .upload(path, file, { contentType: file.type, upsert: false });
+    if (upErr) throw upErr;
+    const sizeKb = Math.round(file.size / 1024);
+    const docName = shipmentRef.trim()
+      ? `${label} - ${shipmentRef.trim()}`
+      : `${label} - ${file.name}`;
+    const { error: insErr } = await supabase.from("client_documents").insert({
+      customer_id: clientProfile!.customer_id,
+      document_name: docName,
+      document_type: docType,
+      file_url: path,
+      file_size: sizeKb >= 1024 ? `${(sizeKb / 1024).toFixed(1)} MB` : `${sizeKb} KB`,
+      notes: shipmentNotes.trim() || null,
+      status: "active",
+    });
+    if (insErr) throw insErr;
+  };
+
+  const handleSubmitShipmentDocs = async () => {
+    if (!clientProfile) return;
+    const items: Array<[File | null, string, string]> = [
+      [bolFile, "bill_of_lading", "Bill of Lading"],
+      [packingFile, "packing_list", "Packing List"],
+      [invoiceFile, "invoice", "Commercial Invoice"],
+    ];
+    const queued = items.filter(([f]) => !!f);
+    if (queued.length === 0) {
+      toast.error("Attach at least one document");
+      return;
+    }
+    for (const [f] of queued) {
+      if (f && f.size > 20 * 1024 * 1024) {
+        toast.error(`${f.name} exceeds 20MB`);
+        return;
+      }
+    }
+    setSubmittingShipment(true);
+    try {
+      for (const [f, t, l] of queued) {
+        if (f) await uploadOne(f, t, l);
+      }
+      toast.success(`${queued.length} document(s) submitted to our team`);
+      setShipmentRef("");
+      setShipmentNotes("");
+      setBolFile(null);
+      setPackingFile(null);
+      setInvoiceFile(null);
+      if (bolRef.current) bolRef.current.value = "";
+      if (packingRef.current) packingRef.current.value = "";
+      if (invoiceRef.current) invoiceRef.current.value = "";
+      fetchDocs();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.message || "Submission failed");
+    } finally {
+      setSubmittingShipment(false);
+    }
+  };
+
   const handleDownload = async (doc: any) => {
     if (!doc.file_url) return;
     const { data } = await supabase.storage
