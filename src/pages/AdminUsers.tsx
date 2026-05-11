@@ -47,11 +47,29 @@ export default function AdminUsers() {
   });
 
   const fetchUsers = async () => {
-    const { data } = await supabase
+    const { data: profiles, error: profilesError } = await supabase
       .from("profiles")
-      .select("*, user_roles(role)")
+      .select("*")
       .order("created_at", { ascending: false });
-    setUsers(data || []);
+
+    if (profilesError) {
+      toast.error(profilesError.message);
+      setUsers([]);
+      return;
+    }
+
+    const userIds = (profiles || []).map((profile) => profile.user_id);
+    const { data: roleRows, error: rolesError } = userIds.length
+      ? await supabase.from("user_roles").select("user_id, role").in("user_id", userIds)
+      : { data: [], error: null };
+
+    if (rolesError) toast.error(rolesError.message);
+
+    const rolesByUser = new Map((roleRows || []).map((row: any) => [row.user_id, row.role]));
+    setUsers((profiles || []).map((profile) => ({
+      ...profile,
+      role: rolesByUser.get(profile.user_id) || "staff",
+    })));
   };
 
   useEffect(() => { fetchUsers(); fetchClients(); }, []);
@@ -242,7 +260,7 @@ export default function AdminUsers() {
                           : <Badge variant="destructive" className="gap-1"><UserX className="h-3 w-3" /> Removed</Badge>}
                       </TableCell>
                       <TableCell>
-                        <Select value={u.user_roles?.[0]?.role || "staff"} onValueChange={(v) => updateRole(u.user_id, v)}>
+                        <Select value={u.role || "staff"} onValueChange={(v) => updateRole(u.user_id, v)}>
                           <SelectTrigger className="h-8 w-[140px] capitalize"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             {ROLES.map(r => <SelectItem key={r} value={r} className="capitalize">{r.replace("_", " ")}</SelectItem>)}
