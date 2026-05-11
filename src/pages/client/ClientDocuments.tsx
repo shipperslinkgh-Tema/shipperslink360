@@ -344,6 +344,12 @@ export default function ClientDocuments() {
         </CardContent>
       </Card>
 
+      {/* Documents from SLAC for completed jobs */}
+      <div className="pt-2">
+        <h2 className="text-lg font-semibold">Documents from SLAC</h2>
+        <p className="text-xs text-muted-foreground">Files our team has shared with you for completed jobs.</p>
+      </div>
+
       {/* Category Tabs */}
       <Tabs value={activeCategory} onValueChange={setActiveCategory}>
         <TabsList className="flex-wrap h-auto gap-1">
