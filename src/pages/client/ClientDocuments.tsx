@@ -49,19 +49,28 @@ export default function ClientDocuments() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("all");
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadType, setUploadType] = useState("other");
+  const [uploadName, setUploadName] = useState("");
+  const [uploadNotes, setUploadNotes] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const fetchDocs = async () => {
+    if (!clientProfile) return;
+    setLoading(true);
+    const { data } = await supabase
+      .from("client_documents")
+      .select("*")
+      .eq("customer_id", clientProfile.customer_id)
+      .order("created_at", { ascending: false });
+    setDocuments(data || []);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    if (!clientProfile) return;
-    const fetch = async () => {
-      const { data } = await supabase
-        .from("client_documents")
-        .select("*")
-        .eq("customer_id", clientProfile.customer_id)
-        .order("created_at", { ascending: false });
-      setDocuments(data || []);
-      setLoading(false);
-    };
-    fetch();
+    fetchDocs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientProfile]);
 
   const filtered = documents.filter(d => {
@@ -72,9 +81,54 @@ export default function ClientDocuments() {
     return matchesSearch && matchesCategory;
   });
 
+  const handleUpload = async () => {
+    if (!clientProfile || !uploadFile) {
+      toast.error("Please choose a file to share");
+      return;
+    }
+    if (uploadFile.size > 20 * 1024 * 1024) {
+      toast.error("File must be 20MB or smaller");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = uploadFile.name.split(".").pop();
+      const path = `${clientProfile.customer_id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("client-documents")
+        .upload(path, uploadFile, { contentType: uploadFile.type, upsert: false });
+      if (upErr) throw upErr;
+
+      const sizeKb = Math.round(uploadFile.size / 1024);
+      const { error: insErr } = await supabase.from("client_documents").insert({
+        customer_id: clientProfile.customer_id,
+        document_name: uploadName.trim() || uploadFile.name,
+        document_type: uploadType,
+        file_url: path,
+        file_size: sizeKb >= 1024 ? `${(sizeKb / 1024).toFixed(1)} MB` : `${sizeKb} KB`,
+        notes: uploadNotes.trim() || null,
+        status: "active",
+      });
+      if (insErr) throw insErr;
+
+      toast.success("Document shared with our team");
+      setUploadFile(null);
+      setUploadName("");
+      setUploadNotes("");
+      setUploadType("other");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      fetchDocs();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.message || "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleDownload = async (doc: any) => {
     if (!doc.file_url) return;
-    const { data, error } = await supabase.storage
+    const { data } = await supabase.storage
       .from("client-documents")
       .createSignedUrl(doc.file_url, 60);
     if (data?.signedUrl) window.open(data.signedUrl, "_blank");
