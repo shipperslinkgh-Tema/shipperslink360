@@ -56,6 +56,17 @@ export default function ClientDocuments() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // New Shipment Documents (BOL, Packing List, Commercial Invoice)
+  const [shipmentRef, setShipmentRef] = useState("");
+  const [bolFile, setBolFile] = useState<File | null>(null);
+  const [packingFile, setPackingFile] = useState<File | null>(null);
+  const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
+  const [shipmentNotes, setShipmentNotes] = useState("");
+  const [submittingShipment, setSubmittingShipment] = useState(false);
+  const bolRef = useRef<HTMLInputElement>(null);
+  const packingRef = useRef<HTMLInputElement>(null);
+  const invoiceRef = useRef<HTMLInputElement>(null);
+
   const fetchDocs = async () => {
     if (!clientProfile) return;
     setLoading(true);
