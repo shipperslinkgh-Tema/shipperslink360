@@ -29,10 +29,10 @@ import { DemurrageTracker } from "@/components/shipping-line/DemurrageTracker";
 import { ShippingLineDocuments } from "@/components/shipping-line/ShippingLineDocuments";
 
 const metrics = [
-  { label: "Active DOs", value: 34, icon: FileText, color: "text-accent" },
-  { label: "Pending Release", value: 12, icon: Clock, color: "text-warning" },
-  { label: "Free Days Expiring", value: 5, icon: AlertTriangle, color: "text-destructive" },
-  { label: "Containers to Return", value: 8, icon: Container, color: "text-info" },
+  { label: "Active DOs", value: 0, icon: FileText, color: "text-accent" },
+  { label: "Pending Release", value: 0, icon: Clock, color: "text-warning" },
+  { label: "Free Days Expiring", value: 0, icon: AlertTriangle, color: "text-destructive" },
+  { label: "Containers to Return", value: 0, icon: Container, color: "text-info" },
 ];
 
 export default function ShippingLineStatus() {
