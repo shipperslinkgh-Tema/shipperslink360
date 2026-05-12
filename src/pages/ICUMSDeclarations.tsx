@@ -70,8 +70,41 @@ const getStatusBadge = (status: Declaration["status"]) => {
 export default function ICUMSDeclarations() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [rows, setRows] = useState<Declaration[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredDeclarations = declarations.filter((dec) => {
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("consignment_workflows")
+        .select("id, icums_declaration_number, bl_number, awb_number, client_name, port_of_discharge, current_stage, duty_amount, created_at")
+        .order("created_at", { ascending: false });
+      const mapped: Declaration[] = (data || []).map((d: any) => {
+        const stage = d.current_stage || "";
+        let status: Declaration["status"] = "draft";
+        if (["customs_declared"].includes(stage)) status = "submitted";
+        else if (["duty_paid"].includes(stage)) status = "payment";
+        else if (["port_processing"].includes(stage)) status = "examination";
+        else if (["cargo_released", "delivery_started", "delivery_completed"].includes(stage)) status = "released";
+        else if (["documentation_completed"].includes(stage)) status = "assessment";
+        return {
+          id: d.id,
+          icumsRef: d.icums_declaration_number || "—",
+          blNumber: d.bl_number || d.awb_number || "—",
+          customer: d.client_name || "—",
+          declarationType: "Import",
+          status,
+          submissionDate: d.created_at ? new Date(d.created_at).toLocaleDateString() : "—",
+          dutyAmount: d.duty_amount ? `GH₵ ${Number(d.duty_amount).toLocaleString()}` : undefined,
+          port: d.port_of_discharge || "Tema",
+        };
+      });
+      setRows(mapped);
+      setLoading(false);
+    })();
+  }, []);
+
+  const filteredDeclarations = rows.filter((dec) => {
     const matchesSearch =
       dec.icumsRef.toLowerCase().includes(searchQuery.toLowerCase()) ||
       dec.blNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
