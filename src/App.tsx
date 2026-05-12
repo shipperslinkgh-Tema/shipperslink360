@@ -24,6 +24,7 @@ import AccountsInvoices from "./pages/accounts/AccountsInvoices";
 import AccountsVouchers from "./pages/accounts/AccountsVouchers";
 import AccountsExpenses from "./pages/accounts/AccountsExpenses";
 import AccountsLedgers from "./pages/accounts/AccountsLedgers";
+import AccountsDocuments from "./pages/accounts/AccountsDocuments";
 import AccountsReports from "./pages/accounts/AccountsReports";
 import BankIntegration from "./pages/BankIntegration";
 import Presentation from "./pages/Presentation";
@@ -165,6 +166,7 @@ function StaffRoutes() {
           <Route path="vouchers" element={<AccountsVouchers />} />
           <Route path="expenses" element={<AccountsExpenses />} />
           <Route path="ledgers" element={<AccountsLedgers />} />
+          <Route path="documents" element={<AccountsDocuments />} />
           <Route path="reports" element={<AccountsReports />} />
         </Route>
         <Route path="/customs/gpha" element={<ProtectedRoute><WithLayout><GPHAPortStatus /></WithLayout></ProtectedRoute>} />

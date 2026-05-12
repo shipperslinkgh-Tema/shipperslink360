@@ -14,6 +14,77 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounts_documents: {
+        Row: {
+          amount: number | null
+          consignment_ref: string | null
+          created_at: string
+          currency: string | null
+          customer: string | null
+          document_date: string | null
+          document_type: string
+          file_name: string
+          file_size: string | null
+          file_url: string
+          id: string
+          notes: string | null
+          party_name: string | null
+          reference_no: string | null
+          source: string
+          updated_at: string
+          uploaded_by: string | null
+          voucher_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          consignment_ref?: string | null
+          created_at?: string
+          currency?: string | null
+          customer?: string | null
+          document_date?: string | null
+          document_type?: string
+          file_name: string
+          file_size?: string | null
+          file_url: string
+          id?: string
+          notes?: string | null
+          party_name?: string | null
+          reference_no?: string | null
+          source: string
+          updated_at?: string
+          uploaded_by?: string | null
+          voucher_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          consignment_ref?: string | null
+          created_at?: string
+          currency?: string | null
+          customer?: string | null
+          document_date?: string | null
+          document_type?: string
+          file_name?: string
+          file_size?: string | null
+          file_url?: string
+          id?: string
+          notes?: string | null
+          party_name?: string | null
+          reference_no?: string | null
+          source?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          voucher_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_documents_voucher_id_fkey"
+            columns: ["voucher_id"]
+            isOneToOne: false
+            referencedRelation: "vouchers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_interactions: {
         Row: {
           created_at: string
