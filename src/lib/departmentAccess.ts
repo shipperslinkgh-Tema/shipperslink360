@@ -47,7 +47,7 @@ export const departmentRedirect: Record<Department, string> = {
 
 type AppRole = "super_admin" | "admin" | "manager" | "staff";
 
-const FINANCE_PATHS = ["/finance", "/finance/invoices", "/finance/payments", "/finance/reports"];
+const FINANCE_PATHS = ["/finance", "/finance/invoices", "/finance/payments", "/finance/reports", "/finance/banking", "/accounts"];
 
 function getAllowedPaths(department: Department | null, roles: AppRole[] = []): string[] {
   if (!department) return [];
