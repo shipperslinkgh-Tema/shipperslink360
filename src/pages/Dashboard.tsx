@@ -1,13 +1,4 @@
-import {
-  Package,
-  Ship,
-  Plane,
-  Truck,
-  DollarSign,
-  Clock,
-  AlertTriangle,
-  CheckCircle2,
-} from "lucide-react";
+import { Package, Ship, Clock } from "lucide-react";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { IntegrationStatusCard } from "@/components/dashboard/IntegrationStatusCard";
 import { ShipmentStatusChart } from "@/components/dashboard/ShipmentStatusChart";
