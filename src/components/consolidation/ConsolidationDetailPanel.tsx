@@ -1,4 +1,5 @@
-import { Ship, Plane, X, Package, FileText, Clock, MapPin, Truck, DollarSign, AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { Ship, Plane, X, Package, FileText, Clock, MapPin, Truck, DollarSign, AlertTriangle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -6,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Consolidation, Shipper, DemurrageRecord } from "@/types/consolidation";
 import { ShipperDetailsTable } from "./ShipperDetailsTable";
+import { AddHouseConsignmentDialog } from "./AddHouseConsignmentDialog";
 import { cn } from "@/lib/utils";
 
 interface ConsolidationDetailPanelProps {
@@ -35,6 +37,7 @@ export function ConsolidationDetailPanel({
   demurrage,
   onClose,
 }: ConsolidationDetailPanelProps) {
+  const [addOpen, setAddOpen] = useState(false);
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-GH", {
       style: "currency",
@@ -137,7 +140,14 @@ export function ConsolidationDetailPanel({
             <TabsTrigger value="finance">Finance</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="shippers" className="mt-4">
+          <TabsContent value="shippers" className="mt-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">{shippers.length} house consignment{shippers.length === 1 ? "" : "s"} attached</p>
+              <Button size="sm" className="bg-accent hover:bg-accent/90" onClick={() => setAddOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add House Consignment
+              </Button>
+            </div>
             <ShipperDetailsTable shippers={shippers} />
           </TabsContent>
 
@@ -322,6 +332,8 @@ export function ConsolidationDetailPanel({
           </Button>
         </div>
       </div>
+
+      <AddHouseConsignmentDialog open={addOpen} onOpenChange={setAddOpen} consolidation={consolidation} />
     </div>
   );
 }
