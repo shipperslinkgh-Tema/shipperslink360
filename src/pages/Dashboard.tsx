@@ -27,6 +27,7 @@ const integrations = [
 
 export default function Dashboard() {
   const { profile } = useAuth();
+  const stats = useDepartmentStats();
   const firstName = profile?.full_name?.split(" ")[0] || "there";
 
   return (
@@ -40,68 +41,25 @@ export default function Dashboard() {
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <MetricCard
           title="Active Shipments"
-          value={175}
-          change={12}
-          changeLabel="vs last week"
+          value={stats.activeShipments}
           icon={<Package className="h-5 w-5" />}
           variant="accent"
         />
         <MetricCard
           title="At Port / Customs"
-          value={46}
-          change={-5}
-          changeLabel="vs yesterday"
+          value={stats.pendingClearance}
           icon={<Ship className="h-5 w-5" />}
           variant="warning"
         />
         <MetricCard
-          title="Pending Clearance"
-          value={18}
+          title="Pending Documentation"
+          value={stats.pendingDocs}
           icon={<Clock className="h-5 w-5" />}
         />
       </div>
-
-      {/* Secondary Metrics */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <div className="flex items-center gap-4 rounded-xl border border-border bg-card p-4">
-          <div className="rounded-lg bg-info/10 p-2.5">
-            <Plane className="h-5 w-5 text-info" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-foreground">23</p>
-            <p className="text-xs text-muted-foreground">Air Shipments</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-4 rounded-xl border border-border bg-card p-4">
-          <div className="rounded-lg bg-accent/10 p-2.5">
-            <Ship className="h-5 w-5 text-accent" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-foreground">142</p>
-            <p className="text-xs text-muted-foreground">Sea Freight</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-4 rounded-xl border border-border bg-card p-4">
-          <div className="rounded-lg bg-success/10 p-2.5">
-            <Truck className="h-5 w-5 text-success" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-foreground">10</p>
-            <p className="text-xs text-muted-foreground">Road Transport</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-4 rounded-xl border border-border bg-card p-4">
-          <div className="rounded-lg bg-destructive/10 p-2.5">
-            <AlertTriangle className="h-5 w-5 text-destructive" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-foreground">4</p>
-            <p className="text-xs text-muted-foreground">Alerts</p>
-          </div>
-        </div>
       </div>
 
       {/* Main Content Grid */}
