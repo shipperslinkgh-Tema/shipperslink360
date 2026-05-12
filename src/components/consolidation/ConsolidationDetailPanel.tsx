@@ -332,6 +332,8 @@ export function ConsolidationDetailPanel({
           </Button>
         </div>
       </div>
+
+      <AddHouseConsignmentDialog open={addOpen} onOpenChange={setAddOpen} consolidation={consolidation} />
     </div>
   );
 }
