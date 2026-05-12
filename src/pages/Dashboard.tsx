@@ -16,6 +16,7 @@ import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { ClearanceStatusWidget } from "@/components/dashboard/ClearanceStatusWidget";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDepartmentStats } from "@/hooks/useDepartmentStats";
 
 const integrations = [
   { name: "ICUMS (Ghana Customs)", status: "connected" as const, lastSync: "2 min ago", details: "Real-time sync active" },
