@@ -1,105 +1,119 @@
-# Sage-Style Accounts Portal Rebuild
+# Unified System Integration Plan
 
-Rebuild the Finance area as a Sage-like double-entry accounting portal where every transaction flows through a voucher, posts to the ledger, and links back to a consignment + customer.
+Make the **`consignment_workflows`** record the single source of truth that every portal reads from and writes to, and add an event layer so a change in one department automatically updates the others in real-time.
 
-## Scope
+---
 
-Replace the current Finance pages with a dedicated **Accounts Portal** at `/accounts` (kept alongside existing pages so nothing breaks for Operations). Accounts/Admin/Super Admin can edit; other staff are read-only; clients have no access.
+## 1. Central Object: Consignment
 
-## Database (new tables)
+Already exists as `consignment_workflows` with `consignment_ref`. We will:
 
-All with RLS: only `accounts`/`admin`/`super_admin` (via `has_role` / `profiles.department`) can write; staff can read; clients blocked. Posted vouchers are locked via trigger.
+- Treat `consignment_id` as the foreign reference used by Documentation, Customs/ICUMS, Accounts, Fleet, Warehouse, and Client Portal.
+- Add missing link columns where they don't exist yet:
+  - `finance_invoices.consignment_id`
+  - `finance_expenses.consignment_id`
+  - `trucking_jobs.consignment_id`
+  - `cargo_receipts.consignment_id` (warehouse in/out)
+  - `client_shipments.consignment_id` (client portal mirror)
+- Add a `consignment_events` table (audit + event bus) — every state change writes a row here.
 
-- **chart_of_accounts** — code, name, type (asset/liability/equity/income/expense), parent_id, currency, is_active
-- **vouchers** — voucher_no (auto: PV/RV/JV/CV-YYYY-####), type (payment/receipt/journal/contra), date, status (draft/posted/cancelled), reference, narration, currency, exchange_rate, total_amount, ghs_equivalent, consignment_id (FK to `consignment_workflows`), customer_id, party_name, payment_method, bank_account_id, invoice_id (for receipts), posted_at, posted_by, created_by
-- **voucher_lines** — voucher_id, account_id, debit, credit, description, line_no (double-entry; trigger enforces sum(debit)=sum(credit) on post)
-- **ledger_entries** — voucher_id, voucher_line_id, account_id, date, debit, credit, balance_after, consignment_id, customer_id, currency, ghs_equivalent (auto-populated when voucher is posted)
-- **audit_logs_finance** — voucher_id, action, before, after, user_id, timestamp
+## 2. Automated Workflow (DB triggers + Edge Function dispatcher)
 
-Triggers/functions:
-- `generate_voucher_number()` BEFORE INSERT
-- `post_voucher(voucher_id)` SECURITY DEFINER → validates balance, inserts ledger_entries, sets status=posted, locks edits
-- `prevent_posted_edit()` BEFORE UPDATE/DELETE on vouchers/voucher_lines
-- `update_invoice_on_receipt()` after receipt voucher posts → updates `finance_invoices.paid_amount` + status
-- Seed default Chart of Accounts (Cash, Bank GHS/USD, AR, AP, Sales-Clearance, Sales-Freight, Sales-Trucking, Port Charges, Duty, Fuel, Terminal Charges, FX Gain/Loss, Retained Earnings, etc.)
+A new Postgres trigger on `consignment_workflows` and related tables will:
 
-## Frontend
+| Trigger source | Effect |
+|---|---|
+| `consignment_documents` insert | set workflow stage → `documents_received`, insert event, notify Operations |
+| `consignment_workflows.current_stage = 'documentation_completed'` | auto-create draft `finance_invoices` row, notify Accounts |
+| `finance_invoices.status = 'paid'` | set workflow stage → `cargo_released` (cleared for release), notify Operations |
+| `consignment_workflows.cargo_released_at` set | auto-create `trucking_jobs` row in `pending` status, notify Fleet |
+| `trucking_jobs.status = 'in_transit'` | generate tracking link `/track/{ref}`, write to `client_shipments`, insert notification (channel: in-app + email/WhatsApp queued) |
+| `cargo_receipts` insert/update | update workflow warehouse fields, notify Accounts + Operations |
 
-New route group `/accounts/*` with sidebar (Accounts dept only, plus admins):
+All triggers also INSERT into `consignment_events` and `notifications`.
 
-```text
-Accounts Portal
-├── Dashboard          /accounts
-├── Invoices           /accounts/invoices
-├── Vouchers           /accounts/vouchers
-│   ├── Payment        /accounts/vouchers/payment
-│   ├── Receipt        /accounts/vouchers/receipt
-│   ├── Journal        /accounts/vouchers/journal
-│   └── Contra         /accounts/vouchers/contra
-├── Expenses           /accounts/expenses
-├── Ledgers            /accounts/ledgers (General / Customer / Supplier tabs)
-└── Reports            /accounts/reports (P&L, Cash Flow, AR Aging, Voucher Register, Job Profitability)
-```
+## 3. Notification Engine
 
-### Dashboard
-Cards: Total Revenue, Total Expenses, Outstanding Invoices, Cash Balance, Profit per Consignment table (top 10).
+- New `notifications` table (user_id, consignment_id, type, channel, title, body, read_at).
+- Edge function `dispatch-notification` consumes new events (called from trigger via `pg_net` or polled) and:
+  - writes in-app row,
+  - sends email via existing infra,
+  - queues WhatsApp/SMS (stub provider — flagged TODO until provider keys added).
+- Frontend: global `useNotifications()` hook subscribed to Supabase Realtime on `notifications` table; bell badge in `TopBar`.
 
-### Invoices
-Reuse existing `finance_invoices`. Add: link-to-consignment selector, line items (services), PDF export (jspdf + autoTable already common — install if missing), status badges, "Record Receipt" CTA → opens prefilled Receipt Voucher.
+## 4. Shared Dashboard Cross-Visibility
 
-### Vouchers
-- List view with filters (type, date, status, consignment, customer) and color status (Draft=grey, Posted=green, Cancelled=red, Overdue=red on invoices)
-- Create dialog per type with double-entry line grid (account, debit, credit, running balance check)
-- "Post" action calls `post_voucher` RPC. After posted, form is read-only.
-- Auto-link: opening from Expense pre-creates a Payment Voucher draft; from Invoice → Receipt Voucher.
+Update each department dashboard to surface cross-department signals from the same consignment:
 
-### Expenses
-Existing `finance_expenses` list + "Approve & Post" button that auto-generates a Payment Voucher (Dr Expense, Cr Cash/Bank).
+- **Operations**: add "Payment status" column (joins `finance_invoices`).
+- **Accounts**: add "Shipment stage" column (joins `consignment_workflows.current_stage`).
+- **Fleet**: add "Cleared for release" filter (workflow stage = `cargo_released`).
+- **Warehouse**: add active consignments awaiting receipt.
+- **Client Portal**: live stage timeline + tracking link.
 
-### Ledgers
-Query `ledger_entries` grouped by account / customer / supplier with date range and running balance.
+## 5. Realtime Sync
 
-### Reports
-Built from `ledger_entries` + `finance_invoices`:
-- P&L (income vs expense accounts in date range)
-- Cash Flow (movements on cash/bank accounts)
-- AR Aging (current / 30 / 60 / 90+ buckets)
-- Voucher Register (filterable list)
-- Job Profitability (revenue − costs per `consignment_id`)
-All exportable to CSV (UTF-8 BOM, per project memory).
+Enable Supabase Realtime on:
+`consignment_workflows`, `consignment_events`, `notifications`, `finance_invoices`, `trucking_jobs`, `cargo_receipts`.
 
-### Multi-currency
-Currency + exchange_rate fields on every voucher; `ghs_equivalent` auto-computed; reports run in GHS by default with currency toggle.
+Add a single `useConsignmentRealtime(consignmentId)` hook used by all detail panels so any user sees changes instantly.
 
-## Security & Access
-- New `useAccountsAccess` hook checking `profiles.department='accounts'` OR admin role
-- Route guard redirects unauthorized staff
-- RLS policies enforce write restriction to accounts/admin
-- Audit log entry on every create/post/cancel
+## 6. AI Assistant Integration
 
-## Files to create
-- `supabase/migrations/<ts>_accounts_portal.sql` (tables, functions, triggers, RLS, COA seed)
-- `src/pages/accounts/AccountsLayout.tsx`
-- `src/pages/accounts/AccountsDashboard.tsx`
-- `src/pages/accounts/AccountsInvoices.tsx`
-- `src/pages/accounts/AccountsVouchers.tsx`
-- `src/pages/accounts/VoucherForm.tsx` (handles all 4 types)
-- `src/pages/accounts/AccountsExpenses.tsx`
-- `src/pages/accounts/AccountsLedgers.tsx`
-- `src/pages/accounts/AccountsReports.tsx`
-- `src/hooks/useVouchers.ts`, `useLedger.ts`, `useChartOfAccounts.ts`, `useAccountsReports.ts`
-- `src/lib/voucherPdf.ts`, `src/lib/invoicePdf.ts`
-- `src/types/accounts.ts`
-- Sidebar entry in `AppSidebar.tsx` (visible to accounts/admin)
-- Route registration in `App.tsx`
+Extend `supabase/functions/ai-assistant` with new tool functions:
+- `list_delayed_shipments` (workflow stages stuck > SLA),
+- `list_unpaid_invoices`,
+- `get_consignment_status(ref)`,
+- `suggest_next_action(consignment_id)` — uses current_stage + outstanding items.
 
-## Files to keep / leave alone
-- Existing `Finance.tsx`, `Invoicing.tsx`, `Payments.tsx` stay — they continue to feed data the new portal reads. Old `AccountsDashboard.tsx` becomes a redirect to `/accounts`.
+Expose in the existing AIChatPanel; no UI rewrite needed.
 
-## Out of scope (this round)
-- Tax/VAT handling
-- Bank statement import (existing bank module already covers this; Contra vouchers can reference bank accounts)
-- Year-end closing entries
-- Approval workflow beyond single "Post" action
+## 7. RBAC, Audit, Consistency
 
-This is a sizable build (~15-20 files + a substantial migration). After your approval I'll create the migration first (you'll approve it), then ship the UI.
+- All new tables ship with RLS reusing `is_admin`, `is_accounts`, `is_client`, `get_user_department`.
+- `consignment_events` is append-only (no update/delete policy) → audit trail.
+- All writes go through existing tables — no duplicate stores.
+
+---
+
+## Technical Section
+
+**Migrations**
+1. `ALTER TABLE` add `consignment_id uuid` to `finance_invoices`, `finance_expenses`, `trucking_jobs`, `cargo_receipts`, `client_shipments` (nullable, indexed).
+2. `CREATE TABLE consignment_events (id, consignment_id, event_type, source_department, payload jsonb, actor_id, created_at)` + RLS (staff read, system insert).
+3. `CREATE TABLE notifications (id, user_id, consignment_id nullable, type, channel, title, body, link, read_at, created_at)` + RLS (own rows + admin).
+4. Trigger functions:
+   - `fn_on_workflow_stage_change()` — creates invoice draft / trucking job / events.
+   - `fn_on_invoice_paid()` — advances workflow + event.
+   - `fn_on_trucking_status_change()` — emits tracking-ready event.
+   - `fn_on_document_uploaded()` — sets stage if first doc.
+5. `ALTER PUBLICATION supabase_realtime ADD TABLE` for the six tables above.
+
+**Edge functions**
+- `dispatch-notification` (new): reads `consignment_events` for unprocessed rows → fans out to channels.
+- `ai-assistant` (extend): add tool handlers listed in §6.
+
+**Frontend**
+- `src/hooks/useNotifications.ts` (new) — realtime subscription + mark-as-read.
+- `src/hooks/useConsignmentRealtime.ts` (new).
+- `src/components/layout/TopBar.tsx` — bell badge wired to hook.
+- Dashboard widgets: small cross-link columns added to existing tables (Operations, Accounts, Fleet, Warehouse).
+- Client portal `ClientShipments.tsx` — live stage timeline + copy tracking link.
+- `AIChatPanel` — no structural change; new tool calls flow through existing channel.
+
+**Out of scope of this plan** (call out, not implementing now)
+- Real WhatsApp/SMS provider wiring (we'll stub queue + leave TODO until you choose a provider, e.g. Twilio).
+- Replacing existing per-department CRUD UIs — they keep working; we only add cross-links and triggers.
+
+---
+
+## Rollout Order
+
+1. Migrations (link columns + `consignment_events` + `notifications` + RLS + realtime publication).
+2. Trigger functions for workflow ↔ invoice ↔ trucking ↔ documents.
+3. `dispatch-notification` edge function + `useNotifications` hook + TopBar badge.
+4. Cross-department columns on each dashboard.
+5. AI assistant new tools.
+6. Client portal live timeline + tracking link share.
+
+Approve and I'll execute step by step (each migration shown for confirmation before code changes).
