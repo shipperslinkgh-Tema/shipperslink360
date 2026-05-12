@@ -11,40 +11,7 @@ interface Alert {
   priority: "high" | "medium" | "low";
 }
 
-const alerts: Alert[] = [
-  {
-    id: "1",
-    type: "demurrage",
-    title: "Demurrage Warning - MSKU2345678",
-    description: "Free days expire in 2 days. Container at Tema Port.",
-    time: "2h ago",
-    priority: "high",
-  },
-  {
-    id: "2",
-    type: "customs",
-    title: "ICUMS Declaration Pending",
-    description: "AWB-7890123 awaiting assessment completion.",
-    time: "4h ago",
-    priority: "medium",
-  },
-  {
-    id: "3",
-    type: "deadline",
-    title: "DO Expiring Soon",
-    description: "Delivery Order for COSU8901234 expires Jan 25.",
-    time: "6h ago",
-    priority: "medium",
-  },
-  {
-    id: "4",
-    type: "payment",
-    title: "Outstanding Payment",
-    description: "Invoice INV-2026-0234 overdue by 5 days.",
-    time: "1d ago",
-    priority: "low",
-  },
-];
+const alerts: Alert[] = [];
 
 const getAlertIcon = (type: Alert["type"]) => {
   switch (type) {
@@ -96,8 +63,14 @@ export function AlertsPanel() {
         </Button>
       </div>
 
-      <div className="space-y-3">
-        {alerts.map((alert) => (
+      {alerts.length === 0 ? (
+        <div className="rounded-lg border border-border bg-muted/30 p-6 text-center">
+          <p className="text-sm font-medium text-foreground">No active alerts</p>
+          <p className="mt-1 text-xs text-muted-foreground">Alerts will appear when live shipments or finance records require attention.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {alerts.map((alert) => (
           <div
             key={alert.id}
             className={cn(
@@ -121,12 +94,15 @@ export function AlertsPanel() {
               <X className="h-3 w-3" />
             </Button>
           </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      <Button variant="outline" className="w-full mt-4">
-        View All Alerts
-      </Button>
+      {alerts.length > 0 && (
+        <Button variant="outline" className="w-full mt-4">
+          View All Alerts
+        </Button>
+      )}
     </div>
   );
 }

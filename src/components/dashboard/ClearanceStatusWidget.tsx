@@ -11,32 +11,7 @@ interface ClearanceJob {
   gpha: "cleared" | "pending" | "issue";
 }
 
-const jobs: ClearanceJob[] = [
-  {
-    id: "1",
-    blNumber: "MSKU2345678",
-    customer: "Gold Coast Trading",
-    icums: "cleared",
-    shippingLine: "cleared",
-    gpha: "pending",
-  },
-  {
-    id: "2",
-    blNumber: "AWB-7890123",
-    customer: "Accra Electronics",
-    icums: "pending",
-    shippingLine: "cleared",
-    gpha: "pending",
-  },
-  {
-    id: "3",
-    blNumber: "COSU8901234",
-    customer: "West Africa Motors",
-    icums: "cleared",
-    shippingLine: "issue",
-    gpha: "pending",
-  },
-];
+const jobs: ClearanceJob[] = [];
 
 const getStatusIcon = (status: "cleared" | "pending" | "issue") => {
   switch (status) {
@@ -70,8 +45,14 @@ export function ClearanceStatusWidget() {
         </div>
       </div>
 
-      <div className="space-y-3">
-        {jobs.map((job) => (
+      {jobs.length === 0 ? (
+        <div className="rounded-lg border border-border bg-muted/30 p-6 text-center">
+          <p className="text-sm font-medium text-foreground">No clearance jobs</p>
+          <p className="mt-1 text-xs text-muted-foreground">Client and clearance status will appear after new consignments are added.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {jobs.map((job) => (
           <div
             key={job.id}
             className={cn(
@@ -112,12 +93,15 @@ export function ClearanceStatusWidget() {
               </Button>
             </div>
           </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      <Button variant="outline" className="w-full mt-4">
-        View All Clearances
-      </Button>
+      {jobs.length > 0 && (
+        <Button variant="outline" className="w-full mt-4">
+          View All Clearances
+        </Button>
+      )}
     </div>
   );
 }
