@@ -38,68 +38,7 @@ interface DORecord {
   doAmount: number;
 }
 
-const doRecords: DORecord[] = [
-  {
-    id: "1",
-    blNumber: "MSKU2345678",
-    containerNo: "MSKU1234567",
-    shippingLine: "Maersk",
-    customer: "Gold Coast Trading",
-    doStatus: "released",
-    freeDaysLeft: 5,
-    totalFreeDays: 14,
-    arrivalDate: "2024-01-15",
-    doAmount: 850,
-  },
-  {
-    id: "2",
-    blNumber: "MSCU8901234",
-    containerNo: "MSCU9876543",
-    shippingLine: "MSC",
-    customer: "Accra Electronics",
-    doStatus: "pending_payment",
-    freeDaysLeft: 2,
-    totalFreeDays: 14,
-    arrivalDate: "2024-01-12",
-    doAmount: 920,
-  },
-  {
-    id: "3",
-    blNumber: "CMAU5678901",
-    containerNo: "CMAU4567890",
-    shippingLine: "CMA CGM",
-    customer: "West Africa Motors",
-    doStatus: "pending_approval",
-    freeDaysLeft: 8,
-    totalFreeDays: 14,
-    arrivalDate: "2024-01-18",
-    doAmount: 780,
-  },
-  {
-    id: "4",
-    blNumber: "HLCU3456789",
-    containerNo: "HLCU2345678",
-    shippingLine: "Hapag-Lloyd",
-    customer: "Ghana Importers Ltd",
-    doStatus: "blocked",
-    freeDaysLeft: 0,
-    totalFreeDays: 14,
-    arrivalDate: "2024-01-05",
-    doAmount: 1250,
-  },
-  {
-    id: "5",
-    blNumber: "COSU7890123",
-    containerNo: "COSU6789012",
-    shippingLine: "COSCO",
-    customer: "Tema Distributors",
-    doStatus: "released",
-    freeDaysLeft: 10,
-    totalFreeDays: 14,
-    arrivalDate: "2024-01-20",
-    doAmount: 680,
-  },
-];
+const doRecords: DORecord[] = [];
 
 const getStatusBadge = (status: DORecord["doStatus"]) => {
   switch (status) {

@@ -29,10 +29,10 @@ import { DemurrageTracker } from "@/components/shipping-line/DemurrageTracker";
 import { ShippingLineDocuments } from "@/components/shipping-line/ShippingLineDocuments";
 
 const metrics = [
-  { label: "Active DOs", value: 34, icon: FileText, color: "text-accent" },
-  { label: "Pending Release", value: 12, icon: Clock, color: "text-warning" },
-  { label: "Free Days Expiring", value: 5, icon: AlertTriangle, color: "text-destructive" },
-  { label: "Containers to Return", value: 8, icon: Container, color: "text-info" },
+  { label: "Active DOs", value: 0, icon: FileText, color: "text-accent" },
+  { label: "Pending Release", value: 0, icon: Clock, color: "text-warning" },
+  { label: "Free Days Expiring", value: 0, icon: AlertTriangle, color: "text-destructive" },
+  { label: "Containers to Return", value: 0, icon: Container, color: "text-info" },
 ];
 
 export default function ShippingLineStatus() {
@@ -74,60 +74,12 @@ export default function ShippingLineStatus() {
 
       {/* Shipping Line Cards */}
       <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-        <ShippingLineCard
-          name="Maersk Line"
-          logo="🚢"
-          status="connected"
-          activeDOs={12}
-          pendingPayment={3}
-          lastSync="2 min ago"
-          portalUrl="https://www.maersk.com/myfinance/"
-        />
-        <ShippingLineCard
-          name="CMA CGM"
-          logo="🛳️"
-          status="connected"
-          activeDOs={6}
-          pendingPayment={2}
-          lastSync="5 min ago"
-          portalUrl="https://www.cma-cgm.com/local/ghana/links"
-        />
-        <ShippingLineCard
-          name="ONE (Ocean Network Express)"
-          logo="⚓"
-          status="connected"
-          activeDOs={8}
-          pendingPayment={1}
-          lastSync="3 min ago"
-          portalUrl="https://ecomm.one-line.com/one-ecom/manage-shipment/cargo-tracking"
-        />
-        <ShippingLineCard
-          name="ODeX"
-          logo="📋"
-          status="connected"
-          activeDOs={5}
-          pendingPayment={2}
-          lastSync="3 min ago"
-          portalUrl="https://gh.odexglobal.com/loginLanding.do"
-        />
-        <ShippingLineCard
-          name="ZIM"
-          logo="🚀"
-          status="connected"
-          activeDOs={4}
-          pendingPayment={0}
-          lastSync="1 min ago"
-          portalUrl="https://www.zim.com"
-        />
-        <ShippingLineCard
-          name="MSC"
-          logo="🔱"
-          status="connected"
-          activeDOs={10}
-          pendingPayment={4}
-          lastSync="4 min ago"
-          portalUrl="https://www.msc.com"
-        />
+        <ShippingLineCard name="Maersk Line" logo="🚢" status="connected" activeDOs={0} pendingPayment={0} lastSync="—" portalUrl="https://www.maersk.com/myfinance/" />
+        <ShippingLineCard name="CMA CGM" logo="🛳️" status="connected" activeDOs={0} pendingPayment={0} lastSync="—" portalUrl="https://www.cma-cgm.com/local/ghana/links" />
+        <ShippingLineCard name="ONE (Ocean Network Express)" logo="⚓" status="connected" activeDOs={0} pendingPayment={0} lastSync="—" portalUrl="https://ecomm.one-line.com/one-ecom/manage-shipment/cargo-tracking" />
+        <ShippingLineCard name="ODeX" logo="📋" status="connected" activeDOs={0} pendingPayment={0} lastSync="—" portalUrl="https://gh.odexglobal.com/loginLanding.do" />
+        <ShippingLineCard name="ZIM" logo="🚀" status="connected" activeDOs={0} pendingPayment={0} lastSync="—" portalUrl="https://www.zim.com" />
+        <ShippingLineCard name="MSC" logo="🔱" status="connected" activeDOs={0} pendingPayment={0} lastSync="—" portalUrl="https://www.msc.com" />
       </div>
 
       {/* Filters */}
