@@ -1,4 +1,4 @@
-import { Package, Ship, Clock } from "lucide-react";
+import { Ship, Clock } from "lucide-react";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { IntegrationStatusCard } from "@/components/dashboard/IntegrationStatusCard";
 import { ShipmentStatusChart } from "@/components/dashboard/ShipmentStatusChart";
@@ -32,13 +32,7 @@ export default function Dashboard() {
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <MetricCard
-          title="Active Shipments"
-          value={stats.activeShipments}
-          icon={<Package className="h-5 w-5" />}
-          variant="accent"
-        />
+      <div className="grid gap-4 md:grid-cols-2">
         <MetricCard
           title="At Port / Customs"
           value={stats.pendingClearance}
