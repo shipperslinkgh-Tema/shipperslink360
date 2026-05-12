@@ -443,6 +443,7 @@ export type Database = {
       cargo_receipts: {
         Row: {
           condition: string | null
+          consignment_id: string | null
           consolidation_id: string
           created_at: string
           damage_notes: string | null
@@ -463,6 +464,7 @@ export type Database = {
         }
         Insert: {
           condition?: string | null
+          consignment_id?: string | null
           consolidation_id: string
           created_at?: string
           damage_notes?: string | null
@@ -483,6 +485,7 @@ export type Database = {
         }
         Update: {
           condition?: string | null
+          consignment_id?: string | null
           consolidation_id?: string
           created_at?: string
           damage_notes?: string | null
@@ -808,6 +811,7 @@ export type Database = {
           ata: string | null
           bl_number: string
           cargo_description: string | null
+          consignment_id: string | null
           container_number: string | null
           created_at: string
           created_by: string | null
@@ -818,6 +822,7 @@ export type Database = {
           notes: string | null
           origin: string
           status: string
+          tracking_link: string | null
           updated_at: string
           vessel_name: string | null
           voyage_number: string | null
@@ -827,6 +832,7 @@ export type Database = {
           ata?: string | null
           bl_number: string
           cargo_description?: string | null
+          consignment_id?: string | null
           container_number?: string | null
           created_at?: string
           created_by?: string | null
@@ -837,6 +843,7 @@ export type Database = {
           notes?: string | null
           origin: string
           status?: string
+          tracking_link?: string | null
           updated_at?: string
           vessel_name?: string | null
           voyage_number?: string | null
@@ -846,6 +853,7 @@ export type Database = {
           ata?: string | null
           bl_number?: string
           cargo_description?: string | null
+          consignment_id?: string | null
           container_number?: string | null
           created_at?: string
           created_by?: string | null
@@ -856,6 +864,7 @@ export type Database = {
           notes?: string | null
           origin?: string
           status?: string
+          tracking_link?: string | null
           updated_at?: string
           vessel_name?: string | null
           voyage_number?: string | null
@@ -1071,6 +1080,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      consignment_events: {
+        Row: {
+          actor_id: string | null
+          consignment_id: string | null
+          consignment_ref: string | null
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json | null
+          source_department: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          consignment_id?: string | null
+          consignment_ref?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json | null
+          source_department?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          consignment_id?: string | null
+          consignment_ref?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json | null
+          source_department?: string | null
+        }
+        Relationships: []
       }
       consignment_workflows: {
         Row: {
@@ -1899,6 +1941,7 @@ export type Database = {
           amount: number
           approved_by: string | null
           category: string
+          consignment_id: string | null
           created_at: string
           currency: string
           description: string
@@ -1917,6 +1960,7 @@ export type Database = {
           amount?: number
           approved_by?: string | null
           category?: string
+          consignment_id?: string | null
           created_at?: string
           currency?: string
           description: string
@@ -1935,6 +1979,7 @@ export type Database = {
           amount?: number
           approved_by?: string | null
           category?: string
+          consignment_id?: string | null
           created_at?: string
           currency?: string
           description?: string
@@ -1955,6 +2000,7 @@ export type Database = {
         Row: {
           approval_date: string | null
           approved_by: string | null
+          consignment_id: string | null
           consolidation_ref: string | null
           created_at: string
           created_by: string
@@ -1985,6 +2031,7 @@ export type Database = {
         Insert: {
           approval_date?: string | null
           approved_by?: string | null
+          consignment_id?: string | null
           consolidation_ref?: string | null
           created_at?: string
           created_by?: string
@@ -2015,6 +2062,7 @@ export type Database = {
         Update: {
           approval_date?: string | null
           approved_by?: string | null
+          consignment_id?: string | null
           consolidation_ref?: string | null
           created_at?: string
           created_by?: string
@@ -2893,6 +2941,60 @@ export type Database = {
           },
         ]
       }
+      trucking_jobs: {
+        Row: {
+          completed_at: string | null
+          consignment_id: string | null
+          consignment_ref: string | null
+          created_at: string
+          created_by: string | null
+          destination: string | null
+          driver_id: string | null
+          id: string
+          job_ref: string | null
+          origin: string | null
+          started_at: string | null
+          status: string
+          tracking_link: string | null
+          truck_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          consignment_id?: string | null
+          consignment_ref?: string | null
+          created_at?: string
+          created_by?: string | null
+          destination?: string | null
+          driver_id?: string | null
+          id?: string
+          job_ref?: string | null
+          origin?: string | null
+          started_at?: string | null
+          status?: string
+          tracking_link?: string | null
+          truck_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          consignment_id?: string | null
+          consignment_ref?: string | null
+          created_at?: string
+          created_by?: string | null
+          destination?: string | null
+          driver_id?: string | null
+          id?: string
+          job_ref?: string | null
+          origin?: string | null
+          started_at?: string | null
+          status?: string
+          tracking_link?: string | null
+          truck_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       trucking_trips: {
         Row: {
           actual_end_time: string | null
@@ -3450,6 +3552,18 @@ export type Database = {
       is_accounts: { Args: { _user_id: string }; Returns: boolean }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_client: { Args: { _user_id: string }; Returns: boolean }
+      notify_department: {
+        Args: {
+          _body: string
+          _consignment_id: string
+          _consignment_ref: string
+          _department: string
+          _link: string
+          _title: string
+          _type: string
+        }
+        Returns: undefined
+      }
       post_voucher: {
         Args: { _voucher_id: string }
         Returns: {
