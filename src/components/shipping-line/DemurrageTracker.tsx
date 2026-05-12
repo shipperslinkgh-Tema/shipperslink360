@@ -11,38 +11,9 @@ interface DemurrageItem {
   type: "demurrage" | "detention";
 }
 
-const demurrageItems: DemurrageItem[] = [
-  {
-    id: "1",
-    containerNo: "HLCU2345678",
-    customer: "Ghana Importers Ltd",
-    daysOverdue: 5,
-    estimatedCharge: 750,
-    type: "demurrage",
-  },
-  {
-    id: "2",
-    containerNo: "MSKU9876543",
-    customer: "Accra Traders",
-    daysOverdue: 3,
-    estimatedCharge: 450,
-    type: "detention",
-  },
-  {
-    id: "3",
-    containerNo: "MSCU4567890",
-    customer: "West Coast Imports",
-    daysOverdue: 2,
-    estimatedCharge: 300,
-    type: "demurrage",
-  },
-];
+const demurrageItems: DemurrageItem[] = [];
 
-const upcomingExpiry = [
-  { containerNo: "CMAU1234567", customer: "Tema Foods", expiresIn: 1 },
-  { containerNo: "COSU7890123", customer: "Gold Traders", expiresIn: 2 },
-  { containerNo: "MSKU3456789", customer: "Electronics Plus", expiresIn: 3 },
-];
+const upcomingExpiry: { containerNo: string; customer: string; expiresIn: number }[] = [];
 
 export function DemurrageTracker() {
   const totalCharges = demurrageItems.reduce((sum, item) => sum + item.estimatedCharge, 0);
