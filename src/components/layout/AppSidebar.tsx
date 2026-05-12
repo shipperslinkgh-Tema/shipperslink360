@@ -74,14 +74,20 @@ const navigation: NavItem[] = [{
   title: "Accounting",
   icon: DollarSign,
   children: [{
+    title: "Accounts Portal",
+    href: "/accounts"
+  }, {
+    title: "Vouchers",
+    href: "/accounts/vouchers"
+  }, {
     title: "Invoices",
-    href: "/finance/invoices"
+    href: "/accounts/invoices"
   }, {
-    title: "Payments",
-    href: "/finance/payments"
+    title: "Ledgers",
+    href: "/accounts/ledgers"
   }, {
-    title: "P&L Reports",
-    href: "/finance/reports"
+    title: "Reports",
+    href: "/accounts/reports"
   }, {
     title: "Bank Integration",
     href: "/finance/banking"

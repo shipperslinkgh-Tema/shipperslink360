@@ -18,6 +18,13 @@ import Customers from "./pages/Customers";
 import Finance from "./pages/Finance";
 import Invoicing from "./pages/Invoicing";
 import Payments from "./pages/Payments";
+import AccountsLayout from "./pages/accounts/AccountsLayout";
+import AccountsDashboard from "./pages/accounts/AccountsDashboard";
+import AccountsInvoices from "./pages/accounts/AccountsInvoices";
+import AccountsVouchers from "./pages/accounts/AccountsVouchers";
+import AccountsExpenses from "./pages/accounts/AccountsExpenses";
+import AccountsLedgers from "./pages/accounts/AccountsLedgers";
+import AccountsReports from "./pages/accounts/AccountsReports";
 import BankIntegration from "./pages/BankIntegration";
 import Presentation from "./pages/Presentation";
 import ConsolidationPortal from "./pages/ConsolidationPortal";
@@ -152,6 +159,14 @@ function StaffRoutes() {
         <Route path="/finance/payments" element={<ProtectedRoute><WithLayout><Payments /></WithLayout></ProtectedRoute>} />
         <Route path="/finance/reports" element={<ProtectedRoute><WithLayout><Finance /></WithLayout></ProtectedRoute>} />
         <Route path="/finance/banking" element={<ProtectedRoute><WithLayout><BankIntegration /></WithLayout></ProtectedRoute>} />
+        <Route path="/accounts" element={<ProtectedRoute><WithLayout><AccountsLayout /></WithLayout></ProtectedRoute>}>
+          <Route index element={<AccountsDashboard />} />
+          <Route path="invoices" element={<AccountsInvoices />} />
+          <Route path="vouchers" element={<AccountsVouchers />} />
+          <Route path="expenses" element={<AccountsExpenses />} />
+          <Route path="ledgers" element={<AccountsLedgers />} />
+          <Route path="reports" element={<AccountsReports />} />
+        </Route>
         <Route path="/customs/gpha" element={<ProtectedRoute><WithLayout><GPHAPortStatus /></WithLayout></ProtectedRoute>} />
         <Route path="/consolidation" element={<ProtectedRoute><WithLayout><ConsolidationPortal /></WithLayout></ProtectedRoute>} />
         <Route path="/warehouse" element={<ProtectedRoute><WithLayout><Warehouse /></WithLayout></ProtectedRoute>} />
