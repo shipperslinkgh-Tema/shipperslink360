@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NewShipmentDialog } from "@/components/shipments/NewShipmentDialog";
 import {
   Search,
@@ -14,6 +14,7 @@ import {
   FileText,
   ChevronLeft,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Shipment {
   id: string;
@@ -42,114 +44,13 @@ interface Shipment {
   origin: string;
   destination: string;
   type: "sea" | "air" | "road";
-  status: "in-transit" | "at-port" | "customs" | "delivered" | "pending";
-  mode: "FCL" | "LCL" | "Air" | "Road";
+  status: string;
+  mode: string;
   eta: string;
   containers?: number;
   weight: string;
   icumsRef?: string;
 }
-
-const shipments: Shipment[] = [
-  {
-    id: "SHP001",
-    blNumber: "MSKU2345678",
-    customer: "Gold Coast Trading Ltd",
-    consignee: "Same as shipper",
-    origin: "Shanghai, CN",
-    destination: "Tema, GH",
-    type: "sea",
-    status: "at-port",
-    mode: "FCL",
-    eta: "Jan 22, 2026",
-    containers: 2,
-    weight: "24,500 KG",
-    icumsRef: "C2026-00892",
-  },
-  {
-    id: "SHP002",
-    blNumber: "AWB-7890123",
-    customer: "Accra Electronics",
-    consignee: "Accra Electronics Ltd",
-    origin: "Dubai, UAE",
-    destination: "Kotoka Int'l",
-    type: "air",
-    status: "customs",
-    mode: "Air",
-    eta: "Jan 21, 2026",
-    weight: "1,250 KG",
-    icumsRef: "C2026-00895",
-  },
-  {
-    id: "SHP003",
-    blNumber: "COSU8901234",
-    customer: "West Africa Motors",
-    consignee: "W.A. Motors Ghana",
-    origin: "Hamburg, DE",
-    destination: "Tema, GH",
-    type: "sea",
-    status: "in-transit",
-    mode: "FCL",
-    eta: "Feb 05, 2026",
-    containers: 4,
-    weight: "78,200 KG",
-  },
-  {
-    id: "SHP004",
-    blNumber: "TRK-4567890",
-    customer: "Kumasi Textiles",
-    consignee: "Kumasi Textiles Co",
-    origin: "Tema Port",
-    destination: "Kumasi",
-    type: "road",
-    status: "delivered",
-    mode: "Road",
-    eta: "Jan 20, 2026",
-    weight: "12,000 KG",
-  },
-  {
-    id: "SHP005",
-    blNumber: "HLCU5678901",
-    customer: "Ghana Pharma Ltd",
-    consignee: "Ghana Pharma Ltd",
-    origin: "Mumbai, IN",
-    destination: "Tema, GH",
-    type: "sea",
-    status: "pending",
-    mode: "LCL",
-    eta: "Feb 15, 2026",
-    containers: 1,
-    weight: "8,400 KG",
-  },
-  {
-    id: "SHP006",
-    blNumber: "OOLU7654321",
-    customer: "Takoradi Steel",
-    consignee: "Takoradi Steel Works",
-    origin: "Rotterdam, NL",
-    destination: "Takoradi, GH",
-    type: "sea",
-    status: "in-transit",
-    mode: "FCL",
-    eta: "Feb 10, 2026",
-    containers: 6,
-    weight: "156,000 KG",
-  },
-  {
-    id: "SHP007",
-    blNumber: "AWB-1234567",
-    customer: "Cape Coast Imports",
-    consignee: "CC Imports Ltd",
-    origin: "London, UK",
-    destination: "Kotoka Int'l",
-    type: "air",
-    status: "at-port",
-    mode: "Air",
-    eta: "Jan 23, 2026",
-    weight: "890 KG",
-    icumsRef: "C2026-00901",
-  },
-];
 
 const getTypeIcon = (type: Shipment["type"]) => {
   switch (type) {
@@ -162,24 +63,8 @@ const getTypeIcon = (type: Shipment["type"]) => {
   }
 };
 
-const getStatusBadge = (status: Shipment["status"]) => {
-  const styles = {
-    "in-transit": "status-info",
-    "at-port": "status-warning",
-    customs: "status-pending",
-    delivered: "status-success",
-    pending: "status-pending",
-  };
-
-  const labels = {
-    "in-transit": "In Transit",
-    "at-port": "At Port",
-    customs: "Customs",
-    delivered: "Delivered",
-    pending: "Pending",
-  };
-
-  return <span className={cn("status-badge", styles[status])}>{labels[status]}</span>;
+const getStatusBadge = (status: string) => {
+  return <span className="status-badge status-info">{status.replace(/_/g, " ")}</span>;
 };
 
 export default function Shipments() {
@@ -187,6 +72,41 @@ export default function Shipments() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [showNewShipment, setShowNewShipment] = useState(false);
+  const [shipments, setShipments] = useState<Shipment[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchShipments = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("consignment_workflows")
+        .select("id, consignment_ref, bl_number, client_name, origin_country, port_of_discharge, shipment_type, current_stage, eta")
+        .order("created_at", { ascending: false });
+
+      if (!error && data) {
+        const mapped: Shipment[] = data.map((d: any) => {
+          const t = (d.shipment_type || "").toLowerCase();
+          const type: Shipment["type"] = t.includes("air") ? "air" : t.includes("road") || t.includes("truck") ? "road" : "sea";
+          return {
+            id: d.id,
+            blNumber: d.bl_number || d.consignment_ref || "—",
+            customer: d.client_name || "—",
+            consignee: d.client_name || "—",
+            origin: d.origin_country || "—",
+            destination: d.port_of_discharge || "—",
+            type,
+            status: d.current_stage || "pending",
+            mode: d.shipment_type || "—",
+            eta: d.eta ? new Date(d.eta).toLocaleDateString() : "—",
+            weight: "—",
+          };
+        });
+        setShipments(mapped);
+      }
+      setLoading(false);
+    };
+    fetchShipments();
+  }, []);
 
   const filteredShipments = shipments.filter((shipment) => {
     const matchesSearch =
@@ -235,11 +155,6 @@ export default function Shipments() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="in-transit">In Transit</SelectItem>
-              <SelectItem value="at-port">At Port</SelectItem>
-              <SelectItem value="customs">Customs</SelectItem>
-              <SelectItem value="delivered">Delivered</SelectItem>
             </SelectContent>
           </Select>
           <Select value={typeFilter} onValueChange={setTypeFilter}>
@@ -265,154 +180,116 @@ export default function Shipments() {
           <span className="text-sm font-medium text-foreground">{shipments.length}</span>
           <span className="text-sm text-muted-foreground">Total</span>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-info/10 whitespace-nowrap">
-          <span className="text-sm font-medium text-info">
-            {shipments.filter((s) => s.status === "in-transit").length}
-          </span>
-          <span className="text-sm text-muted-foreground">In Transit</span>
-        </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-warning/10 whitespace-nowrap">
-          <span className="text-sm font-medium text-warning">
-            {shipments.filter((s) => s.status === "at-port").length}
-          </span>
-          <span className="text-sm text-muted-foreground">At Port</span>
-        </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-success/10 whitespace-nowrap">
-          <span className="text-sm font-medium text-success">
-            {shipments.filter((s) => s.status === "delivered").length}
-          </span>
-          <span className="text-sm text-muted-foreground">Delivered</span>
-        </div>
       </div>
 
       {/* Table */}
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  BL/AWB
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  Customer
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  Route
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  Mode
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  Status
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  ETA
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  ICUMS Ref
-                </th>
-                <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filteredShipments.map((shipment) => (
-                <tr key={shipment.id} className="data-row">
-                  <td className="px-5 py-4">
-                    <div>
-                      <span className="font-mono text-sm font-medium text-foreground">
-                        {shipment.blNumber}
-                      </span>
-                      <p className="text-xs text-muted-foreground mt-0.5">ID: {shipment.id}</p>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4">
-                    <div>
-                      <span className="text-sm font-medium text-foreground">{shipment.customer}</span>
-                      <p className="text-xs text-muted-foreground mt-0.5">{shipment.consignee}</p>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4">
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">{shipment.origin}</span>
-                      <span className="mx-2 text-muted-foreground/50">→</span>
-                      <span className="text-foreground">{shipment.destination}</span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground">{getTypeIcon(shipment.type)}</span>
-                      <span className="text-sm text-foreground">{shipment.mode}</span>
-                      {shipment.containers && (
-                        <Badge variant="secondary" className="text-xs">
-                          {shipment.containers}x
-                        </Badge>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-5 py-4">{getStatusBadge(shipment.status)}</td>
-                  <td className="px-5 py-4">
-                    <span className="text-sm text-muted-foreground">{shipment.eta}</span>
-                  </td>
-                  <td className="px-5 py-4">
-                    {shipment.icumsRef ? (
-                      <span className="font-mono text-xs text-accent">{shipment.icumsRef}</span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    )}
-                  </td>
-                  <td className="px-5 py-4 text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Eye className="mr-2 h-4 w-4" />
-                          View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit Shipment
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <FileText className="mr-2 h-4 w-4" />
-                          View Documents
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-accent">
-                          Track in ICUMS
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
+          {loading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : filteredShipments.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <p className="text-sm text-muted-foreground">No shipments found</p>
+              <Button
+                className="mt-4 bg-accent hover:bg-accent/90 text-accent-foreground"
+                onClick={() => setShowNewShipment(true)}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                New Shipment
+              </Button>
+            </div>
+          ) : (
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border bg-muted/30">
+                  <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">BL/AWB</th>
+                  <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Customer</th>
+                  <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Route</th>
+                  <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Mode</th>
+                  <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Status</th>
+                  <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">ETA</th>
+                  <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filteredShipments.map((shipment) => (
+                  <tr key={shipment.id} className="data-row">
+                    <td className="px-5 py-4">
+                      <span className="font-mono text-sm font-medium text-foreground">{shipment.blNumber}</span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className="text-sm font-medium text-foreground">{shipment.customer}</span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">{shipment.origin}</span>
+                        <span className="mx-2 text-muted-foreground/50">→</span>
+                        <span className="text-foreground">{shipment.destination}</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">{getTypeIcon(shipment.type)}</span>
+                        <span className="text-sm text-foreground">{shipment.mode}</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4">{getStatusBadge(shipment.status)}</td>
+                    <td className="px-5 py-4">
+                      <span className="text-sm text-muted-foreground">{shipment.eta}</span>
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Shipment
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <FileText className="mr-2 h-4 w-4" />
+                            View Documents
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-accent">Track in ICUMS</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between border-t border-border px-5 py-3">
-          <p className="text-sm text-muted-foreground">
-            Showing <span className="font-medium text-foreground">{filteredShipments.length}</span> of{" "}
-            <span className="font-medium text-foreground">{shipments.length}</span> shipments
-          </p>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" disabled>
-              <ChevronLeft className="h-4 w-4" />
-              Previous
-            </Button>
-            <Button variant="outline" size="sm">
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+        {filteredShipments.length > 0 && (
+          <div className="flex items-center justify-between border-t border-border px-5 py-3">
+            <p className="text-sm text-muted-foreground">
+              Showing <span className="font-medium text-foreground">{filteredShipments.length}</span> of{" "}
+              <span className="font-medium text-foreground">{shipments.length}</span> shipments
+            </p>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" disabled>
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+              <Button variant="outline" size="sm">
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
       <NewShipmentDialog open={showNewShipment} onOpenChange={setShowNewShipment} />
     </div>
