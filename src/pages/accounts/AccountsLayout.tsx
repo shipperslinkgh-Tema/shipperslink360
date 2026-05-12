@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useLocation, Navigate } from "react-router-dom";
-import { LayoutDashboard, FileText, Receipt, BookOpen, Wallet, BarChart3, Lock } from "lucide-react";
+import { LayoutDashboard, FileText, Receipt, BookOpen, Wallet, BarChart3, Lock, FolderArchive } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAccountsAccess } from "@/hooks/useAccountsAccess";
 
@@ -9,6 +9,7 @@ const links = [
   { to: "/accounts/vouchers", label: "Vouchers", icon: Receipt },
   { to: "/accounts/expenses", label: "Expenses", icon: Wallet },
   { to: "/accounts/ledgers", label: "Ledgers", icon: BookOpen },
+  { to: "/accounts/documents", label: "Documents", icon: FolderArchive },
   { to: "/accounts/reports", label: "Reports", icon: BarChart3 },
 ];
 
