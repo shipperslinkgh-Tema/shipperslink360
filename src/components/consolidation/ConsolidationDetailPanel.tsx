@@ -140,7 +140,14 @@ export function ConsolidationDetailPanel({
             <TabsTrigger value="finance">Finance</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="shippers" className="mt-4">
+          <TabsContent value="shippers" className="mt-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">{shippers.length} house consignment{shippers.length === 1 ? "" : "s"} attached</p>
+              <Button size="sm" className="bg-accent hover:bg-accent/90" onClick={() => setAddOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add House Consignment
+              </Button>
+            </div>
             <ShipperDetailsTable shippers={shippers} />
           </TabsContent>
 
