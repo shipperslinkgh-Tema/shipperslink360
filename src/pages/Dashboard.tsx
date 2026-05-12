@@ -60,7 +60,6 @@ export default function Dashboard() {
           icon={<Clock className="h-5 w-5" />}
         />
       </div>
-      </div>
 
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
