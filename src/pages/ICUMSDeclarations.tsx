@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Search,
   Filter,
@@ -45,74 +46,7 @@ interface Declaration {
   port: string;
 }
 
-const declarations: Declaration[] = [
-  {
-    id: "DEC001",
-    icumsRef: "C2026-00892",
-    blNumber: "MSKU2345678",
-    customer: "Gold Coast Trading Ltd",
-    declarationType: "Import",
-    status: "examination",
-    submissionDate: "Jan 18, 2026",
-    assessedValue: "GH₵ 485,200",
-    dutyAmount: "GH₵ 72,780",
-    port: "Tema",
-  },
-  {
-    id: "DEC002",
-    icumsRef: "C2026-00895",
-    blNumber: "AWB-7890123",
-    customer: "Accra Electronics",
-    declarationType: "Import",
-    status: "payment",
-    submissionDate: "Jan 19, 2026",
-    assessedValue: "GH₵ 156,800",
-    dutyAmount: "GH₵ 23,520",
-    port: "Kotoka Airport",
-  },
-  {
-    id: "DEC003",
-    icumsRef: "C2026-00901",
-    blNumber: "AWB-1234567",
-    customer: "Cape Coast Imports",
-    declarationType: "Import",
-    status: "assessment",
-    submissionDate: "Jan 20, 2026",
-    port: "Kotoka Airport",
-  },
-  {
-    id: "DEC004",
-    icumsRef: "C2026-00875",
-    blNumber: "OOLU1234567",
-    customer: "Takoradi Steel",
-    declarationType: "Import",
-    status: "released",
-    submissionDate: "Jan 15, 2026",
-    assessedValue: "GH₵ 1,250,000",
-    dutyAmount: "GH₵ 187,500",
-    port: "Takoradi",
-  },
-  {
-    id: "DEC005",
-    icumsRef: "C2026-00910",
-    blNumber: "HLCU5678901",
-    customer: "Ghana Pharma Ltd",
-    declarationType: "Import",
-    status: "submitted",
-    submissionDate: "Jan 21, 2026",
-    port: "Tema",
-  },
-  {
-    id: "DEC006",
-    icumsRef: "—",
-    blNumber: "COSU8901234",
-    customer: "West Africa Motors",
-    declarationType: "Import",
-    status: "draft",
-    submissionDate: "—",
-    port: "Tema",
-  },
-];
+const declarations: Declaration[] = [];
 
 const getStatusProgress = (status: Declaration["status"]) => {
   const steps = ["draft", "submitted", "assessment", "payment", "examination", "released"];
@@ -136,8 +70,41 @@ const getStatusBadge = (status: Declaration["status"]) => {
 export default function ICUMSDeclarations() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [rows, setRows] = useState<Declaration[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredDeclarations = declarations.filter((dec) => {
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("consignment_workflows")
+        .select("id, icums_declaration_number, bl_number, awb_number, client_name, port_of_discharge, current_stage, duty_amount, created_at")
+        .order("created_at", { ascending: false });
+      const mapped: Declaration[] = (data || []).map((d: any) => {
+        const stage = d.current_stage || "";
+        let status: Declaration["status"] = "draft";
+        if (["customs_declared"].includes(stage)) status = "submitted";
+        else if (["duty_paid"].includes(stage)) status = "payment";
+        else if (["port_processing"].includes(stage)) status = "examination";
+        else if (["cargo_released", "delivery_started", "delivery_completed"].includes(stage)) status = "released";
+        else if (["documentation_completed"].includes(stage)) status = "assessment";
+        return {
+          id: d.id,
+          icumsRef: d.icums_declaration_number || "—",
+          blNumber: d.bl_number || d.awb_number || "—",
+          customer: d.client_name || "—",
+          declarationType: "Import",
+          status,
+          submissionDate: d.created_at ? new Date(d.created_at).toLocaleDateString() : "—",
+          dutyAmount: d.duty_amount ? `GH₵ ${Number(d.duty_amount).toLocaleString()}` : undefined,
+          port: d.port_of_discharge || "Tema",
+        };
+      });
+      setRows(mapped);
+      setLoading(false);
+    })();
+  }, []);
+
+  const filteredDeclarations = rows.filter((dec) => {
     const matchesSearch =
       dec.icumsRef.toLowerCase().includes(searchQuery.toLowerCase()) ||
       dec.blNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -221,11 +188,11 @@ export default function ICUMSDeclarations() {
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-5">
         {[
-          { label: "Draft", count: 1, icon: FileCheck, color: "text-muted-foreground" },
-          { label: "Submitted", count: 1, icon: Clock, color: "text-info" },
-          { label: "Assessment", count: 1, icon: AlertCircle, color: "text-warning" },
-          { label: "Payment", count: 1, icon: Clock, color: "text-warning" },
-          { label: "Released", count: 1, icon: CheckCircle2, color: "text-success" },
+          { label: "Draft", count: rows.filter(r => r.status === "draft").length, icon: FileCheck, color: "text-muted-foreground" },
+          { label: "Submitted", count: rows.filter(r => r.status === "submitted").length, icon: Clock, color: "text-info" },
+          { label: "Assessment", count: rows.filter(r => r.status === "assessment").length, icon: AlertCircle, color: "text-warning" },
+          { label: "Payment", count: rows.filter(r => r.status === "payment").length, icon: Clock, color: "text-warning" },
+          { label: "Released", count: rows.filter(r => r.status === "released").length, icon: CheckCircle2, color: "text-success" },
         ].map((stat) => (
           <div
             key={stat.label}
