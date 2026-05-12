@@ -45,10 +45,6 @@ export function ShipmentStatusChart() {
           </PieChart>
         </ResponsiveContainer>
       </div>
-      <div className="mt-4 text-center">
-        <p className="text-3xl font-bold text-foreground">175</p>
-        <p className="text-sm text-muted-foreground">Total Active Shipments</p>
-      </div>
     </div>
   );
 }
