@@ -188,11 +188,11 @@ export default function ICUMSDeclarations() {
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-5">
         {[
-          { label: "Draft", count: 1, icon: FileCheck, color: "text-muted-foreground" },
-          { label: "Submitted", count: 1, icon: Clock, color: "text-info" },
-          { label: "Assessment", count: 1, icon: AlertCircle, color: "text-warning" },
-          { label: "Payment", count: 1, icon: Clock, color: "text-warning" },
-          { label: "Released", count: 1, icon: CheckCircle2, color: "text-success" },
+          { label: "Draft", count: rows.filter(r => r.status === "draft").length, icon: FileCheck, color: "text-muted-foreground" },
+          { label: "Submitted", count: rows.filter(r => r.status === "submitted").length, icon: Clock, color: "text-info" },
+          { label: "Assessment", count: rows.filter(r => r.status === "assessment").length, icon: AlertCircle, color: "text-warning" },
+          { label: "Payment", count: rows.filter(r => r.status === "payment").length, icon: Clock, color: "text-warning" },
+          { label: "Released", count: rows.filter(r => r.status === "released").length, icon: CheckCircle2, color: "text-success" },
         ].map((stat) => (
           <div
             key={stat.label}
