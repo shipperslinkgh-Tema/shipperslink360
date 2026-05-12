@@ -46,74 +46,7 @@ interface Declaration {
   port: string;
 }
 
-const declarations: Declaration[] = [
-  {
-    id: "DEC001",
-    icumsRef: "C2026-00892",
-    blNumber: "MSKU2345678",
-    customer: "Gold Coast Trading Ltd",
-    declarationType: "Import",
-    status: "examination",
-    submissionDate: "Jan 18, 2026",
-    assessedValue: "GH₵ 485,200",
-    dutyAmount: "GH₵ 72,780",
-    port: "Tema",
-  },
-  {
-    id: "DEC002",
-    icumsRef: "C2026-00895",
-    blNumber: "AWB-7890123",
-    customer: "Accra Electronics",
-    declarationType: "Import",
-    status: "payment",
-    submissionDate: "Jan 19, 2026",
-    assessedValue: "GH₵ 156,800",
-    dutyAmount: "GH₵ 23,520",
-    port: "Kotoka Airport",
-  },
-  {
-    id: "DEC003",
-    icumsRef: "C2026-00901",
-    blNumber: "AWB-1234567",
-    customer: "Cape Coast Imports",
-    declarationType: "Import",
-    status: "assessment",
-    submissionDate: "Jan 20, 2026",
-    port: "Kotoka Airport",
-  },
-  {
-    id: "DEC004",
-    icumsRef: "C2026-00875",
-    blNumber: "OOLU1234567",
-    customer: "Takoradi Steel",
-    declarationType: "Import",
-    status: "released",
-    submissionDate: "Jan 15, 2026",
-    assessedValue: "GH₵ 1,250,000",
-    dutyAmount: "GH₵ 187,500",
-    port: "Takoradi",
-  },
-  {
-    id: "DEC005",
-    icumsRef: "C2026-00910",
-    blNumber: "HLCU5678901",
-    customer: "Ghana Pharma Ltd",
-    declarationType: "Import",
-    status: "submitted",
-    submissionDate: "Jan 21, 2026",
-    port: "Tema",
-  },
-  {
-    id: "DEC006",
-    icumsRef: "—",
-    blNumber: "COSU8901234",
-    customer: "West Africa Motors",
-    declarationType: "Import",
-    status: "draft",
-    submissionDate: "—",
-    port: "Tema",
-  },
-];
+const declarations: Declaration[] = [];
 
 const getStatusProgress = (status: Declaration["status"]) => {
   const steps = ["draft", "submitted", "assessment", "payment", "examination", "released"];
