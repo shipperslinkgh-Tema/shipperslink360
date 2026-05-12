@@ -37,6 +37,7 @@ export function ConsolidationDetailPanel({
   demurrage,
   onClose,
 }: ConsolidationDetailPanelProps) {
+  const [addOpen, setAddOpen] = useState(false);
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-GH", {
       style: "currency",
