@@ -447,6 +447,53 @@ export type Database = {
           },
         ]
       }
+      chart_of_accounts: {
+        Row: {
+          code: string
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          parent_id: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          parent_id?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          parent_id?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chart_of_accounts_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           channel: string
@@ -1741,6 +1788,41 @@ export type Database = {
         }
         Relationships: []
       }
+      finance_audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          user_id: string | null
+          voucher_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          user_id?: string | null
+          voucher_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          user_id?: string | null
+          voucher_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_audit_logs_voucher_id_fkey"
+            columns: ["voucher_id"]
+            isOneToOne: false
+            referencedRelation: "vouchers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       finance_expenses: {
         Row: {
           amount: number
@@ -2238,6 +2320,76 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      ledger_entries: {
+        Row: {
+          account_id: string
+          consignment_id: string | null
+          created_at: string
+          credit: number
+          currency: string
+          customer_id: string | null
+          debit: number
+          description: string | null
+          entry_date: string
+          ghs_equivalent: number
+          id: string
+          voucher_id: string
+          voucher_line_id: string | null
+        }
+        Insert: {
+          account_id: string
+          consignment_id?: string | null
+          created_at?: string
+          credit?: number
+          currency?: string
+          customer_id?: string | null
+          debit?: number
+          description?: string | null
+          entry_date: string
+          ghs_equivalent?: number
+          id?: string
+          voucher_id: string
+          voucher_line_id?: string | null
+        }
+        Update: {
+          account_id?: string
+          consignment_id?: string | null
+          created_at?: string
+          credit?: number
+          currency?: string
+          customer_id?: string | null
+          debit?: number
+          description?: string | null
+          entry_date?: string
+          ghs_equivalent?: number
+          id?: string
+          voucher_id?: string
+          voucher_line_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ledger_entries_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_voucher_id_fkey"
+            columns: ["voucher_id"]
+            isOneToOne: false
+            referencedRelation: "vouchers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_voucher_line_id_fkey"
+            columns: ["voucher_line_id"]
+            isOneToOne: false
+            referencedRelation: "voucher_lines"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       login_history: {
         Row: {
@@ -2887,6 +3039,129 @@ export type Database = {
         }
         Relationships: []
       }
+      voucher_lines: {
+        Row: {
+          account_id: string
+          created_at: string
+          credit: number
+          debit: number
+          description: string | null
+          id: string
+          line_no: number
+          voucher_id: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          credit?: number
+          debit?: number
+          description?: string | null
+          id?: string
+          line_no?: number
+          voucher_id: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          credit?: number
+          debit?: number
+          description?: string | null
+          id?: string
+          line_no?: number
+          voucher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "voucher_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "voucher_lines_voucher_id_fkey"
+            columns: ["voucher_id"]
+            isOneToOne: false
+            referencedRelation: "vouchers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vouchers: {
+        Row: {
+          bank_connection_id: string | null
+          consignment_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_id: string | null
+          exchange_rate: number
+          ghs_equivalent: number
+          id: string
+          invoice_id: string | null
+          narration: string | null
+          party_name: string | null
+          payment_method: string | null
+          posted_at: string | null
+          posted_by: string | null
+          reference: string | null
+          status: string
+          total_amount: number
+          updated_at: string
+          voucher_date: string
+          voucher_no: string | null
+          voucher_type: string
+        }
+        Insert: {
+          bank_connection_id?: string | null
+          consignment_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_id?: string | null
+          exchange_rate?: number
+          ghs_equivalent?: number
+          id?: string
+          invoice_id?: string | null
+          narration?: string | null
+          party_name?: string | null
+          payment_method?: string | null
+          posted_at?: string | null
+          posted_by?: string | null
+          reference?: string | null
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          voucher_date?: string
+          voucher_no?: string | null
+          voucher_type: string
+        }
+        Update: {
+          bank_connection_id?: string | null
+          consignment_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_id?: string | null
+          exchange_rate?: number
+          ghs_equivalent?: number
+          id?: string
+          invoice_id?: string | null
+          narration?: string | null
+          party_name?: string | null
+          payment_method?: string | null
+          posted_at?: string | null
+          posted_by?: string | null
+          reference?: string | null
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          voucher_date?: string
+          voucher_no?: string | null
+          voucher_type?: string
+        }
+        Relationships: []
+      }
       workflow_documents: {
         Row: {
           created_at: string
@@ -3055,6 +3330,39 @@ export type Database = {
     }
     Functions: {
       can_view_delivery_otp: { Args: { _user_id: string }; Returns: boolean }
+      cancel_voucher: {
+        Args: { _reason: string; _voucher_id: string }
+        Returns: {
+          bank_connection_id: string | null
+          consignment_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_id: string | null
+          exchange_rate: number
+          ghs_equivalent: number
+          id: string
+          invoice_id: string | null
+          narration: string | null
+          party_name: string | null
+          payment_method: string | null
+          posted_at: string | null
+          posted_by: string | null
+          reference: string | null
+          status: string
+          total_amount: number
+          updated_at: string
+          voucher_date: string
+          voucher_no: string | null
+          voucher_type: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vouchers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_client_customer_id: { Args: { _user_id: string }; Returns: string }
       get_user_department: {
         Args: { _user_id: string }
@@ -3068,8 +3376,42 @@ export type Database = {
         Returns: boolean
       }
       increment_failed_login: { Args: { _user_id: string }; Returns: undefined }
+      is_accounts: { Args: { _user_id: string }; Returns: boolean }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_client: { Args: { _user_id: string }; Returns: boolean }
+      post_voucher: {
+        Args: { _voucher_id: string }
+        Returns: {
+          bank_connection_id: string | null
+          consignment_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_id: string | null
+          exchange_rate: number
+          ghs_equivalent: number
+          id: string
+          invoice_id: string | null
+          narration: string | null
+          party_name: string | null
+          payment_method: string | null
+          posted_at: string | null
+          posted_by: string | null
+          reference: string | null
+          status: string
+          total_amount: number
+          updated_at: string
+          voucher_date: string
+          voucher_no: string | null
+          voucher_type: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vouchers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reset_failed_login: { Args: { _user_id: string }; Returns: undefined }
     }
     Enums: {
