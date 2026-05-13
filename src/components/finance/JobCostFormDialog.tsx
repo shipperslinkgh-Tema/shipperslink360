@@ -91,6 +91,13 @@ export function JobCostFormDialog({ open, onOpenChange, userName }: Props) {
               <SelectContent>{["GHS", "USD", "EUR", "GBP", "CNY"].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
             </Select>
           </div>
+          {form.currency !== "GHS" && (
+            <div className="col-span-2 space-y-2">
+              <Label>Exchange Rate {rateLoading ? "(loading...)" : rateDate ? `(live ${rateDate})` : ""}</Label>
+              <Input type="number" step="0.0001" value={form.exchange_rate} onChange={e => setForm(f => ({ ...f, exchange_rate: parseFloat(e.target.value) || 1 }))} />
+              <p className="text-xs text-muted-foreground">1 {form.currency} = {form.exchange_rate} GHS</p>
+            </div>
+          )}
           <div className="col-span-2 space-y-2">
             <Label>Description</Label>
             <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} />
