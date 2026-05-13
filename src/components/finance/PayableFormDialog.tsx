@@ -66,8 +66,9 @@ export function PayableFormDialog({ open, onOpenChange, userName }: Props) {
           </div>
           {form.currency !== "GHS" && (
             <div className="space-y-2">
-              <Label>Exchange Rate</Label>
+              <Label>Exchange Rate {rateLoading ? "(loading...)" : rateDate ? `(live ${rateDate})` : ""}</Label>
               <Input type="number" step="0.0001" value={form.exchange_rate} onChange={e => setForm(f => ({ ...f, exchange_rate: parseFloat(e.target.value) || 1 }))} />
+              <p className="text-xs text-muted-foreground">1 {form.currency} = {form.exchange_rate} GHS</p>
             </div>
           )}
           <div className="space-y-2">
