@@ -53,8 +53,8 @@ export default function ClientDashboard() {
   const statCards = [
     { title: "Active Shipments", value: stats.shipments, icon: Ship, color: "text-primary", path: "/portal/shipments" },
     { title: "Documents", value: stats.documents, icon: FileText, color: "text-emerald-500", path: "/portal/documents" },
-    { title: "Invoices", value: stats.invoices, icon: DollarSign, color: "text-amber-500", path: "/portal/invoices" },
-    { title: "Unread Messages", value: stats.messages, icon: MessageSquare, color: "text-blue-500", path: "/portal/messages", highlight: stats.messages > 0 },
+    { title: "Invoices", value: stats.invoices, icon: DollarSign, color: "text-amber-500", path: "/portal/financials" },
+    { title: "Notifications", value: stats.messages, icon: MessageSquare, color: "text-blue-500", path: "/portal/notifications", highlight: stats.messages > 0 },
   ];
 
   return (
@@ -137,7 +137,7 @@ export default function ClientDashboard() {
                 <DollarSign className="h-4 w-4 text-amber-500" />
                 Pending Invoices
               </CardTitle>
-              <button onClick={() => navigate("/portal/invoices")} className="text-xs text-primary hover:underline flex items-center gap-1">
+              <button onClick={() => navigate("/portal/financials")} className="text-xs text-primary hover:underline flex items-center gap-1">
                 View All <ArrowRight className="h-3 w-3" />
               </button>
             </div>
