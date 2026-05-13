@@ -30,18 +30,103 @@ interface AIChatPanelProps {
 
 export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, className }: AIChatPanelProps) {
   const { messages, isLoading, sendMessage, clearMessages } = useAIChat(module);
+  const { processDocument, isProcessing } = useDocumentProcessor();
   const [input, setInput] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
+  const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
+  const readFileAsDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+
+  const readFileAsText = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = reject;
+      r.readAsText(file);
+    });
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files) return;
+    for (const file of Array.from(files)) {
+      if (file.size > MAX_FILE_MB * 1024 * 1024) {
+        toast.error(`${file.name} exceeds ${MAX_FILE_MB}MB limit`);
+        continue;
+      }
+      try {
+        if (file.type.startsWith("image/")) {
+          const dataUrl = await readFileAsDataUrl(file);
+          setAttachments(prev => [...prev, { file, kind: "image", dataUrl }]);
+        } else if (file.type === "application/pdf") {
+          toast.info(`Extracting text from ${file.name}...`);
+          const data = await processDocument(file);
+          const extracted = data
+            ? `[Extracted from ${file.name}]\n${JSON.stringify(data, null, 2)}`
+            : `[Could not extract structured data from ${file.name}]`;
+          setAttachments(prev => [...prev, { file, kind: "pdf", extractedText: extracted }]);
+        } else if (
+          file.type.startsWith("text/") ||
+          /\.(txt|csv|json|md|log|xml|yaml|yml)$/i.test(file.name)
+        ) {
+          const text = await readFileAsText(file);
+          const truncated = text.length > 50000 ? text.slice(0, 50000) + "\n...[truncated]" : text;
+          setAttachments(prev => [...prev, { file, kind: "text", extractedText: `[Contents of ${file.name}]\n${truncated}` }]);
+        } else {
+          toast.error(`Unsupported file type: ${file.name}`);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error(`Failed to read ${file.name}`);
+      }
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removeAttachment = (idx: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== idx));
+  };
+
   const handleSend = () => {
-    if (!input.trim() || isLoading) return;
-    sendMessage(input.trim());
+    const text = input.trim();
+    if ((!text && attachments.length === 0) || isLoading || isProcessing) return;
+
+    if (attachments.length === 0) {
+      sendMessage(text);
+    } else {
+      const parts: Array<
+        { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }
+      > = [];
+      const textParts: string[] = [];
+      if (text) textParts.push(text);
+      for (const a of attachments) {
+        if (a.kind === "image" && a.dataUrl) {
+          parts.push({ type: "image_url", image_url: { url: a.dataUrl } });
+        } else if (a.extractedText) {
+          textParts.push(a.extractedText);
+        }
+      }
+      parts.unshift({ type: "text", text: textParts.join("\n\n") || "Please review the attached file(s)." });
+      sendMessage(parts);
+    }
     setInput("");
+    setAttachments([]);
+  };
+
+  const copyToClipboard = (content: string, id: string) => {
+    navigator.clipboard.writeText(content);
+    setCopied(id);
+    setTimeout(() => setCopied(null), 2000);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -49,12 +134,6 @@ export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, 
       e.preventDefault();
       handleSend();
     }
-  };
-
-  const copyToClipboard = (content: string, id: string) => {
-    navigator.clipboard.writeText(content);
-    setCopied(id);
-    setTimeout(() => setCopied(null), 2000);
   };
 
   const defaultWelcome = `Hello! I'm your AI assistant for the **${moduleLabel}** module. How can I help you today?`;
