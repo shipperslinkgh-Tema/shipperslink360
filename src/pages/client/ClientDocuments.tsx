@@ -430,6 +430,8 @@ export default function ClientDocuments() {
           ))}
         </div>
       )}
+
+      <DocumentPreview open={!!previewDoc} onClose={() => setPreviewDoc(null)} doc={previewDoc} />
     </div>
   );
 }
