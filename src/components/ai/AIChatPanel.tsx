@@ -369,6 +369,7 @@ export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, 
           Attach images, PDFs, or text files (max {MAX_FILE_MB}MB). AI responses are for guidance only.
         </p>
       </div>
+      </div>
     </div>
   );
 }
