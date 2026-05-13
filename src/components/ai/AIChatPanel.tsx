@@ -30,7 +30,18 @@ interface AIChatPanelProps {
 }
 
 export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, className }: AIChatPanelProps) {
-  const { messages, isLoading, sendMessage, clearMessages } = useAIChat(module);
+  const {
+    messages,
+    isLoading,
+    sendMessage,
+    clearMessages,
+    conversations,
+    conversationId,
+    loadConversation,
+    newConversation,
+    deleteConversation,
+  } = useAIChat(module);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const { processDocument, isProcessing } = useDocumentProcessor();
   const [input, setInput] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
