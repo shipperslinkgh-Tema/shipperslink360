@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, Trash2, Copy, Check } from "lucide-react";
+import { Send, Bot, User, Loader2, Trash2, Copy, Check, Paperclip, X, FileText, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,7 +7,18 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useAIChat, AIMessage } from "@/hooks/useAIChat";
+import { useDocumentProcessor } from "@/hooks/useDocumentProcessor";
+import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+
+interface PendingAttachment {
+  file: File;
+  kind: "image" | "pdf" | "text";
+  dataUrl?: string; // for images
+  extractedText?: string; // for pdf/text
+}
+
+const MAX_FILE_MB = 10;
 
 interface AIChatPanelProps {
   module: string;
