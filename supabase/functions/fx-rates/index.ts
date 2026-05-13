@@ -10,20 +10,21 @@ const SUPPORTED = ["USD", "EUR", "GBP", "CNY"];
 const QUOTE = "GHS";
 
 async function fetchRates(): Promise<Record<string, number>> {
-  // Primary: Frankfurter (ECB data, free, no key) - but doesn't include GHS reliably.
-  // Use exchangerate.host (free, no key) which supports GHS.
-  const url = `https://api.exchangerate.host/latest?base=${QUOTE}&symbols=${SUPPORTED.join(",")}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`FX provider returned ${res.status}`);
-  const data = await res.json();
-  if (!data?.rates) throw new Error("No rates in provider response");
-  // data.rates = { USD: 0.0xx, EUR: ... } meaning 1 GHS = X foreign
-  // We want 1 FOREIGN = ? GHS, so invert.
+  // open.er-api.com — free, no API key, daily updates, supports GHS
+  // We fetch with each foreign currency as base, take the GHS rate directly.
   const out: Record<string, number> = {};
-  for (const sym of SUPPORTED) {
-    const inv = data.rates[sym];
-    if (inv && inv > 0) out[sym] = 1 / inv;
+  for (const base of SUPPORTED) {
+    try {
+      const res = await fetch(`https://open.er-api.com/v6/latest/${base}`);
+      if (!res.ok) continue;
+      const data = await res.json();
+      const ghs = data?.rates?.GHS;
+      if (typeof ghs === "number" && ghs > 0) out[base] = ghs;
+    } catch (e) {
+      console.error(`Failed ${base}:`, e);
+    }
   }
+  if (Object.keys(out).length === 0) throw new Error("No rates fetched from provider");
   return out;
 }
 
