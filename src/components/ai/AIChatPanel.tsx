@@ -147,7 +147,64 @@ export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, 
   const defaultWelcome = `Hello! I'm your AI assistant for the **${moduleLabel}** module. How can I help you today?`;
 
   return (
-    <div className={cn("flex flex-col h-full bg-card border border-border rounded-xl overflow-hidden", className)}>
+    <div className={cn("flex h-full bg-card border border-border rounded-xl overflow-hidden", className)}>
+      {/* History sidebar */}
+      {historyOpen && (
+        <div className="w-56 border-r border-border bg-muted/30 flex flex-col">
+          <div className="px-3 py-2 border-b border-border flex items-center justify-between">
+            <span className="text-xs font-semibold text-foreground">History</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={newConversation}
+              title="New chat"
+            >
+              <MessageSquarePlus className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+          <ScrollArea className="flex-1">
+            <div className="p-2 space-y-1">
+              {conversations.length === 0 ? (
+                <p className="text-[11px] text-muted-foreground px-2 py-3 text-center">
+                  No saved chats yet
+                </p>
+              ) : (
+                conversations.map(c => (
+                  <div
+                    key={c.id}
+                    className={cn(
+                      "group flex items-center gap-1.5 rounded-md px-2 py-1.5 cursor-pointer hover:bg-muted text-xs",
+                      conversationId === c.id && "bg-muted"
+                    )}
+                    onClick={() => loadConversation(c.id)}
+                  >
+                    <MessageSquare className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
+                    <div className="flex-1 min-w-0">
+                      <p className="truncate text-foreground">{c.title}</p>
+                      <p className="text-[9px] text-muted-foreground">
+                        {formatDistanceToNow(new Date(c.updated_at), { addSuffix: true })}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={e => {
+                        e.stopPropagation();
+                        deleteConversation(c.id);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 h-5 w-5 rounded hover:bg-destructive/10 hover:text-destructive flex items-center justify-center"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </ScrollArea>
+        </div>
+      )}
+
+      <div className="flex-1 flex flex-col min-w-0">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary/5">
         <div className="flex items-center gap-2">
@@ -159,15 +216,35 @@ export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, 
             <Badge variant="outline" className="text-[9px] h-4 px-1.5">{moduleLabel}</Badge>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 text-muted-foreground hover:text-destructive"
-          onClick={clearMessages}
-          title="Clear conversation"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground hover:text-foreground"
+            onClick={() => setHistoryOpen(v => !v)}
+            title="Chat history"
+          >
+            <History className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground hover:text-foreground"
+            onClick={newConversation}
+            title="New chat"
+          >
+            <MessageSquarePlus className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+            onClick={clearMessages}
+            title="Clear current view"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       </div>
 
       {/* Messages */}
