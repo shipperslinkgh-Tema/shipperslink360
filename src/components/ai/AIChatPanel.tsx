@@ -212,7 +212,54 @@ export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, 
 
       {/* Input */}
       <div className="p-4 border-t border-border bg-muted/20">
+        {attachments.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-2">
+            {attachments.map((a, idx) => (
+              <div
+                key={idx}
+                className="flex items-center gap-2 bg-background border border-border rounded-lg pl-2 pr-1 py-1 text-xs"
+              >
+                {a.kind === "image" ? (
+                  <ImageIcon className="h-3.5 w-3.5 text-primary" />
+                ) : (
+                  <FileText className="h-3.5 w-3.5 text-primary" />
+                )}
+                <span className="max-w-[140px] truncate">{a.file.name}</span>
+                <button
+                  type="button"
+                  onClick={() => removeAttachment(idx)}
+                  className="h-5 w-5 rounded hover:bg-muted flex items-center justify-center"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="flex gap-2 items-end">
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*,application/pdf,text/*,.csv,.json,.md,.log,.xml,.yaml,.yml,.txt"
+            className="hidden"
+            onChange={e => handleFiles(e.target.files)}
+          />
+          <Button
+            variant="outline"
+            size="icon"
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isLoading || isProcessing}
+            className="h-9 w-9 flex-shrink-0"
+            title="Attach images, PDFs, or text files"
+          >
+            {isProcessing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Paperclip className="h-4 w-4" />
+            )}
+          </Button>
           <Textarea
             value={input}
             onChange={e => setInput(e.target.value)}
@@ -223,7 +270,7 @@ export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, 
           />
           <Button
             onClick={handleSend}
-            disabled={!input.trim() || isLoading}
+            disabled={(!input.trim() && attachments.length === 0) || isLoading || isProcessing}
             className="h-9 w-9 p-0 bg-primary hover:bg-primary/90 flex-shrink-0"
           >
             {isLoading ? (
@@ -234,7 +281,7 @@ export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, 
           </Button>
         </div>
         <p className="text-[10px] text-muted-foreground mt-1.5">
-          AI responses are for guidance only. Always verify critical information.
+          Attach images, PDFs, or text files (max {MAX_FILE_MB}MB). AI responses are for guidance only.
         </p>
       </div>
     </div>
