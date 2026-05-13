@@ -295,6 +295,16 @@ function MessageBubble({ message, onCopy, copied }: {
 }) {
   const isUser = message.role === "user";
 
+  // Normalize content for rendering
+  const textContent =
+    typeof message.content === "string"
+      ? message.content
+      : message.content.filter(p => p.type === "text").map(p => (p as any).text).join("\n\n");
+  const imageUrls =
+    typeof message.content === "string"
+      ? []
+      : message.content.filter(p => p.type === "image_url").map(p => (p as any).image_url.url as string);
+
   if (isUser) {
     return (
       <div className="flex gap-3 flex-row-reverse">
@@ -303,8 +313,11 @@ function MessageBubble({ message, onCopy, copied }: {
             <User className="h-3.5 w-3.5" />
           </AvatarFallback>
         </Avatar>
-        <div className="max-w-[80%] bg-primary text-primary-foreground rounded-xl rounded-tr-none p-3">
-          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+        <div className="max-w-[80%] bg-primary text-primary-foreground rounded-xl rounded-tr-none p-3 space-y-2">
+          {imageUrls.map((url, i) => (
+            <img key={i} src={url} alt="attachment" className="rounded-md max-h-48 object-contain" />
+          ))}
+          {textContent && <p className="text-sm whitespace-pre-wrap">{textContent}</p>}
         </div>
       </div>
     );
@@ -318,9 +331,9 @@ function MessageBubble({ message, onCopy, copied }: {
       <div className="flex-1 group">
         <div className="bg-muted/50 rounded-xl rounded-tl-none p-3 relative">
           <div className="prose prose-sm max-w-none text-foreground text-sm [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-            <ReactMarkdown>{message.content}</ReactMarkdown>
+            <ReactMarkdown>{textContent}</ReactMarkdown>
           </div>
-          {message.content && (
+          {textContent && (
             <Button
               variant="ghost"
               size="icon"
