@@ -3647,6 +3647,20 @@ export type Database = {
       is_accounts: { Args: { _user_id: string }; Returns: boolean }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_client: { Args: { _user_id: string }; Returns: boolean }
+      notify_client: {
+        Args: {
+          _action_url: string
+          _category: string
+          _customer_id: string
+          _message: string
+          _priority: string
+          _reference_id: string
+          _reference_type: string
+          _title: string
+          _type: string
+        }
+        Returns: undefined
+      }
       notify_department: {
         Args: {
           _body: string

@@ -49,8 +49,8 @@ import ClientLogin from "./pages/client/ClientLogin";
 import ClientDashboard from "./pages/client/ClientDashboard";
 import ClientShipments from "./pages/client/ClientShipments";
 import ClientDocuments from "./pages/client/ClientDocuments";
-import ClientInvoices from "./pages/client/ClientInvoices";
-import ClientMessages from "./pages/client/ClientMessages";
+import ClientFinancials from "./pages/client/ClientFinancials";
+import ClientNotifications from "./pages/client/ClientNotifications";
 import { ClientPortalLayout } from "./components/layout/ClientPortalLayout";
 
 const queryClient = new QueryClient();
@@ -68,7 +68,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (!session) return <Navigate to="/login" replace />;
   // If logged-in user has no staff profile, they're a client — send to portal
-  if (!profile) return <Navigate to="/portal/invoices" replace />;
+  if (!profile) return <Navigate to="/portal" replace />;
   if (profile?.must_change_password) return <Navigate to="/change-password" replace />;
 
   return <>{children}</>;
@@ -100,7 +100,7 @@ function ClientProtectedRoute({ children }: { children: React.ReactNode }) {
 function ClientAuthRoute({ children }: { children: React.ReactNode }) {
   const { session, loading, clientProfile } = useClientAuth();
   if (loading) return null;
-  if (session && clientProfile) return <Navigate to="/portal/invoices" replace />;
+  if (session && clientProfile) return <Navigate to="/portal" replace />;
   return <>{children}</>;
 }
 
@@ -123,10 +123,13 @@ const App = () => (
             <ClientAuthProvider>
               <Routes>
                 <Route path="/login" element={<ClientAuthRoute><ClientLogin /></ClientAuthRoute>} />
-                <Route path="/" element={<Navigate to="/portal/invoices" replace />} />
+                <Route path="/" element={<ClientProtectedRoute><ClientDashboard /></ClientProtectedRoute>} />
+                <Route path="/shipments" element={<ClientProtectedRoute><ClientShipments /></ClientProtectedRoute>} />
                 <Route path="/documents" element={<ClientProtectedRoute><ClientDocuments /></ClientProtectedRoute>} />
-                <Route path="/invoices" element={<ClientProtectedRoute><ClientInvoices /></ClientProtectedRoute>} />
-                <Route path="*" element={<Navigate to="/portal/invoices" replace />} />
+                <Route path="/financials" element={<ClientProtectedRoute><ClientFinancials /></ClientProtectedRoute>} />
+                <Route path="/invoices" element={<Navigate to="/portal/financials" replace />} />
+                <Route path="/notifications" element={<ClientProtectedRoute><ClientNotifications /></ClientProtectedRoute>} />
+                <Route path="*" element={<Navigate to="/portal" replace />} />
               </Routes>
             </ClientAuthProvider>
           } />

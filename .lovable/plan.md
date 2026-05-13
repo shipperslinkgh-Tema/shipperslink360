@@ -1,119 +1,60 @@
-# Unified System Integration Plan
+# Client Portal Rebuild
 
-Make the **`consignment_workflows`** record the single source of truth that every portal reads from and writes to, and add an event layer so a change in one department automatically updates the others in real-time.
+The portal already has Dashboard, Shipments, Documents, Invoices and Messages pages, but only Documents and Invoices are routed and there is no Payments, Statement of Account or Notifications surface. This rebuild wires everything into a clean 4-tab structure (Dashboard / Shipments / Documents / Financials) and fills the missing pieces.
 
----
+## Scope
 
-## 1. Central Object: Consignment
+### 1. Routing & Layout
+- Wire all 4 tabs in `App.tsx`: `/portal` (Dashboard) · `/portal/shipments` · `/portal/documents` · `/portal/financials`.
+- Replace `ClientPortalLayout` nav with: Dashboard, Shipments, Documents, Financials, Notifications (bell icon).
+- Default redirect changes from `/portal/invoices` → `/portal`.
 
-Already exists as `consignment_workflows` with `consignment_ref`. We will:
+### 2. Dashboard (`ClientDashboard`)
+- Already built — keep stat cards, active shipments, pending invoices, outstanding balance.
+- Add: "Track Live" button on shipments currently in `in_transit` (links to `/track/:token`).
+- Add unread notifications counter card.
 
-- Treat `consignment_id` as the foreign reference used by Documentation, Customs/ICUMS, Accounts, Fleet, Warehouse, and Client Portal.
-- Add missing link columns where they don't exist yet:
-  - `finance_invoices.consignment_id`
-  - `finance_expenses.consignment_id`
-  - `trucking_jobs.consignment_id`
-  - `cargo_receipts.consignment_id` (warehouse in/out)
-  - `client_shipments.consignment_id` (client portal mirror)
-- Add a `consignment_events` table (audit + event bus) — every state change writes a row here.
+### 3. Shipments (`ClientShipments`)
+- Keep existing card grid + status timeline + realtime subscription.
+- Add **"Track Shipment Live"** button in the detail dialog when `tracking_link` is present (deep-link to `/track/:token`).
+- Map status → label colors: Documents Received, In Clearance, Released, In Transit, Delivered.
 
-## 2. Automated Workflow (DB triggers + Edge Function dispatcher)
+### 4. Documents Vault (`ClientDocuments`)
+- Already built — keep download-with-signed-URL + category filters + uploads.
+- Add **inline preview** dialog (PDF/image) before download using a 5-minute signed URL inside an `<iframe>` / `<img>`.
+- Add filter by shipment.
 
-A new Postgres trigger on `consignment_workflows` and related tables will:
+### 5. Financials (new `ClientFinancials` page with sub-tabs)
+- **Invoices**: existing `ClientInvoices` content, with PDF download (client-side jsPDF generation).
+- **Payments**: new sub-tab listing all `client_invoices` rows with `paid_amount > 0`, sorted by `paid_date`, showing invoice link, amount, method.
+- **Statement of Account**: auto-generated summary
+  - Total Billed · Total Paid · Outstanding Balance · Aging buckets (0–30 / 31–60 / 60+ days)
+  - Line-by-line ledger (Date, Invoice #, Description, Debit, Credit, Balance)
+  - "Download PDF" button using jsPDF + autotable.
 
-| Trigger source | Effect |
-|---|---|
-| `consignment_documents` insert | set workflow stage → `documents_received`, insert event, notify Operations |
-| `consignment_workflows.current_stage = 'documentation_completed'` | auto-create draft `finance_invoices` row, notify Accounts |
-| `finance_invoices.status = 'paid'` | set workflow stage → `cargo_released` (cleared for release), notify Operations |
-| `consignment_workflows.cargo_released_at` set | auto-create `trucking_jobs` row in `pending` status, notify Fleet |
-| `trucking_jobs.status = 'in_transit'` | generate tracking link `/track/{ref}`, write to `client_shipments`, insert notification (channel: in-app + email/WhatsApp queued) |
-| `cargo_receipts` insert/update | update workflow warehouse fields, notify Accounts + Operations |
+### 6. Notifications (new `/portal/notifications`)
+- Reuse existing `notifications` table filtered by `recipient_id = auth.uid()`.
+- Trigger `INSERT` on `notifications` from existing DB triggers when:
+  - new `client_invoices` row inserted
+  - `client_invoices.paid_amount` updated
+  - `client_shipments.status` changes to `in_transit` (delivery start)
+- Bell icon in header shows unread count; clicking opens list page; mark-as-read on click.
 
-All triggers also INSERT into `consignment_events` and `notifications`.
+### 7. Real-time sync
+- Add Supabase realtime channels on `client_invoices` and `notifications` (already on `client_shipments`).
 
-## 3. Notification Engine
+### 8. Security (no changes needed — already enforced)
+- RLS policies via `get_client_customer_id(auth.uid())` already isolate data.
+- Storage downloads use 60–300s signed URLs.
+- Read-only: no UPDATE/DELETE policies for clients on financial/shipment tables.
 
-- New `notifications` table (user_id, consignment_id, type, channel, title, body, read_at).
-- Edge function `dispatch-notification` consumes new events (called from trigger via `pg_net` or polled) and:
-  - writes in-app row,
-  - sends email via existing infra,
-  - queues WhatsApp/SMS (stub provider — flagged TODO until provider keys added).
-- Frontend: global `useNotifications()` hook subscribed to Supabase Realtime on `notifications` table; bell badge in `TopBar`.
+## Out of scope (not implemented this round)
+- WhatsApp notifications (mentioned as optional).
+- Email notifications via separate edge function (existing notifications system covers in-app; email needs domain setup — can be added in a follow-up).
+- Online payment processing (statement notes that clients should "contact accounts").
 
-## 4. Shared Dashboard Cross-Visibility
-
-Update each department dashboard to surface cross-department signals from the same consignment:
-
-- **Operations**: add "Payment status" column (joins `finance_invoices`).
-- **Accounts**: add "Shipment stage" column (joins `consignment_workflows.current_stage`).
-- **Fleet**: add "Cleared for release" filter (workflow stage = `cargo_released`).
-- **Warehouse**: add active consignments awaiting receipt.
-- **Client Portal**: live stage timeline + tracking link.
-
-## 5. Realtime Sync
-
-Enable Supabase Realtime on:
-`consignment_workflows`, `consignment_events`, `notifications`, `finance_invoices`, `trucking_jobs`, `cargo_receipts`.
-
-Add a single `useConsignmentRealtime(consignmentId)` hook used by all detail panels so any user sees changes instantly.
-
-## 6. AI Assistant Integration
-
-Extend `supabase/functions/ai-assistant` with new tool functions:
-- `list_delayed_shipments` (workflow stages stuck > SLA),
-- `list_unpaid_invoices`,
-- `get_consignment_status(ref)`,
-- `suggest_next_action(consignment_id)` — uses current_stage + outstanding items.
-
-Expose in the existing AIChatPanel; no UI rewrite needed.
-
-## 7. RBAC, Audit, Consistency
-
-- All new tables ship with RLS reusing `is_admin`, `is_accounts`, `is_client`, `get_user_department`.
-- `consignment_events` is append-only (no update/delete policy) → audit trail.
-- All writes go through existing tables — no duplicate stores.
-
----
-
-## Technical Section
-
-**Migrations**
-1. `ALTER TABLE` add `consignment_id uuid` to `finance_invoices`, `finance_expenses`, `trucking_jobs`, `cargo_receipts`, `client_shipments` (nullable, indexed).
-2. `CREATE TABLE consignment_events (id, consignment_id, event_type, source_department, payload jsonb, actor_id, created_at)` + RLS (staff read, system insert).
-3. `CREATE TABLE notifications (id, user_id, consignment_id nullable, type, channel, title, body, link, read_at, created_at)` + RLS (own rows + admin).
-4. Trigger functions:
-   - `fn_on_workflow_stage_change()` — creates invoice draft / trucking job / events.
-   - `fn_on_invoice_paid()` — advances workflow + event.
-   - `fn_on_trucking_status_change()` — emits tracking-ready event.
-   - `fn_on_document_uploaded()` — sets stage if first doc.
-5. `ALTER PUBLICATION supabase_realtime ADD TABLE` for the six tables above.
-
-**Edge functions**
-- `dispatch-notification` (new): reads `consignment_events` for unprocessed rows → fans out to channels.
-- `ai-assistant` (extend): add tool handlers listed in §6.
-
-**Frontend**
-- `src/hooks/useNotifications.ts` (new) — realtime subscription + mark-as-read.
-- `src/hooks/useConsignmentRealtime.ts` (new).
-- `src/components/layout/TopBar.tsx` — bell badge wired to hook.
-- Dashboard widgets: small cross-link columns added to existing tables (Operations, Accounts, Fleet, Warehouse).
-- Client portal `ClientShipments.tsx` — live stage timeline + copy tracking link.
-- `AIChatPanel` — no structural change; new tool calls flow through existing channel.
-
-**Out of scope of this plan** (call out, not implementing now)
-- Real WhatsApp/SMS provider wiring (we'll stub queue + leave TODO until you choose a provider, e.g. Twilio).
-- Replacing existing per-department CRUD UIs — they keep working; we only add cross-links and triggers.
-
----
-
-## Rollout Order
-
-1. Migrations (link columns + `consignment_events` + `notifications` + RLS + realtime publication).
-2. Trigger functions for workflow ↔ invoice ↔ trucking ↔ documents.
-3. `dispatch-notification` edge function + `useNotifications` hook + TopBar badge.
-4. Cross-department columns on each dashboard.
-5. AI assistant new tools.
-6. Client portal live timeline + tracking link share.
-
-Approve and I'll execute step by step (each migration shown for confirmation before code changes).
+## Technical notes
+- New migration: 3 DB triggers (invoice insert/payment/shipment status) → INSERT into `notifications` with `recipient_id` resolved from `client_profiles.user_id` via `customer_id` lookup. Add `client_invoices` to `supabase_realtime` publication.
+- New deps: none — `jspdf` + `jspdf-autotable` likely already present (used in DutyEstimator); will verify and add if missing.
+- New files: `src/pages/client/ClientFinancials.tsx`, `src/pages/client/ClientPayments.tsx`, `src/pages/client/ClientStatement.tsx`, `src/pages/client/ClientNotifications.tsx`, `src/components/client/DocumentPreview.tsx`.
+- Edited: `src/App.tsx`, `src/components/layout/ClientPortalLayout.tsx`, `src/pages/client/ClientDashboard.tsx`, `src/pages/client/ClientShipments.tsx`, `src/pages/client/ClientDocuments.tsx`.

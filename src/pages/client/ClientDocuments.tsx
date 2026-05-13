@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Search, Download, FolderOpen, File, FileCheck, Upload, Send } from "lucide-react";
+import { FileText, Search, Download, FolderOpen, File, FileCheck, Upload, Send, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { DocumentPreview } from "@/components/client/DocumentPreview";
 
 const UPLOAD_TYPES = [
   { value: "bill_of_lading", label: "Bill of Lading" },
@@ -55,6 +56,7 @@ export default function ClientDocuments() {
   const [uploadNotes, setUploadNotes] = useState("");
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previewDoc, setPreviewDoc] = useState<any | null>(null);
 
   // New Shipment Documents (BOL, Packing List, Commercial Invoice)
   const [shipmentRef, setShipmentRef] = useState("");
@@ -399,9 +401,14 @@ export default function ClientDocuments() {
                     </div>
                   </div>
                   {d.file_url && (
-                    <Button variant="ghost" size="sm" className="flex-shrink-0" onClick={() => handleDownload(d)}>
-                      <Download className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-1 flex-shrink-0">
+                      <Button variant="ghost" size="sm" onClick={() => setPreviewDoc(d)}>
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDownload(d)}>
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </div>
                   )}
                 </div>
 
@@ -423,6 +430,8 @@ export default function ClientDocuments() {
           ))}
         </div>
       )}
+
+      <DocumentPreview open={!!previewDoc} onClose={() => setPreviewDoc(null)} doc={previewDoc} />
     </div>
   );
 }

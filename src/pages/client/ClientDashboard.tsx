@@ -31,7 +31,7 @@ export default function ClientDashboard() {
         supabase.from("client_shipments").select("id", { count: "exact", head: true }).eq("customer_id", clientProfile.customer_id),
         supabase.from("client_documents").select("id", { count: "exact", head: true }).eq("customer_id", clientProfile.customer_id),
         supabase.from("client_invoices").select("id", { count: "exact", head: true }).eq("customer_id", clientProfile.customer_id),
-        supabase.from("client_messages").select("id", { count: "exact", head: true }).eq("customer_id", clientProfile.customer_id).eq("is_read", false),
+        supabase.from("notifications").select("id", { count: "exact", head: true }).eq("recipient_id", (await supabase.auth.getUser()).data.user?.id || "").eq("is_read", false),
         supabase.from("client_shipments").select("*").eq("customer_id", clientProfile.customer_id).neq("status", "delivered").order("created_at", { ascending: false }).limit(5),
         supabase.from("client_invoices").select("*").eq("customer_id", clientProfile.customer_id).in("status", ["pending", "overdue", "partial"]).order("due_date", { ascending: true }).limit(5),
       ]);
@@ -53,8 +53,8 @@ export default function ClientDashboard() {
   const statCards = [
     { title: "Active Shipments", value: stats.shipments, icon: Ship, color: "text-primary", path: "/portal/shipments" },
     { title: "Documents", value: stats.documents, icon: FileText, color: "text-emerald-500", path: "/portal/documents" },
-    { title: "Invoices", value: stats.invoices, icon: DollarSign, color: "text-amber-500", path: "/portal/invoices" },
-    { title: "Unread Messages", value: stats.messages, icon: MessageSquare, color: "text-blue-500", path: "/portal/messages", highlight: stats.messages > 0 },
+    { title: "Invoices", value: stats.invoices, icon: DollarSign, color: "text-amber-500", path: "/portal/financials" },
+    { title: "Notifications", value: stats.messages, icon: MessageSquare, color: "text-blue-500", path: "/portal/notifications", highlight: stats.messages > 0 },
   ];
 
   return (
@@ -137,7 +137,7 @@ export default function ClientDashboard() {
                 <DollarSign className="h-4 w-4 text-amber-500" />
                 Pending Invoices
               </CardTitle>
-              <button onClick={() => navigate("/portal/invoices")} className="text-xs text-primary hover:underline flex items-center gap-1">
+              <button onClick={() => navigate("/portal/financials")} className="text-xs text-primary hover:underline flex items-center gap-1">
                 View All <ArrowRight className="h-3 w-3" />
               </button>
             </div>
@@ -161,7 +161,7 @@ export default function ClientDashboard() {
               pendingInvoices.map(inv => {
                 const balance = Number(inv.amount) - Number(inv.paid_amount || 0);
                 return (
-                  <div key={inv.id} className="flex items-center justify-between p-2.5 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => navigate("/portal/invoices")}>
+                  <div key={inv.id} className="flex items-center justify-between p-2.5 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => navigate("/portal/financials")}>
                     <div className="min-w-0">
                       <p className="text-sm font-mono font-medium">{inv.invoice_number}</p>
                       <p className="text-xs text-muted-foreground">Due: {new Date(inv.due_date).toLocaleDateString()}</p>
@@ -195,8 +195,8 @@ export default function ClientDashboard() {
             {[
               { label: "Track Shipments", desc: "Real-time status", icon: Ship, color: "text-primary", path: "/portal/shipments" },
               { label: "Documents", desc: "Download files", icon: FileText, color: "text-emerald-500", path: "/portal/documents" },
-              { label: "Invoices", desc: "Payment status", icon: DollarSign, color: "text-amber-500", path: "/portal/invoices" },
-              { label: "Messages", desc: "Contact SLAC", icon: MessageSquare, color: "text-blue-500", path: "/portal/messages" },
+              { label: "Financials", desc: "Invoices & statement", icon: DollarSign, color: "text-amber-500", path: "/portal/financials" },
+              { label: "Notifications", desc: "Recent updates", icon: MessageSquare, color: "text-blue-500", path: "/portal/notifications" },
             ].map(item => (
               <button
                 key={item.label}
