@@ -65,16 +65,12 @@ export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, 
         continue;
       }
       try {
-        if (file.type.startsWith("image/")) {
+        if (file.type.startsWith("image/") || file.type === "application/pdf") {
           const dataUrl = await readFileAsDataUrl(file);
-          setAttachments(prev => [...prev, { file, kind: "image", dataUrl }]);
-        } else if (file.type === "application/pdf") {
-          toast.info(`Extracting text from ${file.name}...`);
-          const data = await processDocument(file);
-          const extracted = data
-            ? `[Extracted from ${file.name}]\n${JSON.stringify(data, null, 2)}`
-            : `[Could not extract structured data from ${file.name}]`;
-          setAttachments(prev => [...prev, { file, kind: "pdf", extractedText: extracted }]);
+          setAttachments(prev => [
+            ...prev,
+            { file, kind: file.type === "application/pdf" ? "pdf" : "image", dataUrl },
+          ]);
         } else if (
           file.type.startsWith("text/") ||
           /\.(txt|csv|json|md|log|xml|yaml|yml)$/i.test(file.name)
@@ -110,7 +106,7 @@ export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, 
       const textParts: string[] = [];
       if (text) textParts.push(text);
       for (const a of attachments) {
-        if (a.kind === "image" && a.dataUrl) {
+        if ((a.kind === "image" || a.kind === "pdf") && a.dataUrl) {
           parts.push({ type: "image_url", image_url: { url: a.dataUrl } });
         } else if (a.extractedText) {
           textParts.push(a.extractedText);
