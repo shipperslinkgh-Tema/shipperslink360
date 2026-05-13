@@ -24,6 +24,11 @@ export function PaymentFormDialog({ open, onOpenChange, userName, defaultType = 
   });
 
   useEffect(() => { if (open) { generatePaymentRef().then(setRef); setForm(f => ({ ...f, type: defaultType as "incoming" | "outgoing" })); } }, [open, defaultType]);
+  const { rate: liveRate, loading: rateLoading, date: rateDate } = useExchangeRate(form.currency);
+  useEffect(() => {
+    if (form.currency !== "GHS" && liveRate && liveRate !== 1) setForm(f => ({ ...f, exchange_rate: Number(liveRate.toFixed(4)) }));
+    else if (form.currency === "GHS") setForm(f => ({ ...f, exchange_rate: 1 }));
+  }, [form.currency, liveRate]);
 
   const handleInvoiceSelect = (id: string) => {
     const inv = invoices.find(i => i.id === id);
