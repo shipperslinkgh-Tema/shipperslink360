@@ -177,14 +177,22 @@ export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, 
             </div>
           </div>
 
-          {messages.map((msg, i) => (
-            <MessageBubble
-              key={i}
-              message={msg}
-              onCopy={() => copyToClipboard(msg.content, `msg-${i}`)}
-              copied={copied === `msg-${i}`}
-            />
-          ))}
+          {messages.map((msg, i) => {
+            const textForCopy =
+              typeof msg.content === "string"
+                ? msg.content
+                : msg.content
+                    .map(p => (p.type === "text" ? p.text : "[image]"))
+                    .join("\n");
+            return (
+              <MessageBubble
+                key={i}
+                message={msg}
+                onCopy={() => copyToClipboard(textForCopy, `msg-${i}`)}
+                copied={copied === `msg-${i}`}
+              />
+            );
+          })}
 
           {isLoading && messages[messages.length - 1]?.role === "user" && (
             <div className="flex gap-3">
