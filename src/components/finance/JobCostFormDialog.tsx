@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateJobCost } from "@/hooks/useFinanceMutations";
 import { useCustomerCredits } from "@/hooks/useFinanceData";
+import { useExchangeRate } from "@/hooks/useFXRates";
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; userName: string; }
 
@@ -18,6 +19,12 @@ export function JobCostFormDialog({ open, onOpenChange, userName }: Props) {
     cost_category: "freight_sea", description: "", amount: 0, currency: "GHS",
     exchange_rate: 1, vendor: "", shipment_ref: "", consolidation_ref: "",
   });
+
+  const { rate: liveRate, loading: rateLoading, date: rateDate } = useExchangeRate(form.currency);
+  useEffect(() => {
+    if (form.currency !== "GHS" && liveRate && liveRate !== 1) setForm(f => ({ ...f, exchange_rate: Number(liveRate.toFixed(4)) }));
+    else if (form.currency === "GHS") setForm(f => ({ ...f, exchange_rate: 1 }));
+  }, [form.currency, liveRate]);
 
   const handleCustomerChange = (id: string) => {
     const c = customers.find(c => c.customerId === id);
@@ -84,6 +91,13 @@ export function JobCostFormDialog({ open, onOpenChange, userName }: Props) {
               <SelectContent>{["GHS", "USD", "EUR", "GBP", "CNY"].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
             </Select>
           </div>
+          {form.currency !== "GHS" && (
+            <div className="col-span-2 space-y-2">
+              <Label>Exchange Rate {rateLoading ? "(loading...)" : rateDate ? `(live ${rateDate})` : ""}</Label>
+              <Input type="number" step="0.0001" value={form.exchange_rate} onChange={e => setForm(f => ({ ...f, exchange_rate: parseFloat(e.target.value) || 1 }))} />
+              <p className="text-xs text-muted-foreground">1 {form.currency} = {form.exchange_rate} GHS</p>
+            </div>
+          )}
           <div className="col-span-2 space-y-2">
             <Label>Description</Label>
             <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} />

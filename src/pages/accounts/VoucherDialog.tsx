@@ -10,6 +10,7 @@ import { useChartOfAccounts } from "@/hooks/useChartOfAccounts";
 import { usePostVoucher, useSaveVoucher, useVoucher } from "@/hooks/useVouchers";
 import { CURRENCIES, VOUCHER_TYPE_LABEL, type Voucher, type VoucherLine, type VoucherType } from "@/types/accounts";
 import { toast } from "sonner";
+import { useExchangeRate } from "@/hooks/useFXRates";
 
 interface Props {
   open: boolean;
@@ -50,6 +51,16 @@ export default function VoucherDialog({ open, onOpenChange, type, voucherId, pre
       setLines(presetLines && presetLines.length ? presetLines : [blankLine(), blankLine()]);
     }
   }, [open, existing, type, preset, presetLines]);
+
+  const { rate: liveRate, loading: rateLoading, date: rateDate } = useExchangeRate(form.currency ?? "GHS");
+  useEffect(() => {
+    if (form.status === "posted" || form.status === "cancelled") return;
+    if (form.currency && form.currency !== "GHS" && liveRate && liveRate !== 1) {
+      setForm(f => ({ ...f, exchange_rate: Number(liveRate.toFixed(4)) }));
+    } else if (form.currency === "GHS") {
+      setForm(f => ({ ...f, exchange_rate: 1 }));
+    }
+  }, [form.currency, liveRate, form.status]);
 
   const isPosted = form.status === "posted" || form.status === "cancelled";
 
@@ -113,7 +124,7 @@ export default function VoucherDialog({ open, onOpenChange, type, voucherId, pre
             </Select>
           </div>
           <div>
-            <Label>Exchange Rate (→ GHS)</Label>
+            <Label>Exchange Rate (→ GHS) {rateLoading ? "(loading...)" : rateDate ? `(live ${rateDate})` : ""}</Label>
             <Input type="number" step="0.0001" disabled={isPosted} value={form.exchange_rate ?? 1} onChange={(e) => setForm({ ...form, exchange_rate: Number(e.target.value) })} />
           </div>
           <div>

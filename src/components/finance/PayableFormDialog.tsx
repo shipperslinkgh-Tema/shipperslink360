@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreatePayable, generatePayableRef } from "@/hooks/useFinanceMutations";
+import { useExchangeRate } from "@/hooks/useFXRates";
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; userName: string; }
 
@@ -19,6 +20,11 @@ export function PayableFormDialog({ open, onOpenChange, userName }: Props) {
   });
 
   useEffect(() => { if (open) generatePayableRef().then(setRef); }, [open]);
+  const { rate: liveRate, loading: rateLoading, date: rateDate } = useExchangeRate(form.currency);
+  useEffect(() => {
+    if (form.currency !== "GHS" && liveRate && liveRate !== 1) setForm(f => ({ ...f, exchange_rate: Number(liveRate.toFixed(4)) }));
+    else if (form.currency === "GHS") setForm(f => ({ ...f, exchange_rate: 1 }));
+  }, [form.currency, liveRate]);
 
   const handleSubmit = () => {
     if (!form.vendor || !form.description || form.amount <= 0 || !form.due_date) return;
@@ -60,8 +66,9 @@ export function PayableFormDialog({ open, onOpenChange, userName }: Props) {
           </div>
           {form.currency !== "GHS" && (
             <div className="space-y-2">
-              <Label>Exchange Rate</Label>
+              <Label>Exchange Rate {rateLoading ? "(loading...)" : rateDate ? `(live ${rateDate})` : ""}</Label>
               <Input type="number" step="0.0001" value={form.exchange_rate} onChange={e => setForm(f => ({ ...f, exchange_rate: parseFloat(e.target.value) || 1 }))} />
+              <p className="text-xs text-muted-foreground">1 {form.currency} = {form.exchange_rate} GHS</p>
             </div>
           )}
           <div className="space-y-2">

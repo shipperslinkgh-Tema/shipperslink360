@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRecordPayment, generatePaymentRef } from "@/hooks/useFinanceMutations";
 import { useFinanceInvoices, useFinancePayables } from "@/hooks/useFinanceData";
+import { useExchangeRate } from "@/hooks/useFXRates";
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; userName: string; defaultType?: "incoming" | "outgoing"; }
 
@@ -23,6 +24,11 @@ export function PaymentFormDialog({ open, onOpenChange, userName, defaultType = 
   });
 
   useEffect(() => { if (open) { generatePaymentRef().then(setRef); setForm(f => ({ ...f, type: defaultType as "incoming" | "outgoing" })); } }, [open, defaultType]);
+  const { rate: liveRate, loading: rateLoading, date: rateDate } = useExchangeRate(form.currency);
+  useEffect(() => {
+    if (form.currency !== "GHS" && liveRate && liveRate !== 1) setForm(f => ({ ...f, exchange_rate: Number(liveRate.toFixed(4)) }));
+    else if (form.currency === "GHS") setForm(f => ({ ...f, exchange_rate: 1 }));
+  }, [form.currency, liveRate]);
 
   const handleInvoiceSelect = (id: string) => {
     const inv = invoices.find(i => i.id === id);
@@ -99,6 +105,13 @@ export function PaymentFormDialog({ open, onOpenChange, userName, defaultType = 
               <SelectContent>{["GHS", "USD", "EUR", "GBP", "CNY"].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
             </Select>
           </div>
+          {form.currency !== "GHS" && (
+            <div className="space-y-2">
+              <Label>Exchange Rate {rateLoading ? "(loading...)" : rateDate ? `(live ${rateDate})` : ""}</Label>
+              <Input type="number" step="0.0001" value={form.exchange_rate} onChange={e => setForm(f => ({ ...f, exchange_rate: parseFloat(e.target.value) || 1 }))} />
+              <p className="text-xs text-muted-foreground">1 {form.currency} = {form.exchange_rate} GHS</p>
+            </div>
+          )}
           <div className="space-y-2">
             <Label>Payment Date</Label>
             <Input type="date" value={form.payment_date} onChange={e => setForm(f => ({ ...f, payment_date: e.target.value }))} />
