@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, Trash2, Copy, Check } from "lucide-react";
+import { Send, Bot, User, Loader2, Trash2, Copy, Check, Paperclip, X, FileText, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,7 +7,18 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useAIChat, AIMessage } from "@/hooks/useAIChat";
+import { useDocumentProcessor } from "@/hooks/useDocumentProcessor";
+import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+
+interface PendingAttachment {
+  file: File;
+  kind: "image" | "pdf" | "text";
+  dataUrl?: string; // for images
+  extractedText?: string; // for pdf/text
+}
+
+const MAX_FILE_MB = 10;
 
 interface AIChatPanelProps {
   module: string;
@@ -19,18 +30,103 @@ interface AIChatPanelProps {
 
 export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, className }: AIChatPanelProps) {
   const { messages, isLoading, sendMessage, clearMessages } = useAIChat(module);
+  const { processDocument, isProcessing } = useDocumentProcessor();
   const [input, setInput] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
+  const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
+  const readFileAsDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+
+  const readFileAsText = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = reject;
+      r.readAsText(file);
+    });
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files) return;
+    for (const file of Array.from(files)) {
+      if (file.size > MAX_FILE_MB * 1024 * 1024) {
+        toast.error(`${file.name} exceeds ${MAX_FILE_MB}MB limit`);
+        continue;
+      }
+      try {
+        if (file.type.startsWith("image/")) {
+          const dataUrl = await readFileAsDataUrl(file);
+          setAttachments(prev => [...prev, { file, kind: "image", dataUrl }]);
+        } else if (file.type === "application/pdf") {
+          toast.info(`Extracting text from ${file.name}...`);
+          const data = await processDocument(file);
+          const extracted = data
+            ? `[Extracted from ${file.name}]\n${JSON.stringify(data, null, 2)}`
+            : `[Could not extract structured data from ${file.name}]`;
+          setAttachments(prev => [...prev, { file, kind: "pdf", extractedText: extracted }]);
+        } else if (
+          file.type.startsWith("text/") ||
+          /\.(txt|csv|json|md|log|xml|yaml|yml)$/i.test(file.name)
+        ) {
+          const text = await readFileAsText(file);
+          const truncated = text.length > 50000 ? text.slice(0, 50000) + "\n...[truncated]" : text;
+          setAttachments(prev => [...prev, { file, kind: "text", extractedText: `[Contents of ${file.name}]\n${truncated}` }]);
+        } else {
+          toast.error(`Unsupported file type: ${file.name}`);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error(`Failed to read ${file.name}`);
+      }
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removeAttachment = (idx: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== idx));
+  };
+
   const handleSend = () => {
-    if (!input.trim() || isLoading) return;
-    sendMessage(input.trim());
+    const text = input.trim();
+    if ((!text && attachments.length === 0) || isLoading || isProcessing) return;
+
+    if (attachments.length === 0) {
+      sendMessage(text);
+    } else {
+      const parts: Array<
+        { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }
+      > = [];
+      const textParts: string[] = [];
+      if (text) textParts.push(text);
+      for (const a of attachments) {
+        if (a.kind === "image" && a.dataUrl) {
+          parts.push({ type: "image_url", image_url: { url: a.dataUrl } });
+        } else if (a.extractedText) {
+          textParts.push(a.extractedText);
+        }
+      }
+      parts.unshift({ type: "text", text: textParts.join("\n\n") || "Please review the attached file(s)." });
+      sendMessage(parts);
+    }
     setInput("");
+    setAttachments([]);
+  };
+
+  const copyToClipboard = (content: string, id: string) => {
+    navigator.clipboard.writeText(content);
+    setCopied(id);
+    setTimeout(() => setCopied(null), 2000);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -38,12 +134,6 @@ export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, 
       e.preventDefault();
       handleSend();
     }
-  };
-
-  const copyToClipboard = (content: string, id: string) => {
-    navigator.clipboard.writeText(content);
-    setCopied(id);
-    setTimeout(() => setCopied(null), 2000);
   };
 
   const defaultWelcome = `Hello! I'm your AI assistant for the **${moduleLabel}** module. How can I help you today?`;
@@ -87,14 +177,22 @@ export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, 
             </div>
           </div>
 
-          {messages.map((msg, i) => (
-            <MessageBubble
-              key={i}
-              message={msg}
-              onCopy={() => copyToClipboard(msg.content, `msg-${i}`)}
-              copied={copied === `msg-${i}`}
-            />
-          ))}
+          {messages.map((msg, i) => {
+            const textForCopy =
+              typeof msg.content === "string"
+                ? msg.content
+                : msg.content
+                    .map(p => (p.type === "text" ? p.text : "[image]"))
+                    .join("\n");
+            return (
+              <MessageBubble
+                key={i}
+                message={msg}
+                onCopy={() => copyToClipboard(textForCopy, `msg-${i}`)}
+                copied={copied === `msg-${i}`}
+              />
+            );
+          })}
 
           {isLoading && messages[messages.length - 1]?.role === "user" && (
             <div className="flex gap-3">
@@ -114,7 +212,54 @@ export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, 
 
       {/* Input */}
       <div className="p-4 border-t border-border bg-muted/20">
+        {attachments.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-2">
+            {attachments.map((a, idx) => (
+              <div
+                key={idx}
+                className="flex items-center gap-2 bg-background border border-border rounded-lg pl-2 pr-1 py-1 text-xs"
+              >
+                {a.kind === "image" ? (
+                  <ImageIcon className="h-3.5 w-3.5 text-primary" />
+                ) : (
+                  <FileText className="h-3.5 w-3.5 text-primary" />
+                )}
+                <span className="max-w-[140px] truncate">{a.file.name}</span>
+                <button
+                  type="button"
+                  onClick={() => removeAttachment(idx)}
+                  className="h-5 w-5 rounded hover:bg-muted flex items-center justify-center"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="flex gap-2 items-end">
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*,application/pdf,text/*,.csv,.json,.md,.log,.xml,.yaml,.yml,.txt"
+            className="hidden"
+            onChange={e => handleFiles(e.target.files)}
+          />
+          <Button
+            variant="outline"
+            size="icon"
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isLoading || isProcessing}
+            className="h-9 w-9 flex-shrink-0"
+            title="Attach images, PDFs, or text files"
+          >
+            {isProcessing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Paperclip className="h-4 w-4" />
+            )}
+          </Button>
           <Textarea
             value={input}
             onChange={e => setInput(e.target.value)}
@@ -125,7 +270,7 @@ export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, 
           />
           <Button
             onClick={handleSend}
-            disabled={!input.trim() || isLoading}
+            disabled={(!input.trim() && attachments.length === 0) || isLoading || isProcessing}
             className="h-9 w-9 p-0 bg-primary hover:bg-primary/90 flex-shrink-0"
           >
             {isLoading ? (
@@ -136,7 +281,7 @@ export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, 
           </Button>
         </div>
         <p className="text-[10px] text-muted-foreground mt-1.5">
-          AI responses are for guidance only. Always verify critical information.
+          Attach images, PDFs, or text files (max {MAX_FILE_MB}MB). AI responses are for guidance only.
         </p>
       </div>
     </div>
@@ -150,6 +295,16 @@ function MessageBubble({ message, onCopy, copied }: {
 }) {
   const isUser = message.role === "user";
 
+  // Normalize content for rendering
+  const textContent =
+    typeof message.content === "string"
+      ? message.content
+      : message.content.filter(p => p.type === "text").map(p => (p as any).text).join("\n\n");
+  const imageUrls =
+    typeof message.content === "string"
+      ? []
+      : message.content.filter(p => p.type === "image_url").map(p => (p as any).image_url.url as string);
+
   if (isUser) {
     return (
       <div className="flex gap-3 flex-row-reverse">
@@ -158,8 +313,11 @@ function MessageBubble({ message, onCopy, copied }: {
             <User className="h-3.5 w-3.5" />
           </AvatarFallback>
         </Avatar>
-        <div className="max-w-[80%] bg-primary text-primary-foreground rounded-xl rounded-tr-none p-3">
-          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+        <div className="max-w-[80%] bg-primary text-primary-foreground rounded-xl rounded-tr-none p-3 space-y-2">
+          {imageUrls.map((url, i) => (
+            <img key={i} src={url} alt="attachment" className="rounded-md max-h-48 object-contain" />
+          ))}
+          {textContent && <p className="text-sm whitespace-pre-wrap">{textContent}</p>}
         </div>
       </div>
     );
@@ -173,9 +331,9 @@ function MessageBubble({ message, onCopy, copied }: {
       <div className="flex-1 group">
         <div className="bg-muted/50 rounded-xl rounded-tl-none p-3 relative">
           <div className="prose prose-sm max-w-none text-foreground text-sm [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-            <ReactMarkdown>{message.content}</ReactMarkdown>
+            <ReactMarkdown>{textContent}</ReactMarkdown>
           </div>
-          {message.content && (
+          {textContent && (
             <Button
               variant="ghost"
               size="icon"

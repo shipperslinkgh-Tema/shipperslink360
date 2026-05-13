@@ -2,7 +2,13 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
-export type AIMessage = { role: "user" | "assistant"; content: string };
+export type AIMessageContent =
+  | string
+  | Array<
+      | { type: "text"; text: string }
+      | { type: "image_url"; image_url: { url: string } }
+    >;
+export type AIMessage = { role: "user" | "assistant"; content: AIMessageContent };
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
@@ -10,8 +16,9 @@ export function useAIChat(module: string = "chat") {
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const sendMessage = useCallback(async (userInput: string) => {
-    if (!userInput.trim() || isLoading) return;
+  const sendMessage = useCallback(async (userInput: AIMessageContent) => {
+    const isEmpty = typeof userInput === "string" ? !userInput.trim() : userInput.length === 0;
+    if (isEmpty || isLoading) return;
 
     const userMsg: AIMessage = { role: "user", content: userInput };
     const updatedMessages = [...messages, userMsg];
