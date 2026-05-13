@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, Trash2, Copy, Check, Paperclip, X, FileText, Image as ImageIcon } from "lucide-react";
+import { Send, Bot, User, Loader2, Trash2, Copy, Check, Paperclip, X, FileText, Image as ImageIcon, MessageSquarePlus, History, MessageSquare } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
