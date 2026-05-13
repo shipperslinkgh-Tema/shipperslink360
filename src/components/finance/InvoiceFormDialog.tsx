@@ -23,6 +23,14 @@ export function InvoiceFormDialog({ open, onOpenChange, userName }: Props) {
   });
 
   useEffect(() => { if (open) generateInvoiceRef().then(setRef); }, [open]);
+  const { rate: liveRate, loading: rateLoading, date: rateDate } = useExchangeRate(form.currency);
+  useEffect(() => {
+    if (form.currency !== "GHS" && liveRate && liveRate !== 1) {
+      setForm(f => ({ ...f, exchange_rate: Number(liveRate.toFixed(4)) }));
+    } else if (form.currency === "GHS") {
+      setForm(f => ({ ...f, exchange_rate: 1 }));
+    }
+  }, [form.currency, liveRate]);
   useEffect(() => {
     const total = form.subtotal + form.tax_amount;
     setForm(f => ({ ...f, total_amount: total }));
