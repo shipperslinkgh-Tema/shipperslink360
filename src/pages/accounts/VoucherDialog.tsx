@@ -10,6 +10,7 @@ import { useChartOfAccounts } from "@/hooks/useChartOfAccounts";
 import { usePostVoucher, useSaveVoucher, useVoucher } from "@/hooks/useVouchers";
 import { CURRENCIES, VOUCHER_TYPE_LABEL, type Voucher, type VoucherLine, type VoucherType } from "@/types/accounts";
 import { toast } from "sonner";
+import { useExchangeRate } from "@/hooks/useFXRates";
 
 interface Props {
   open: boolean;
