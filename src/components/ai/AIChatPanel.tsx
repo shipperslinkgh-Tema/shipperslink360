@@ -106,7 +106,7 @@ export function AIChatPanel({ module, moduleLabel, placeholder, welcomeMessage, 
       const textParts: string[] = [];
       if (text) textParts.push(text);
       for (const a of attachments) {
-        if (a.kind === "image" && a.dataUrl) {
+        if ((a.kind === "image" || a.kind === "pdf") && a.dataUrl) {
           parts.push({ type: "image_url", image_url: { url: a.dataUrl } });
         } else if (a.extractedText) {
           textParts.push(a.extractedText);
