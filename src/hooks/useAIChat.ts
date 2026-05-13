@@ -16,8 +16,9 @@ export function useAIChat(module: string = "chat") {
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const sendMessage = useCallback(async (userInput: string) => {
-    if (!userInput.trim() || isLoading) return;
+  const sendMessage = useCallback(async (userInput: AIMessageContent) => {
+    const isEmpty = typeof userInput === "string" ? !userInput.trim() : userInput.length === 0;
+    if (isEmpty || isLoading) return;
 
     const userMsg: AIMessage = { role: "user", content: userInput };
     const updatedMessages = [...messages, userMsg];
