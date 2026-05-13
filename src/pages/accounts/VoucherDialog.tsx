@@ -124,7 +124,7 @@ export default function VoucherDialog({ open, onOpenChange, type, voucherId, pre
             </Select>
           </div>
           <div>
-            <Label>Exchange Rate (→ GHS)</Label>
+            <Label>Exchange Rate (→ GHS) {rateLoading ? "(loading...)" : rateDate ? `(live ${rateDate})` : ""}</Label>
             <Input type="number" step="0.0001" disabled={isPosted} value={form.exchange_rate ?? 1} onChange={(e) => setForm({ ...form, exchange_rate: Number(e.target.value) })} />
           </div>
           <div>
