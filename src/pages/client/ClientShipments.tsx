@@ -240,12 +240,25 @@ function ShipmentDetail({ shipment, customerId }: { shipment: any; customerId?: 
   return (
     <>
       <DialogHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <DialogTitle className="font-mono">{shipment.bl_number}</DialogTitle>
-          <Badge className={cn("gap-1 border-0", cfg.color)}>
-            <cfg.icon className="h-3 w-3" />
-            {cfg.label}
-          </Badge>
+          <div className="flex items-center gap-2">
+            {shipment.tracking_link && shipment.status === "in_transit" && (
+              <Button size="sm" className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white"
+                onClick={() => {
+                  const link = shipment.tracking_link.startsWith("http")
+                    ? shipment.tracking_link
+                    : `${window.location.origin}${shipment.tracking_link}`;
+                  window.open(link, "_blank");
+                }}>
+                <Ship className="h-3.5 w-3.5" /> Track Shipment Live
+              </Button>
+            )}
+            <Badge className={cn("gap-1 border-0", cfg.color)}>
+              <cfg.icon className="h-3 w-3" />
+              {cfg.label}
+            </Badge>
+          </div>
         </div>
       </DialogHeader>
 
