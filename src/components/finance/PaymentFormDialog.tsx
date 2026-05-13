@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRecordPayment, generatePaymentRef } from "@/hooks/useFinanceMutations";
 import { useFinanceInvoices, useFinancePayables } from "@/hooks/useFinanceData";
+import { useExchangeRate } from "@/hooks/useFXRates";
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; userName: string; defaultType?: "incoming" | "outgoing"; }
 
