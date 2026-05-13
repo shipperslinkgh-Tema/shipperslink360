@@ -161,7 +161,7 @@ export default function ClientDashboard() {
               pendingInvoices.map(inv => {
                 const balance = Number(inv.amount) - Number(inv.paid_amount || 0);
                 return (
-                  <div key={inv.id} className="flex items-center justify-between p-2.5 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => navigate("/portal/invoices")}>
+                  <div key={inv.id} className="flex items-center justify-between p-2.5 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => navigate("/portal/financials")}>
                     <div className="min-w-0">
                       <p className="text-sm font-mono font-medium">{inv.invoice_number}</p>
                       <p className="text-xs text-muted-foreground">Due: {new Date(inv.due_date).toLocaleDateString()}</p>
@@ -195,8 +195,8 @@ export default function ClientDashboard() {
             {[
               { label: "Track Shipments", desc: "Real-time status", icon: Ship, color: "text-primary", path: "/portal/shipments" },
               { label: "Documents", desc: "Download files", icon: FileText, color: "text-emerald-500", path: "/portal/documents" },
-              { label: "Invoices", desc: "Payment status", icon: DollarSign, color: "text-amber-500", path: "/portal/invoices" },
-              { label: "Messages", desc: "Contact SLAC", icon: MessageSquare, color: "text-blue-500", path: "/portal/messages" },
+              { label: "Financials", desc: "Invoices & statement", icon: DollarSign, color: "text-amber-500", path: "/portal/financials" },
+              { label: "Notifications", desc: "Recent updates", icon: MessageSquare, color: "text-blue-500", path: "/portal/notifications" },
             ].map(item => (
               <button
                 key={item.label}
