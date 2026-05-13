@@ -2,7 +2,13 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
-export type AIMessage = { role: "user" | "assistant"; content: string };
+export type AIMessageContent =
+  | string
+  | Array<
+      | { type: "text"; text: string }
+      | { type: "image_url"; image_url: { url: string } }
+    >;
+export type AIMessage = { role: "user" | "assistant"; content: AIMessageContent };
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
