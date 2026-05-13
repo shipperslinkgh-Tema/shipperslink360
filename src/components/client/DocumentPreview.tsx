@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, ExternalLink, Loader2 } from "lucide-react";
+import { Download, ExternalLink, FileDown, Loader2 } from "lucide-react";
+import jsPDF from "jspdf";
+import { toast } from "sonner";
 
 interface Props {
   open: boolean;
