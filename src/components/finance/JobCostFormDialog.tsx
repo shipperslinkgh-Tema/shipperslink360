@@ -20,6 +20,12 @@ export function JobCostFormDialog({ open, onOpenChange, userName }: Props) {
     exchange_rate: 1, vendor: "", shipment_ref: "", consolidation_ref: "",
   });
 
+  const { rate: liveRate, loading: rateLoading, date: rateDate } = useExchangeRate(form.currency);
+  useEffect(() => {
+    if (form.currency !== "GHS" && liveRate && liveRate !== 1) setForm(f => ({ ...f, exchange_rate: Number(liveRate.toFixed(4)) }));
+    else if (form.currency === "GHS") setForm(f => ({ ...f, exchange_rate: 1 }));
+  }, [form.currency, liveRate]);
+
   const handleCustomerChange = (id: string) => {
     const c = customers.find(c => c.customerId === id);
     setForm(f => ({ ...f, customer: c?.customerName || "", customer_id: id }));
