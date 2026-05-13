@@ -31,7 +31,7 @@ export default function ClientDashboard() {
         supabase.from("client_shipments").select("id", { count: "exact", head: true }).eq("customer_id", clientProfile.customer_id),
         supabase.from("client_documents").select("id", { count: "exact", head: true }).eq("customer_id", clientProfile.customer_id),
         supabase.from("client_invoices").select("id", { count: "exact", head: true }).eq("customer_id", clientProfile.customer_id),
-        supabase.from("client_messages").select("id", { count: "exact", head: true }).eq("customer_id", clientProfile.customer_id).eq("is_read", false),
+        supabase.from("notifications").select("id", { count: "exact", head: true }).eq("recipient_id", (await supabase.auth.getUser()).data.user?.id || "").eq("is_read", false),
         supabase.from("client_shipments").select("*").eq("customer_id", clientProfile.customer_id).neq("status", "delivered").order("created_at", { ascending: false }).limit(5),
         supabase.from("client_invoices").select("*").eq("customer_id", clientProfile.customer_id).in("status", ["pending", "overdue", "partial"]).order("due_date", { ascending: true }).limit(5),
       ]);
