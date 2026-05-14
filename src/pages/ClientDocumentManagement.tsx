@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,24 +12,27 @@ import { Textarea } from "@/components/ui/textarea";
 import { FileText, Upload, Trash2, Search, Download } from "lucide-react";
 import { toast } from "sonner";
 
+// Aligned with the Client Document Vault — only these 6 types are visible to clients.
 const DOC_TYPES = [
-  { value: "sop", label: "SOP" },
-  { value: "bill_of_lading", label: "Bill of Lading" },
-  { value: "customs_declaration", label: "Customs Declaration" },
-  { value: "invoice", label: "Invoice" },
+  { value: "bill_of_lading", label: "Bill of Lading (BL)" },
+  { value: "invoice", label: "Commercial Invoice" },
   { value: "packing_list", label: "Packing List" },
-  { value: "certificate_of_origin", label: "Certificate of Origin" },
+  { value: "customs_declaration", label: "Customs Entry (BOE)" },
   { value: "delivery_order", label: "Delivery Order" },
-  { value: "other", label: "Other" },
+  { value: "receipt", label: "Receipt" },
 ];
 
 const TYPE_LABELS: Record<string, string> = Object.fromEntries(DOC_TYPES.map(d => [d.value, d.label]));
 
+const MAX_FILE_BYTES = 20 * 1024 * 1024;
+
 export default function ClientDocumentManagement() {
   const [documents, setDocuments] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
+  const [shipments, setShipments] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [filterCustomer, setFilterCustomer] = useState("all");
+  const [filterType, setFilterType] = useState("all");
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -37,64 +40,78 @@ export default function ClientDocumentManagement() {
 
   const [form, setForm] = useState({
     customer_id: "",
+    shipment_id: "none",
     document_name: "",
-    document_type: "sop",
+    document_type: "bill_of_lading",
     notes: "",
   });
   const [file, setFile] = useState<File | null>(null);
 
   const fetchDocuments = async () => {
-    const query = supabase.from("client_documents").select("*").order("created_at", { ascending: false });
-    const { data } = await query;
+    const { data } = await supabase
+      .from("client_documents")
+      .select("*")
+      .order("created_at", { ascending: false });
     setDocuments(data || []);
     setLoading(false);
   };
 
   const fetchClients = async () => {
-    const { data } = await supabase.from("client_profiles").select("customer_id, company_name").order("company_name");
+    const { data } = await supabase
+      .from("client_profiles")
+      .select("customer_id, company_name")
+      .order("company_name");
     setClients(data || []);
   };
 
+  const fetchShipmentsFor = async (customerId: string) => {
+    if (!customerId) { setShipments([]); return; }
+    const { data } = await supabase
+      .from("client_shipments")
+      .select("id, bl_number, consignment_id")
+      .eq("customer_id", customerId)
+      .order("created_at", { ascending: false });
+    setShipments(data || []);
+  };
+
   useEffect(() => { fetchDocuments(); fetchClients(); }, []);
+  useEffect(() => { fetchShipmentsFor(form.customer_id); }, [form.customer_id]);
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file || !form.customer_id) return;
+    if (file.size > MAX_FILE_BYTES) {
+      toast.error("File exceeds 20MB limit");
+      return;
+    }
     setUploading(true);
 
     try {
-      const ext = file.name.split(".").pop();
       const filePath = `${form.customer_id}/${Date.now()}-${file.name}`;
 
       const { error: uploadError } = await supabase.storage
         .from("client-documents")
         .upload(filePath, file);
-
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from("client-documents")
-        .getPublicUrl(filePath);
-
-      // Format file size
       const sizeKB = (file.size / 1024).toFixed(1);
       const fileSize = file.size > 1048576 ? `${(file.size / 1048576).toFixed(1)} MB` : `${sizeKB} KB`;
 
       const { error: dbError } = await supabase.from("client_documents").insert({
         customer_id: form.customer_id,
+        shipment_id: form.shipment_id !== "none" ? form.shipment_id : null,
         document_name: form.document_name || file.name,
         document_type: form.document_type,
-        file_url: filePath, // Store the path, not public URL (bucket is private)
+        file_url: filePath,
         file_size: fileSize,
         notes: form.notes || null,
         status: "active",
       });
-
       if (dbError) throw dbError;
 
-      toast.success("Document uploaded successfully");
+      toast.success("Document uploaded — visible to client");
       setOpen(false);
-      setForm({ customer_id: "", document_name: "", document_type: "sop", notes: "" });
+      setForm({ customer_id: "", shipment_id: "none", document_name: "", document_type: "bill_of_lading", notes: "" });
       setFile(null);
       if (fileRef.current) fileRef.current.value = "";
       fetchDocuments();
@@ -131,31 +148,38 @@ export default function ClientDocumentManagement() {
   };
 
   const filtered = documents.filter(d => {
-    const matchSearch = d.document_name.toLowerCase().includes(search.toLowerCase()) ||
-      d.document_type.toLowerCase().includes(search.toLowerCase());
+    const q = search.toLowerCase();
+    const matchSearch = !q ||
+      d.document_name?.toLowerCase().includes(q) ||
+      (TYPE_LABELS[d.document_type] || d.document_type || "").toLowerCase().includes(q);
     const matchCustomer = filterCustomer === "all" || d.customer_id === filterCustomer;
-    return matchSearch && matchCustomer;
+    const matchType = filterType === "all" || d.document_type === filterType;
+    return matchSearch && matchCustomer && matchType;
   });
+
+  const isVaultType = (t: string) => DOC_TYPES.some(x => x.value === t);
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <FileText className="h-6 w-6 text-primary" /> Client Document Management
+            <FileText className="h-6 w-6 text-primary" /> Client Document Vault — Admin
           </h1>
-          <p className="text-muted-foreground text-sm">Upload and manage documents for client portal access</p>
+          <p className="text-muted-foreground text-sm">
+            Upload BL, Commercial Invoice, Packing List, Customs Entry (BOE), Delivery Order or Receipt for a client. Only these 6 types appear in the client portal.
+          </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button><Upload className="mr-2 h-4 w-4" /> Upload Document</Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
-            <DialogHeader><DialogTitle>Upload Client Document</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>Upload Vault Document</DialogTitle></DialogHeader>
             <form onSubmit={handleUpload} className="space-y-4 mt-2">
               <div className="space-y-1.5">
                 <Label>Client *</Label>
-                <Select value={form.customer_id} onValueChange={v => setForm(f => ({ ...f, customer_id: v }))}>
+                <Select value={form.customer_id} onValueChange={v => setForm(f => ({ ...f, customer_id: v, shipment_id: "none" }))}>
                   <SelectTrigger><SelectValue placeholder="Select client..." /></SelectTrigger>
                   <SelectContent>
                     {clients.map(c => (
@@ -164,6 +188,22 @@ export default function ClientDocumentManagement() {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div className="space-y-1.5">
+                <Label>Link to Consignment / Shipment</Label>
+                <Select value={form.shipment_id} onValueChange={v => setForm(f => ({ ...f, shipment_id: v }))} disabled={!form.customer_id}>
+                  <SelectTrigger><SelectValue placeholder="Optional — select shipment" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— Not linked —</SelectItem>
+                    {shipments.map(s => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.bl_number || s.consignment_id || s.id.slice(0, 8)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label>Document Name</Label>
@@ -181,8 +221,8 @@ export default function ClientDocumentManagement() {
               </div>
               <div className="space-y-1.5">
                 <Label>File *</Label>
-                <Input ref={fileRef} type="file" onChange={e => setFile(e.target.files?.[0] || null)} required accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.txt,.csv" />
-                <p className="text-xs text-muted-foreground">Max 20MB. PDF, Word, Excel, Images, CSV</p>
+                <Input ref={fileRef} type="file" onChange={e => setFile(e.target.files?.[0] || null)} required accept=".pdf,.png,.jpg,.jpeg" />
+                <p className="text-xs text-muted-foreground">Max 20MB. PDF or image (clients can preview & download as PDF).</p>
               </div>
               <div className="space-y-1.5">
                 <Label>Notes</Label>
@@ -198,18 +238,25 @@ export default function ClientDocumentManagement() {
 
       <Card>
         <CardHeader className="pb-3">
-          <div className="flex gap-3">
-            <div className="relative flex-1">
+          <div className="flex flex-wrap gap-3">
+            <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Search documents..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
             </div>
             <Select value={filterCustomer} onValueChange={setFilterCustomer}>
-              <SelectTrigger className="w-[220px]"><SelectValue placeholder="All Clients" /></SelectTrigger>
+              <SelectTrigger className="w-[200px]"><SelectValue placeholder="All Clients" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Clients</SelectItem>
                 {clients.map(c => (
                   <SelectItem key={c.customer_id} value={c.customer_id}>{c.company_name}</SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="w-[200px]"><SelectValue placeholder="All Types" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                {DOC_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -226,7 +273,7 @@ export default function ClientDocumentManagement() {
                   <TableHead>Document Name</TableHead>
                   <TableHead>Client</TableHead>
                   <TableHead>Type</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Visibility</TableHead>
                   <TableHead>Size</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Actions</TableHead>
@@ -239,9 +286,11 @@ export default function ClientDocumentManagement() {
                     <TableCell className="text-sm font-mono">{d.customer_id}</TableCell>
                     <TableCell><Badge variant="secondary">{TYPE_LABELS[d.document_type] || d.document_type}</Badge></TableCell>
                     <TableCell>
-                      <Badge className={`border-0 ${d.status === "active" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
-                        {d.status}
-                      </Badge>
+                      {isVaultType(d.document_type) ? (
+                        <Badge className="border-0 bg-success/10 text-success">Visible to client</Badge>
+                      ) : (
+                        <Badge className="border-0 bg-muted text-muted-foreground">Internal only</Badge>
+                      )}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">{d.file_size || "—"}</TableCell>
                     <TableCell className="text-sm">{new Date(d.created_at).toLocaleDateString()}</TableCell>
