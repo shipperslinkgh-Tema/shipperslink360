@@ -164,8 +164,7 @@ export function AppSidebar() {
       { title: "User Management", icon: Shield, href: "/admin/users" },
     ] : []),
     ...(isAdmin || department === "accounts" || department === "management" || (department === "operations" && roles.includes("manager")) ? [
-      { title: "Client Data", icon: Users, href: "/admin/client-data" },
-      { title: "Client Documents", icon: FileText, href: "/admin/client-documents" },
+      { title: "Client Management", icon: Users, href: "/admin/client-management" },
     ] : []),
     { title: "Notifications", icon: Bell, href: "/notifications" },
     { title: "Settings", icon: Settings, href: "/settings" },

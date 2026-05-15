@@ -826,6 +826,59 @@ export type Database = {
         }
         Relationships: []
       }
+      client_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_id: string
+          id: string
+          invoice_id: string | null
+          method: string
+          notes: string | null
+          paid_date: string
+          reference: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_id: string
+          id?: string
+          invoice_id?: string | null
+          method?: string
+          notes?: string | null
+          paid_date?: string
+          reference?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_id?: string
+          id?: string
+          invoice_id?: string | null
+          method?: string
+          notes?: string | null
+          paid_date?: string
+          reference?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "client_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_profiles: {
         Row: {
           company_name: string
@@ -837,8 +890,10 @@ export type Database = {
           is_active: boolean
           last_login_at: string | null
           phone: string | null
+          tin_number: string | null
           updated_at: string
           user_id: string
+          warehouse_destinations: string[]
         }
         Insert: {
           company_name: string
@@ -850,8 +905,10 @@ export type Database = {
           is_active?: boolean
           last_login_at?: string | null
           phone?: string | null
+          tin_number?: string | null
           updated_at?: string
           user_id: string
+          warehouse_destinations?: string[]
         }
         Update: {
           company_name?: string
@@ -863,8 +920,10 @@ export type Database = {
           is_active?: boolean
           last_login_at?: string | null
           phone?: string | null
+          tin_number?: string | null
           updated_at?: string
           user_id?: string
+          warehouse_destinations?: string[]
         }
         Relationships: []
       }
