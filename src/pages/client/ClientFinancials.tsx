@@ -28,34 +28,37 @@ const STATUS: Record<string, { label: string; color: string; icon: any }> = {
 export default function ClientFinancials() {
   const { clientProfile } = useClientAuth();
   const [invoices, setInvoices] = useState<any[]>([]);
+  const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<any | null>(null);
 
   useEffect(() => {
     if (!clientProfile) return;
     const fetch = async () => {
-      const { data } = await supabase
-        .from("client_invoices").select("*")
-        .eq("customer_id", clientProfile.customer_id)
-        .order("created_at", { ascending: false });
-      setInvoices(data || []);
+      const [{ data: inv }, { data: pay }] = await Promise.all([
+        supabase.from("client_invoices").select("*")
+          .eq("customer_id", clientProfile.customer_id)
+          .order("created_at", { ascending: false }),
+        supabase.from("client_payments").select("*")
+          .eq("customer_id", clientProfile.customer_id)
+          .order("paid_date", { ascending: false }),
+      ]);
+      setInvoices(inv || []);
+      setPayments(pay || []);
       setLoading(false);
     };
     fetch();
-    const ch = supabase.channel("client-invoices-realtime")
-      .on("postgres_changes", {
-        event: "*", schema: "public", table: "client_invoices",
-        filter: `customer_id=eq.${clientProfile.customer_id}`
-      }, fetch).subscribe();
+    const ch = supabase.channel("client-fin-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "client_invoices", filter: `customer_id=eq.${clientProfile.customer_id}` }, fetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "client_payments", filter: `customer_id=eq.${clientProfile.customer_id}` }, fetch)
+      .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [clientProfile]);
 
   const totalBilled = invoices.filter(i => i.status !== "cancelled").reduce((s, i) => s + Number(i.amount || 0), 0);
-  const totalPaid = invoices.reduce((s, i) => s + Number(i.paid_amount || 0), 0);
+  const totalPaid = payments.reduce((s, p) => s + Number(p.amount || 0), 0);
   const outstanding = totalBilled - totalPaid;
   const overdueCount = invoices.filter(i => i.status === "overdue").length;
-  const payments = invoices.filter(i => Number(i.paid_amount || 0) > 0)
-    .sort((a, b) => new Date(b.paid_date || b.updated_at).getTime() - new Date(a.paid_date || a.updated_at).getTime());
 
   return (
     <div className="space-y-6 animate-fade-in">
