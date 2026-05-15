@@ -83,6 +83,8 @@ serve(async (req: Request) => {
       contact_name,
       email,
       phone: phone || null,
+      tin_number: tin_number || null,
+      warehouse_destinations: warehouse_destinations || [],
     });
 
     // Audit log
