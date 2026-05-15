@@ -890,8 +890,10 @@ export type Database = {
           is_active: boolean
           last_login_at: string | null
           phone: string | null
+          tin_number: string | null
           updated_at: string
           user_id: string
+          warehouse_destinations: string[]
         }
         Insert: {
           company_name: string
@@ -903,8 +905,10 @@ export type Database = {
           is_active?: boolean
           last_login_at?: string | null
           phone?: string | null
+          tin_number?: string | null
           updated_at?: string
           user_id: string
+          warehouse_destinations?: string[]
         }
         Update: {
           company_name?: string
@@ -916,8 +920,10 @@ export type Database = {
           is_active?: boolean
           last_login_at?: string | null
           phone?: string | null
+          tin_number?: string | null
           updated_at?: string
           user_id?: string
+          warehouse_destinations?: string[]
         }
         Relationships: []
       }
