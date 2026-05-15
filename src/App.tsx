@@ -180,8 +180,9 @@ function StaffRoutes() {
         <Route path="/duty-estimator" element={<ProtectedRoute><WithLayout><DutyEstimator /></WithLayout></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><WithLayout><Notifications /></WithLayout></ProtectedRoute>} />
         <Route path="/admin/users" element={<ProtectedRoute><WithLayout><AdminUsers /></WithLayout></ProtectedRoute>} />
-        <Route path="/admin/client-documents" element={<ProtectedRoute><WithLayout><ClientDocumentManagement /></WithLayout></ProtectedRoute>} />
-        <Route path="/admin/client-data" element={<ProtectedRoute><WithLayout><ClientDataManagement /></WithLayout></ProtectedRoute>} />
+        <Route path="/admin/client-management" element={<ProtectedRoute><WithLayout><ClientManagement /></WithLayout></ProtectedRoute>} />
+        <Route path="/admin/client-documents" element={<Navigate to="/admin/client-management" replace />} />
+        <Route path="/admin/client-data" element={<Navigate to="/admin/client-management" replace />} />
         <Route path="/settings" element={<ProtectedRoute><WithLayout><SettingsPage /></WithLayout></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><WithLayout><StaffProfile /></WithLayout></ProtectedRoute>} />
         
