@@ -51,7 +51,7 @@ serve(async (req: Request) => {
       });
     }
 
-    const { customer_id, company_name, contact_name, email, phone, password } = await req.json();
+    const { customer_id, company_name, contact_name, email, phone, password, tin_number, warehouse_destinations } = await req.json();
 
     if (!customer_id || !company_name || !contact_name || !email || !password) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
