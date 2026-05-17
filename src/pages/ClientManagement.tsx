@@ -479,7 +479,7 @@ function DocumentsTab({ client }: { client: any }) {
       <div className="rounded-md border">
         <Table>
           <TableHeader><TableRow>
-            <TableHead>Name</TableHead><TableHead>Type</TableHead><TableHead>Consignment</TableHead>
+            <TableHead>Name</TableHead><TableHead>Type</TableHead><TableHead>Consignment ID</TableHead>
             <TableHead>Size</TableHead><TableHead>Date</TableHead><TableHead className="w-24">Actions</TableHead>
           </TableRow></TableHeader>
           <TableBody>
