@@ -46,7 +46,7 @@ export function DriverTable({ drivers }: DriverTableProps) {
         </TableHeader>
         <TableBody>
           {drivers.map((driver) => {
-            const status = statusConfig[driver.status];
+            const status = statusConfig[driver.status] ?? fallbackStatus;
             const isExpiringSoon = new Date(driver.licenseExpiry) < new Date("2026-06-01");
             return (
               <TableRow key={driver.id}>
