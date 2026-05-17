@@ -24,6 +24,7 @@ import AccountsInvoices from "./pages/accounts/AccountsInvoices";
 import AccountsVouchers from "./pages/accounts/AccountsVouchers";
 import AccountsExpenses from "./pages/accounts/AccountsExpenses";
 import AccountsLedgers from "./pages/accounts/AccountsLedgers";
+import AccountsBooks from "./pages/accounts/AccountsBooks";
 import AccountsDocuments from "./pages/accounts/AccountsDocuments";
 import AccountsReports from "./pages/accounts/AccountsReports";
 import BankIntegration from "./pages/BankIntegration";
