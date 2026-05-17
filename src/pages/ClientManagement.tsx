@@ -491,7 +491,7 @@ function DocumentsTab({ client }: { client: any }) {
                 <TableRow key={d.id}>
                   <TableCell className="font-medium">{d.document_name}</TableCell>
                   <TableCell><Badge variant="secondary">{TYPE_LABELS[d.document_type] || d.document_type}</Badge></TableCell>
-                  <TableCell className="font-mono text-xs">{ship?.bl_number || "—"}</TableCell>
+                  <TableCell className="font-mono text-xs">{shipLabel(ship)}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{d.file_size || "—"}</TableCell>
                   <TableCell className="text-sm">{new Date(d.created_at).toLocaleDateString()}</TableCell>
                   <TableCell>
