@@ -215,11 +215,17 @@ export function useAcceptDeliveryMonitoring() {
 export function useEndTrip() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ tripId, otp, confirmedBy }: {
+    mutationFn: async ({ tripId, otp, confirmedBy, podFile, podLat, podLng }: {
       tripId: string;
       otp?: string;
       confirmedBy?: string;
+      podFile: File;
+      podLat: number;
+      podLng: number;
     }) => {
+      if (!podFile) throw new Error("POD photo or signature is required");
+      if (podLat == null || podLng == null) throw new Error("GPS location is required");
+
       // Verify OTP if provided
       if (otp) {
         const { data: trip } = await supabase
@@ -232,6 +238,17 @@ export function useEndTrip() {
         }
       }
 
+      // Upload POD artefact
+      const ext = (podFile.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${tripId}/${Date.now()}.${ext}`;
+      const up = await supabase.storage.from("trip-pods").upload(path, podFile, {
+        contentType: podFile.type || "image/jpeg",
+        upsert: false,
+      });
+      if (up.error) throw new Error("POD upload failed: " + up.error.message);
+      const { data: signed } = await supabase.storage.from("trip-pods").createSignedUrl(path, 60 * 60 * 24 * 365);
+      const pod_url = signed?.signedUrl || up.data.path;
+
       const { error } = await supabase
         .from("trucking_trips")
         .update({
@@ -240,6 +257,10 @@ export function useEndTrip() {
           tracking_active: false,
           delivery_confirmed_by: confirmedBy || "driver",
           delivery_date: new Date().toISOString().split("T")[0],
+          pod_url,
+          pod_lat: podLat,
+          pod_lng: podLng,
+          pod_captured_at: new Date().toISOString(),
         } as any)
         .eq("id", tripId);
       if (error) throw error;
