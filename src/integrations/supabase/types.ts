@@ -3157,10 +3157,12 @@ export type Database = {
           arrived_at_pickup_time: string | null
           bl_number: string | null
           cargo_description: string | null
+          consignment_id: string | null
           container_number: string | null
           container_return_date: string | null
           container_return_location: string | null
           container_returned: boolean | null
+          cost_per_km: number | null
           created_at: string
           customer: string | null
           customer_accepted: boolean | null
@@ -3170,6 +3172,8 @@ export type Database = {
           customer_phone: string | null
           delivery_confirmed_by: string | null
           delivery_date: string | null
+          delivery_lat: number | null
+          delivery_lng: number | null
           delivery_location: string | null
           delivery_otp: string | null
           destination: string
@@ -3181,12 +3185,18 @@ export type Database = {
           estimated_delivery_time: string | null
           fuel_cost: number | null
           id: string
+          misc_cost: number | null
           notes: string | null
           origin: string
           pickup_date: string | null
+          pickup_lat: number | null
+          pickup_lng: number | null
           pickup_location: string | null
           pod_url: string | null
+          route_eta_seconds: number | null
+          route_polyline: string | null
           status: string
+          toll_cost: number | null
           tracking_active: boolean | null
           tracking_token: string | null
           tracking_url: string | null
@@ -3203,10 +3213,12 @@ export type Database = {
           arrived_at_pickup_time?: string | null
           bl_number?: string | null
           cargo_description?: string | null
+          consignment_id?: string | null
           container_number?: string | null
           container_return_date?: string | null
           container_return_location?: string | null
           container_returned?: boolean | null
+          cost_per_km?: number | null
           created_at?: string
           customer?: string | null
           customer_accepted?: boolean | null
@@ -3216,6 +3228,8 @@ export type Database = {
           customer_phone?: string | null
           delivery_confirmed_by?: string | null
           delivery_date?: string | null
+          delivery_lat?: number | null
+          delivery_lng?: number | null
           delivery_location?: string | null
           delivery_otp?: string | null
           destination: string
@@ -3227,12 +3241,18 @@ export type Database = {
           estimated_delivery_time?: string | null
           fuel_cost?: number | null
           id?: string
+          misc_cost?: number | null
           notes?: string | null
           origin: string
           pickup_date?: string | null
+          pickup_lat?: number | null
+          pickup_lng?: number | null
           pickup_location?: string | null
           pod_url?: string | null
+          route_eta_seconds?: number | null
+          route_polyline?: string | null
           status?: string
+          toll_cost?: number | null
           tracking_active?: boolean | null
           tracking_token?: string | null
           tracking_url?: string | null
@@ -3249,10 +3269,12 @@ export type Database = {
           arrived_at_pickup_time?: string | null
           bl_number?: string | null
           cargo_description?: string | null
+          consignment_id?: string | null
           container_number?: string | null
           container_return_date?: string | null
           container_return_location?: string | null
           container_returned?: boolean | null
+          cost_per_km?: number | null
           created_at?: string
           customer?: string | null
           customer_accepted?: boolean | null
@@ -3262,6 +3284,8 @@ export type Database = {
           customer_phone?: string | null
           delivery_confirmed_by?: string | null
           delivery_date?: string | null
+          delivery_lat?: number | null
+          delivery_lng?: number | null
           delivery_location?: string | null
           delivery_otp?: string | null
           destination?: string
@@ -3273,12 +3297,18 @@ export type Database = {
           estimated_delivery_time?: string | null
           fuel_cost?: number | null
           id?: string
+          misc_cost?: number | null
           notes?: string | null
           origin?: string
           pickup_date?: string | null
+          pickup_lat?: number | null
+          pickup_lng?: number | null
           pickup_location?: string | null
           pod_url?: string | null
+          route_eta_seconds?: number | null
+          route_polyline?: string | null
           status?: string
+          toll_cost?: number | null
           tracking_active?: boolean | null
           tracking_token?: string | null
           tracking_url?: string | null
