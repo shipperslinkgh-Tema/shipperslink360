@@ -33,6 +33,18 @@ export default function AccountsLedgers() {
 
   return (
     <div className="space-y-4">
+      <div className="flex items-start justify-between gap-3 rounded-md border border-border bg-muted/40 p-3">
+        <div className="flex items-start gap-2 text-sm text-muted-foreground">
+          <Info className="h-4 w-4 mt-0.5 shrink-0" />
+          <p>
+            Ledgers are auto-generated from <strong>posted vouchers</strong>. To add entries, create and post a voucher
+            (Payment, Receipt, Journal or Contra) — its balanced debit/credit lines will appear here.
+          </p>
+        </div>
+        <Button size="sm" onClick={() => navigate("/accounts/books?tab=vouchers")} className="gap-2 shrink-0">
+          <Plus className="h-4 w-4" /> New Voucher
+        </Button>
+      </div>
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
           <TabsTrigger value="general">General Ledger</TabsTrigger>
