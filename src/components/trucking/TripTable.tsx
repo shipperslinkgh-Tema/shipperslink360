@@ -32,6 +32,7 @@ const statusConfig = {
 
 export function TripTable({ trips, trucks, drivers }: TripTableProps) {
   const [returnTrip, setReturnTrip] = useState<Trip | null>(null);
+  const [podTripId, setPodTripId] = useState<string | null>(null);
   const getTruck = (truckId: string) => trucks.find((t) => t.id === truckId);
   const getDriver = (driverId: string) => drivers.find((d) => d.id === driverId);
   const activateTracking = useActivateTracking();
