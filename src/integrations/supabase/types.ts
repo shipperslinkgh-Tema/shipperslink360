@@ -3192,6 +3192,10 @@ export type Database = {
           pickup_lat: number | null
           pickup_lng: number | null
           pickup_location: string | null
+          pod_captured_at: string | null
+          pod_distance_m: number | null
+          pod_lat: number | null
+          pod_lng: number | null
           pod_url: string | null
           route_eta_seconds: number | null
           route_polyline: string | null
@@ -3248,6 +3252,10 @@ export type Database = {
           pickup_lat?: number | null
           pickup_lng?: number | null
           pickup_location?: string | null
+          pod_captured_at?: string | null
+          pod_distance_m?: number | null
+          pod_lat?: number | null
+          pod_lng?: number | null
           pod_url?: string | null
           route_eta_seconds?: number | null
           route_polyline?: string | null
@@ -3304,6 +3312,10 @@ export type Database = {
           pickup_lat?: number | null
           pickup_lng?: number | null
           pickup_location?: string | null
+          pod_captured_at?: string | null
+          pod_distance_m?: number | null
+          pod_lat?: number | null
+          pod_lng?: number | null
           pod_url?: string | null
           route_eta_seconds?: number | null
           route_polyline?: string | null
@@ -3732,6 +3744,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      haversine_m: {
+        Args: { lat1: number; lat2: number; lon1: number; lon2: number }
+        Returns: number
       }
       increment_failed_login: { Args: { _user_id: string }; Returns: undefined }
       is_accounts: { Args: { _user_id: string }; Returns: boolean }

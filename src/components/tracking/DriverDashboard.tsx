@@ -23,6 +23,11 @@ export function DriverDashboard({ trip }: Props) {
   const [otpDialog, setOtpDialog] = useState(false);
   const [otpInput, setOtpInput] = useState("");
   const [elapsedTime, setElapsedTime] = useState("");
+  const [podFile, setPodFile] = useState<File | null>(null);
+  const [podPreview, setPodPreview] = useState<string | null>(null);
+  const [podCoords, setPodCoords] = useState<{ lat: number; lng: number; acc: number } | null>(null);
+  const [podError, setPodError] = useState<string | null>(null);
+  const [capturingGps, setCapturingGps] = useState(false);
 
   // Timer
   useEffect(() => {
@@ -92,13 +97,61 @@ export function DriverDashboard({ trip }: Props) {
     setTimeout(recordPosition, 500);
   };
 
-  const handleEndTrip = () => setOtpDialog(true);
+  const handleEndTrip = () => {
+    setPodError(null);
+    setOtpDialog(true);
+    captureGps();
+  };
+
+  const captureGps = () => {
+    if (!("geolocation" in navigator)) {
+      setPodError("Geolocation not available on this device");
+      return;
+    }
+    setCapturingGps(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setPodCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy || 0 });
+        setCapturingGps(false);
+      },
+      (err) => {
+        setPodError("GPS error: " + err.message);
+        setCapturingGps(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  };
+
+  const onPodFile = (f: File | null) => {
+    setPodFile(f);
+    if (podPreview) URL.revokeObjectURL(podPreview);
+    setPodPreview(f ? URL.createObjectURL(f) : null);
+  };
 
   const confirmEndTrip = () => {
+    setPodError(null);
+    if (!podFile) { setPodError("Please capture or upload a POD photo/signature"); return; }
+    if (!podCoords) { setPodError("Waiting for GPS — tap 'Capture GPS' again"); return; }
     setGpsActive(false);
-    endTrip.mutate({ tripId: trip.id, otp: otpInput || undefined, confirmedBy: "driver" });
-    setOtpDialog(false);
-    setOtpInput("");
+    endTrip.mutate(
+      {
+        tripId: trip.id,
+        otp: otpInput || undefined,
+        confirmedBy: "driver",
+        podFile,
+        podLat: podCoords.lat,
+        podLng: podCoords.lng,
+      },
+      {
+        onSuccess: () => {
+          setOtpDialog(false);
+          setOtpInput("");
+          onPodFile(null);
+          setPodCoords(null);
+        },
+        onError: (e: any) => setPodError(e?.message || "Failed to confirm delivery"),
+      }
+    );
   };
 
   const statusConfig: Record<string, { label: string; color: string }> = {
@@ -270,31 +323,86 @@ export function DriverDashboard({ trip }: Props) {
         )}
       </div>
 
-      {/* OTP Dialog */}
-      <Dialog open={otpDialog} onOpenChange={setOtpDialog}>
-        <DialogContent className="max-w-[92vw] sm:max-w-md rounded-xl">
+      {/* POD Dialog */}
+      <Dialog open={otpDialog} onOpenChange={(o) => { setOtpDialog(o); if (!o) setPodError(null); }}>
+        <DialogContent className="max-w-[92vw] sm:max-w-md rounded-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-warning" />
               Confirm Delivery
             </DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground">
-            Enter the 6-digit OTP from the customer to confirm delivery, or skip to complete without verification.
-          </p>
-          <Input
-            placeholder="Enter 6-digit OTP"
-            value={otpInput}
-            onChange={(e) => setOtpInput(e.target.value)}
-            maxLength={6}
-            className="text-center text-2xl tracking-[0.3em] h-14 font-mono"
-            inputMode="numeric"
-          />
+
+          {/* POD Photo / Signature */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">POD photo or signature <span className="text-destructive">*</span></label>
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={(e) => onPodFile(e.target.files?.[0] || null)}
+              className="block w-full text-sm file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-primary file:text-primary-foreground"
+            />
+            {podPreview && (
+              <img src={podPreview} alt="POD preview" className="w-full max-h-40 object-contain rounded border" />
+            )}
+          </div>
+
+          {/* GPS */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Delivery GPS <span className="text-destructive">*</span></label>
+            <div className="flex items-center gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={captureGps} disabled={capturingGps}>
+                <MapPin className="h-4 w-4 mr-1" />
+                {capturingGps ? "Locating…" : podCoords ? "Recapture" : "Capture GPS"}
+              </Button>
+              {podCoords && (
+                <span className="text-xs text-muted-foreground font-mono">
+                  {podCoords.lat.toFixed(5)}, {podCoords.lng.toFixed(5)} (±{Math.round(podCoords.acc)}m)
+                </span>
+              )}
+            </div>
+            {trip.deliveryLat != null && trip.deliveryLng != null && podCoords && (() => {
+              const R = 6371000;
+              const toRad = (d: number) => (d * Math.PI) / 180;
+              const dLat = toRad(trip.deliveryLat - podCoords.lat);
+              const dLng = toRad(trip.deliveryLng - podCoords.lng);
+              const a = Math.sin(dLat/2)**2 + Math.cos(toRad(podCoords.lat)) * Math.cos(toRad(trip.deliveryLat)) * Math.sin(dLng/2)**2;
+              const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+              const ok = d <= 950;
+              return (
+                <p className={cn("text-xs font-medium", ok ? "text-success" : "text-destructive")}>
+                  {ok ? "✓" : "✗"} {Math.round(d)} m from delivery point (limit 950 m)
+                </p>
+              );
+            })()}
+            {(trip.deliveryLat == null || trip.deliveryLng == null) && (
+              <p className="text-xs text-warning">⚠ Delivery point has no GPS on file — delivery cannot be geo-verified.</p>
+            )}
+          </div>
+
+          {/* OTP (optional) */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Customer OTP (optional)</label>
+            <Input
+              placeholder="6-digit OTP"
+              value={otpInput}
+              onChange={(e) => setOtpInput(e.target.value)}
+              maxLength={6}
+              className="text-center text-xl tracking-[0.3em] h-12 font-mono"
+              inputMode="numeric"
+            />
+          </div>
+
+          {podError && (
+            <p className="text-sm text-destructive bg-destructive/10 rounded p-2">{podError}</p>
+          )}
+
           <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={() => setOtpDialog(false)} className="h-12 touch-manipulation">Cancel</Button>
-            <Button onClick={confirmEndTrip} disabled={endTrip.isPending} className="h-12 touch-manipulation">
+            <Button onClick={confirmEndTrip} disabled={endTrip.isPending || !podFile || !podCoords} className="h-12 touch-manipulation">
               <CheckCircle className="h-4 w-4 mr-2" />
-              Confirm Delivery
+              {endTrip.isPending ? "Submitting…" : "Confirm Delivery"}
             </Button>
           </DialogFooter>
         </DialogContent>
