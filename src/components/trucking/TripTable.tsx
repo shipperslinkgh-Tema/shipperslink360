@@ -10,11 +10,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Route, Calendar, DollarSign, Container, CheckCircle2, Package, Copy, ExternalLink, Radio, MessageCircle } from "lucide-react";
+import { Route, Calendar, DollarSign, Container, CheckCircle2, Package, Copy, ExternalLink, Radio, MessageCircle, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useActivateTracking, useTrackingTrips } from "@/hooks/useTracking";
 import { toast } from "sonner";
 import { ContainerReturnDialog } from "@/components/trucking/ContainerReturnDialog";
+import { ConfirmDeliveryDialog } from "@/components/trucking/ConfirmDeliveryDialog";
 
 interface TripTableProps {
   trips: Trip[];
@@ -31,6 +32,7 @@ const statusConfig = {
 
 export function TripTable({ trips, trucks, drivers }: TripTableProps) {
   const [returnTrip, setReturnTrip] = useState<Trip | null>(null);
+  const [podTripId, setPodTripId] = useState<string | null>(null);
   const getTruck = (truckId: string) => trucks.find((t) => t.id === truckId);
   const getDriver = (driverId: string) => drivers.find((d) => d.id === driverId);
   const activateTracking = useActivateTracking();
@@ -121,6 +123,16 @@ export function TripTable({ trips, trucks, drivers }: TripTableProps) {
                         <Calendar className="h-3 w-3 text-status-success" />
                         {trip.deliveryDate}
                       </div>
+                    ) : trip.status === "in-transit" ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1 text-xs"
+                        onClick={() => setPodTripId(trip.id)}
+                      >
+                        <CheckCircle className="h-3 w-3" />
+                        Confirm Delivery
+                      </Button>
                     ) : (
                       <span className="text-muted-foreground text-sm">Pending</span>
                     )}
@@ -203,6 +215,11 @@ export function TripTable({ trips, trucks, drivers }: TripTableProps) {
         open={!!returnTrip}
         onOpenChange={(open) => !open && setReturnTrip(null)}
         trip={returnTrip}
+      />
+      <ConfirmDeliveryDialog
+        open={!!podTripId}
+        onOpenChange={(o) => !o && setPodTripId(null)}
+        tripId={podTripId}
       />
     </div>
   );
