@@ -123,6 +123,16 @@ export function TripTable({ trips, trucks, drivers }: TripTableProps) {
                         <Calendar className="h-3 w-3 text-status-success" />
                         {trip.deliveryDate}
                       </div>
+                    ) : trip.status === "in-transit" ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1 text-xs"
+                        onClick={() => setPodTripId(trip.id)}
+                      >
+                        <CheckCircle className="h-3 w-3" />
+                        Confirm Delivery
+                      </Button>
                     ) : (
                       <span className="text-muted-foreground text-sm">Pending</span>
                     )}
