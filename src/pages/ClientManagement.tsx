@@ -354,12 +354,25 @@ function DocumentsTab({ client }: { client: any }) {
     setDocs(data || []);
   };
 
+  const shipLabel = (s: any) =>
+    s?.consignment_ref || s?.bl_number || (s?.id ? `CONS-${s.id.slice(0, 8).toUpperCase()}` : "—");
+
   useEffect(() => {
     fetchDocs();
-    supabase.from("client_shipments")
-      .select("id, bl_number, consignment_id")
-      .eq("customer_id", client.customer_id)
-      .then(({ data }) => setShipments(data || []));
+    (async () => {
+      const { data: ships } = await supabase.from("client_shipments")
+        .select("id, bl_number, consignment_id")
+        .eq("customer_id", client.customer_id);
+      const list = ships || [];
+      const workflowIds = list.map(s => s.consignment_id).filter(Boolean);
+      let refMap: Record<string, string> = {};
+      if (workflowIds.length) {
+        const { data: wfs } = await supabase.from("consignment_workflows")
+          .select("id, consignment_ref").in("id", workflowIds);
+        refMap = Object.fromEntries((wfs || []).map(w => [w.id, w.consignment_ref]));
+      }
+      setShipments(list.map(s => ({ ...s, consignment_ref: refMap[s.consignment_id] })));
+    })();
   }, [client.id]);
 
   const upload = async (e: React.FormEvent) => {
@@ -424,7 +437,7 @@ function DocumentsTab({ client }: { client: any }) {
           <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Consignments</SelectItem>
-            {shipments.map(s => <SelectItem key={s.id} value={s.id}>{s.bl_number || s.id.slice(0, 8)}</SelectItem>)}
+            {shipments.map(s => <SelectItem key={s.id} value={s.id}>{shipLabel(s)}</SelectItem>)}
           </SelectContent>
         </Select>
         <div className="ml-auto">
@@ -446,7 +459,7 @@ function DocumentsTab({ client }: { client: any }) {
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">— Not linked —</SelectItem>
-                        {shipments.map(s => <SelectItem key={s.id} value={s.id}>{s.bl_number || s.id.slice(0, 8)}</SelectItem>)}
+                        {shipments.map(s => <SelectItem key={s.id} value={s.id}>{shipLabel(s)}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
@@ -466,7 +479,7 @@ function DocumentsTab({ client }: { client: any }) {
       <div className="rounded-md border">
         <Table>
           <TableHeader><TableRow>
-            <TableHead>Name</TableHead><TableHead>Type</TableHead><TableHead>Consignment</TableHead>
+            <TableHead>Name</TableHead><TableHead>Type</TableHead><TableHead>Consignment ID</TableHead>
             <TableHead>Size</TableHead><TableHead>Date</TableHead><TableHead className="w-24">Actions</TableHead>
           </TableRow></TableHeader>
           <TableBody>
@@ -478,7 +491,7 @@ function DocumentsTab({ client }: { client: any }) {
                 <TableRow key={d.id}>
                   <TableCell className="font-medium">{d.document_name}</TableCell>
                   <TableCell><Badge variant="secondary">{TYPE_LABELS[d.document_type] || d.document_type}</Badge></TableCell>
-                  <TableCell className="font-mono text-xs">{ship?.bl_number || "—"}</TableCell>
+                  <TableCell className="font-mono text-xs">{shipLabel(ship)}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{d.file_size || "—"}</TableCell>
                   <TableCell className="text-sm">{new Date(d.created_at).toLocaleDateString()}</TableCell>
                   <TableCell>
