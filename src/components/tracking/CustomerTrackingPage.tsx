@@ -107,6 +107,9 @@ export function CustomerTrackingPage({ trip }: Props) {
                 tripStatus={trip.status}
                 origin={trip.pickupLocation || trip.origin}
                 destination={trip.deliveryLocation || trip.destination}
+                plannedRoute={trip.routePolyline}
+                pickupCoords={trip.pickupLat != null && trip.pickupLng != null ? [trip.pickupLat, trip.pickupLng] : null}
+                deliveryCoords={trip.deliveryLat != null && trip.deliveryLng != null ? [trip.deliveryLat, trip.deliveryLng] : null}
                 className="h-56"
               />
             </CardContent>
