@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     // Lookup trip by tracking token
     const { data: trip, error } = await supabase
       .from("trucking_trips")
-      .select("id, customer, container_number, bl_number, origin, destination, status, tracking_active, customer_accepted, customer_accepted_at, customer_phone, customer_email, pickup_location, delivery_location, driver_name, driver_phone, truck_number, cargo_description, estimated_delivery_time, actual_start_time, actual_end_time, arrived_at_pickup_time, distance_km, delivery_otp, delivery_confirmed_by, tracking_token, tracking_url, trip_cost, driver_payment, fuel_cost, pickup_date, delivery_date")
+      .select("id, customer, container_number, bl_number, origin, destination, status, tracking_active, customer_accepted, customer_accepted_at, customer_phone, customer_email, pickup_location, delivery_location, driver_name, driver_phone, truck_number, cargo_description, estimated_delivery_time, actual_start_time, actual_end_time, arrived_at_pickup_time, distance_km, delivery_otp, delivery_confirmed_by, tracking_token, tracking_url, trip_cost, driver_payment, fuel_cost, pickup_date, delivery_date, pickup_lat, pickup_lng, delivery_lat, delivery_lng, route_polyline, route_eta_seconds")
       .eq("tracking_token", token)
       .single();
 
