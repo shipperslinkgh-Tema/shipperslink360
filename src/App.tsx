@@ -24,6 +24,7 @@ import AccountsInvoices from "./pages/accounts/AccountsInvoices";
 import AccountsVouchers from "./pages/accounts/AccountsVouchers";
 import AccountsExpenses from "./pages/accounts/AccountsExpenses";
 import AccountsLedgers from "./pages/accounts/AccountsLedgers";
+import AccountsBooks from "./pages/accounts/AccountsBooks";
 import AccountsDocuments from "./pages/accounts/AccountsDocuments";
 import AccountsReports from "./pages/accounts/AccountsReports";
 import BankIntegration from "./pages/BankIntegration";
@@ -164,10 +165,11 @@ function StaffRoutes() {
         <Route path="/finance/banking" element={<ProtectedRoute><WithLayout><BankIntegration /></WithLayout></ProtectedRoute>} />
         <Route path="/accounts" element={<ProtectedRoute><WithLayout><AccountsLayout /></WithLayout></ProtectedRoute>}>
           <Route index element={<AccountsDashboard />} />
-          <Route path="invoices" element={<AccountsInvoices />} />
-          <Route path="vouchers" element={<AccountsVouchers />} />
+          <Route path="invoices" element={<Navigate to="/accounts/books?tab=invoices" replace />} />
+          <Route path="vouchers" element={<Navigate to="/accounts/books?tab=vouchers" replace />} />
+          <Route path="ledgers" element={<Navigate to="/accounts/books?tab=ledgers" replace />} />
+          <Route path="books" element={<AccountsBooks />} />
           <Route path="expenses" element={<AccountsExpenses />} />
-          <Route path="ledgers" element={<AccountsLedgers />} />
           <Route path="documents" element={<AccountsDocuments />} />
           <Route path="reports" element={<AccountsReports />} />
         </Route>
