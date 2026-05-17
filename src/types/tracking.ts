@@ -98,6 +98,16 @@ export function mapTripFromDb(t: any): TrackingTrip {
     tripCost: Number(t.trip_cost) || 0,
     driverPayment: Number(t.driver_payment) || 0,
     fuelCost: Number(t.fuel_cost) || 0,
+    pickupLat: t.pickup_lat != null ? Number(t.pickup_lat) : null,
+    pickupLng: t.pickup_lng != null ? Number(t.pickup_lng) : null,
+    deliveryLat: t.delivery_lat != null ? Number(t.delivery_lat) : null,
+    deliveryLng: t.delivery_lng != null ? Number(t.delivery_lng) : null,
+    routePolyline: (() => {
+      if (!t.route_polyline) return null;
+      try { return typeof t.route_polyline === "string" ? JSON.parse(t.route_polyline) : t.route_polyline; }
+      catch { return null; }
+    })(),
+    routeEtaSeconds: t.route_eta_seconds ?? null,
   };
 }
 
