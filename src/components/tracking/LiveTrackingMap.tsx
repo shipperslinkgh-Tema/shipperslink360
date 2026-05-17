@@ -46,6 +46,12 @@ interface LiveTrackingMapProps {
   destination: string;
   className?: string;
   showRoute?: boolean;
+  /** Pre-planned route polyline ([lat,lng] pairs) from OSRM */
+  plannedRoute?: [number, number][] | null;
+  /** Pickup pin coordinates */
+  pickupCoords?: [number, number] | null;
+  /** Delivery pin coordinates */
+  deliveryCoords?: [number, number] | null;
   /** For fleet overview with multiple trucks */
   fleetPositions?: Array<{
     id: string;
