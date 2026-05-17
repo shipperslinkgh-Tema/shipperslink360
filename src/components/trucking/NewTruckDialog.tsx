@@ -98,24 +98,6 @@ export function NewTruckDialog({ open, onOpenChange }: NewTruckDialogProps) {
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>Make *</Label>
-              <Input
-                value={form.make}
-                onChange={(e) => setForm({ ...form, make: e.target.value })}
-                placeholder="e.g. MAN"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Model *</Label>
-              <Input
-                value={form.model}
-                onChange={(e) => setForm({ ...form, model: e.target.value })}
-                placeholder="e.g. TGS 26.440"
-              />
-            </div>
-          </div>
 
           <div className="space-y-1.5">
             <Label>Capacity</Label>
