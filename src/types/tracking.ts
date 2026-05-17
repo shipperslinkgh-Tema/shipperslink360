@@ -38,6 +38,13 @@ export interface TrackingTrip {
   tripCost: number;
   driverPayment: number;
   fuelCost: number;
+  // Planned route (from OSRM via trip-routing edge function)
+  pickupLat: number | null;
+  pickupLng: number | null;
+  deliveryLat: number | null;
+  deliveryLng: number | null;
+  routePolyline: [number, number][] | null;
+  routeEtaSeconds: number | null;
 }
 
 export interface GpsLog {
