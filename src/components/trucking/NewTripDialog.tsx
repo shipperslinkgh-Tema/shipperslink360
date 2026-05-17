@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Truck, Driver } from "@/types/trucking";
@@ -22,8 +22,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { TruckIcon, User, MapPin, DollarSign, FileText } from "lucide-react";
+import { TruckIcon, User, MapPin, DollarSign, FileText, Loader2, Navigation } from "lucide-react";
 
 interface NewTripDialogProps {
   open: boolean;
@@ -45,11 +46,22 @@ const INITIAL_FORM = {
   destination: "",
   pickup_date: "",
   delivery_date: "",
-  trip_cost: "",
+  cost_per_km: "",
+  fuel_cost: "",
+  driver_payment: "",
+  toll_cost: "",
+  misc_cost: "",
   advance_deposit: "",
-  
   notes: "",
 };
+
+interface RouteData {
+  pickup: { lat: number; lng: number; display_name: string };
+  delivery: { lat: number; lng: number; display_name: string };
+  distance_km: number;
+  eta_seconds: number;
+  polyline: [number, number][];
+}
 
 function SectionHeader({ icon: Icon, title }: { icon: React.ElementType; title: string }) {
   return (
@@ -60,9 +72,18 @@ function SectionHeader({ icon: Icon, title }: { icon: React.ElementType; title: 
   );
 }
 
+function formatEta(seconds: number) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.round((seconds % 3600) / 60);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
 export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDialogProps) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState(INITIAL_FORM);
+  const [route, setRoute] = useState<RouteData | null>(null);
+  const [routing, setRouting] = useState(false);
+  const [routeError, setRouteError] = useState<string | null>(null);
 
   const { data: customers = [] } = useQuery({
     queryKey: ["customers"],
@@ -91,10 +112,52 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
       }));
     }
   };
+
+  // Auto-route when both origin & destination filled (debounced)
+  useEffect(() => {
+    if (!form.origin || !form.destination) {
+      setRoute(null);
+      setRouteError(null);
+      return;
+    }
+    const t = setTimeout(async () => {
+      setRouting(true);
+      setRouteError(null);
+      try {
+        const { data, error } = await supabase.functions.invoke("trip-routing", {
+          body: { pickup: form.origin, delivery: form.destination },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        setRoute(data as RouteData);
+      } catch (err: any) {
+        setRoute(null);
+        setRouteError(err.message || "Could not calculate route");
+      } finally {
+        setRouting(false);
+      }
+    }, 700);
+    return () => clearTimeout(t);
+  }, [form.origin, form.destination]);
+
+  // Auto-calculate trip cost when route or cost inputs change
+  const computedTripCost =
+    (route ? Number(form.cost_per_km || 0) * route.distance_km : 0) +
+    Number(form.fuel_cost || 0) +
+    Number(form.driver_payment || 0) +
+    Number(form.toll_cost || 0) +
+    Number(form.misc_cost || 0);
+
   const mutation = useMutation({
     mutationFn: async () => {
       const selectedDriver = drivers.find((d) => d.id === form.driver_id);
-      const { error } = await supabase.from("trucking_trips").insert({
+      const eta = route?.eta_seconds ?? null;
+      const estimatedDelivery =
+        eta && form.pickup_date
+          ? new Date(new Date(form.pickup_date).getTime() + eta * 1000).toISOString()
+          : null;
+
+      const payload: any = {
         truck_id: form.truck_id,
         driver_id: form.driver_id,
         driver_name: selectedDriver?.name || null,
@@ -106,12 +169,31 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
         destination: form.destination,
         pickup_date: form.pickup_date || null,
         delivery_date: form.delivery_date || null,
-        trip_cost: Number(form.trip_cost) || 0,
+        trip_cost: Number(computedTripCost.toFixed(2)),
+        cost_per_km: Number(form.cost_per_km) || 0,
+        fuel_cost: Number(form.fuel_cost) || 0,
+        driver_payment: Number(form.driver_payment) || 0,
+        toll_cost: Number(form.toll_cost) || 0,
+        misc_cost: Number(form.misc_cost) || 0,
         advance_deposit: Number(form.advance_deposit) || 0,
-        
         notes: form.notes || null,
         status: "scheduled",
-      });
+      };
+
+      if (route) {
+        payload.pickup_lat = route.pickup.lat;
+        payload.pickup_lng = route.pickup.lng;
+        payload.delivery_lat = route.delivery.lat;
+        payload.delivery_lng = route.delivery.lng;
+        payload.pickup_location = route.pickup.display_name;
+        payload.delivery_location = route.delivery.display_name;
+        payload.distance_km = Number(route.distance_km.toFixed(2));
+        payload.route_eta_seconds = route.eta_seconds;
+        payload.route_polyline = JSON.stringify(route.polyline);
+        payload.estimated_delivery_time = estimatedDelivery;
+      }
+
+      const { error } = await supabase.from("trucking_trips").insert(payload);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -119,14 +201,13 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
       toast.success("Trip created successfully");
       onOpenChange(false);
       setForm(INITIAL_FORM);
+      setRoute(null);
     },
     onError: (err: any) => {
       toast.error("Failed to create trip: " + err.message);
     },
   });
 
-  const availableTrucks = trucks.filter((t) => t.status === "available");
-  const availableDrivers = drivers.filter((d) => d.status === "available");
   const canSubmit = form.truck_id && form.driver_id && form.origin && form.destination && form.truck_type;
 
   return (
@@ -160,7 +241,7 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
                 <SelectContent>
                   {trucks.map((t) => (
                     <SelectItem key={t.id} value={t.id}>
-                      {t.registrationNumber} — {t.make} {t.model} {t.status !== "available" ? `(${t.status})` : ""}
+                      {t.registrationNumber} {t.status !== "available" ? `(${t.status})` : ""}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -225,12 +306,12 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
           <SectionHeader icon={MapPin} title="Route & Schedule" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label>Origin *</Label>
-              <Input value={form.origin} onChange={set("origin")} placeholder="e.g. Tema Port" />
+              <Label>Pickup Location *</Label>
+              <Input value={form.origin} onChange={set("origin")} placeholder="e.g. Tema Port, Ghana" />
             </div>
             <div className="space-y-1.5">
-              <Label>Destination *</Label>
-              <Input value={form.destination} onChange={set("destination")} placeholder="e.g. Kumasi" />
+              <Label>Delivery Location *</Label>
+              <Input value={form.destination} onChange={set("destination")} placeholder="e.g. Kumasi, Ghana" />
             </div>
             <div className="space-y-1.5">
               <Label>Pickup Date</Label>
@@ -242,19 +323,71 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
             </div>
           </div>
 
+          {/* Route calculation result */}
+          <div className="rounded-md border bg-muted/30 p-3 text-sm">
+            {routing && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Calculating route via OpenStreetMap…
+              </div>
+            )}
+            {!routing && route && (
+              <div className="flex flex-wrap items-center gap-2">
+                <Navigation className="h-4 w-4 text-primary" />
+                <Badge variant="secondary">Distance: {route.distance_km.toFixed(1)} km</Badge>
+                <Badge variant="secondary">ETA: {formatEta(route.eta_seconds)}</Badge>
+                <span className="text-xs text-muted-foreground">
+                  Route auto-saved. Visible on live tracking map.
+                </span>
+              </div>
+            )}
+            {!routing && routeError && (
+              <span className="text-xs text-destructive">⚠ {routeError}</span>
+            )}
+            {!routing && !route && !routeError && (
+              <span className="text-xs text-muted-foreground">
+                Enter pickup & delivery to auto-calculate distance and ETA.
+              </span>
+            )}
+          </div>
+
           <Separator />
 
-          {/* Financials */}
-          <SectionHeader icon={DollarSign} title="Financials (GHS)" />
+          {/* Financials — Trip Cost Identity */}
+          <SectionHeader icon={DollarSign} title="Trip Cost Identity (GHS)" />
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="space-y-1.5">
-              <Label>Trip Cost (GHS)</Label>
-              <Input type="number" value={form.trip_cost} onChange={set("trip_cost")} placeholder="0.00" />
+              <Label>Cost per KM</Label>
+              <Input type="number" value={form.cost_per_km} onChange={set("cost_per_km")} placeholder="0.00" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Fuel Cost</Label>
+              <Input type="number" value={form.fuel_cost} onChange={set("fuel_cost")} placeholder="0.00" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Driver Payment</Label>
+              <Input type="number" value={form.driver_payment} onChange={set("driver_payment")} placeholder="0.00" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Tolls</Label>
+              <Input type="number" value={form.toll_cost} onChange={set("toll_cost")} placeholder="0.00" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Miscellaneous</Label>
+              <Input type="number" value={form.misc_cost} onChange={set("misc_cost")} placeholder="0.00" />
             </div>
             <div className="space-y-1.5">
               <Label>Advance/Deposit</Label>
               <Input type="number" value={form.advance_deposit} onChange={set("advance_deposit")} placeholder="0.00" />
             </div>
+          </div>
+          <div className="rounded-md border bg-primary/5 px-3 py-2 text-sm flex items-center justify-between">
+            <span className="text-muted-foreground">
+              {route ? `(${Number(form.cost_per_km || 0)} × ${route.distance_km.toFixed(1)} km) + expenses` : "Add a route + cost per km to auto-compute"}
+            </span>
+            <span className="font-bold text-lg text-primary">
+              GHS {computedTripCost.toFixed(2)}
+            </span>
           </div>
 
           <Separator />
