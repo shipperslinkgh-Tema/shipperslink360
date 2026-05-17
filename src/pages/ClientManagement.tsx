@@ -459,7 +459,7 @@ function DocumentsTab({ client }: { client: any }) {
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">— Not linked —</SelectItem>
-                        {shipments.map(s => <SelectItem key={s.id} value={s.id}>{s.bl_number || s.id.slice(0, 8)}</SelectItem>)}
+                        {shipments.map(s => <SelectItem key={s.id} value={s.id}>{shipLabel(s)}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
