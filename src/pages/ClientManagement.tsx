@@ -354,12 +354,25 @@ function DocumentsTab({ client }: { client: any }) {
     setDocs(data || []);
   };
 
+  const shipLabel = (s: any) =>
+    s?.consignment_ref || s?.bl_number || (s?.id ? `CONS-${s.id.slice(0, 8).toUpperCase()}` : "—");
+
   useEffect(() => {
     fetchDocs();
-    supabase.from("client_shipments")
-      .select("id, bl_number, consignment_id")
-      .eq("customer_id", client.customer_id)
-      .then(({ data }) => setShipments(data || []));
+    (async () => {
+      const { data: ships } = await supabase.from("client_shipments")
+        .select("id, bl_number, consignment_id")
+        .eq("customer_id", client.customer_id);
+      const list = ships || [];
+      const workflowIds = list.map(s => s.consignment_id).filter(Boolean);
+      let refMap: Record<string, string> = {};
+      if (workflowIds.length) {
+        const { data: wfs } = await supabase.from("consignment_workflows")
+          .select("id, consignment_ref").in("id", workflowIds);
+        refMap = Object.fromEntries((wfs || []).map(w => [w.id, w.consignment_ref]));
+      }
+      setShipments(list.map(s => ({ ...s, consignment_ref: refMap[s.consignment_id] })));
+    })();
   }, [client.id]);
 
   const upload = async (e: React.FormEvent) => {
