@@ -216,6 +216,11 @@ export function TripTable({ trips, trucks, drivers }: TripTableProps) {
         onOpenChange={(open) => !open && setReturnTrip(null)}
         trip={returnTrip}
       />
+      <ConfirmDeliveryDialog
+        open={!!podTripId}
+        onOpenChange={(o) => !o && setPodTripId(null)}
+        tripId={podTripId}
+      />
     </div>
   );
 }
