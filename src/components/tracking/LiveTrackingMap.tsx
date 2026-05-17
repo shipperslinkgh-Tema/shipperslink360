@@ -155,15 +155,27 @@ export function LiveTrackingMap({
         {/* Single trip mode */}
         {!fleetPositions && (
           <>
-            {/* Route trail */}
+            {/* Planned route (from OSRM, dashed grey) */}
+            {showRoute && plannedRoute && plannedRoute.length >= 2 && (
+              <Polyline
+                positions={plannedRoute}
+                pathOptions={{
+                  color: "hsl(var(--muted-foreground))",
+                  weight: 4,
+                  opacity: 0.55,
+                  dashArray: "6 8",
+                }}
+              />
+            )}
+
+            {/* Actual GPS trail (solid primary) */}
             {showRoute && routePoints.length >= 2 && (
               <Polyline
                 positions={routePoints}
                 pathOptions={{
                   color: "hsl(var(--primary))",
                   weight: 4,
-                  opacity: 0.8,
-                  dashArray: tripStatus === "in-transit" ? undefined : "8 6",
+                  opacity: 0.9,
                 }}
               />
             )}
@@ -193,15 +205,24 @@ export function LiveTrackingMap({
               </Marker>
             )}
 
-            {/* Origin marker */}
-            {routePoints.length > 0 && (
+            {/* Pickup marker — prefer planned coords, fallback to first GPS point */}
+            {pickupCoords ? (
+              <Marker position={pickupCoords} icon={pickupIcon}>
+                <Popup><strong>Pickup:</strong> {origin}</Popup>
+              </Marker>
+            ) : routePoints.length > 0 && (
               <Marker position={routePoints[0]} icon={pickupIcon}>
                 <Popup><strong>Pickup:</strong> {origin}</Popup>
               </Marker>
             )}
 
-            {/* Destination marker — show at delivered position or estimate */}
-            {(tripStatus === "delivered" || tripStatus === "completed") && truckPos && (
+            {/* Delivery marker */}
+            {deliveryCoords && (
+              <Marker position={deliveryCoords} icon={deliveryIcon}>
+                <Popup><strong>Delivery:</strong> {destination}</Popup>
+              </Marker>
+            )}
+            {!deliveryCoords && (tripStatus === "delivered" || tripStatus === "completed") && truckPos && (
               <Marker position={truckPos} icon={deliveryIcon}>
                 <Popup><strong>Delivered:</strong> {destination}</Popup>
               </Marker>
