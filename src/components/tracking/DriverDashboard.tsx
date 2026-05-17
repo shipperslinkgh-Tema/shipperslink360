@@ -97,13 +97,61 @@ export function DriverDashboard({ trip }: Props) {
     setTimeout(recordPosition, 500);
   };
 
-  const handleEndTrip = () => setOtpDialog(true);
+  const handleEndTrip = () => {
+    setPodError(null);
+    setOtpDialog(true);
+    captureGps();
+  };
+
+  const captureGps = () => {
+    if (!("geolocation" in navigator)) {
+      setPodError("Geolocation not available on this device");
+      return;
+    }
+    setCapturingGps(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setPodCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy || 0 });
+        setCapturingGps(false);
+      },
+      (err) => {
+        setPodError("GPS error: " + err.message);
+        setCapturingGps(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  };
+
+  const onPodFile = (f: File | null) => {
+    setPodFile(f);
+    if (podPreview) URL.revokeObjectURL(podPreview);
+    setPodPreview(f ? URL.createObjectURL(f) : null);
+  };
 
   const confirmEndTrip = () => {
+    setPodError(null);
+    if (!podFile) { setPodError("Please capture or upload a POD photo/signature"); return; }
+    if (!podCoords) { setPodError("Waiting for GPS — tap 'Capture GPS' again"); return; }
     setGpsActive(false);
-    endTrip.mutate({ tripId: trip.id, otp: otpInput || undefined, confirmedBy: "driver" });
-    setOtpDialog(false);
-    setOtpInput("");
+    endTrip.mutate(
+      {
+        tripId: trip.id,
+        otp: otpInput || undefined,
+        confirmedBy: "driver",
+        podFile,
+        podLat: podCoords.lat,
+        podLng: podCoords.lng,
+      },
+      {
+        onSuccess: () => {
+          setOtpDialog(false);
+          setOtpInput("");
+          onPodFile(null);
+          setPodCoords(null);
+        },
+        onError: (e: any) => setPodError(e?.message || "Failed to confirm delivery"),
+      }
+    );
   };
 
   const statusConfig: Record<string, { label: string; color: string }> = {
