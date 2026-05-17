@@ -40,7 +40,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const INACTIVITY_TIMEOUT = 60 * 1000; // 1 minute
+const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 const WARNING_BEFORE = 10 * 1000; // warn 10 seconds before logout
 
 export function AuthProvider({ children }: { children: ReactNode }) {
