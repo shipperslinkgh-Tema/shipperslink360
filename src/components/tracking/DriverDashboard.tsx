@@ -23,6 +23,11 @@ export function DriverDashboard({ trip }: Props) {
   const [otpDialog, setOtpDialog] = useState(false);
   const [otpInput, setOtpInput] = useState("");
   const [elapsedTime, setElapsedTime] = useState("");
+  const [podFile, setPodFile] = useState<File | null>(null);
+  const [podPreview, setPodPreview] = useState<string | null>(null);
+  const [podCoords, setPodCoords] = useState<{ lat: number; lng: number; acc: number } | null>(null);
+  const [podError, setPodError] = useState<string | null>(null);
+  const [capturingGps, setCapturingGps] = useState(false);
 
   // Timer
   useEffect(() => {
