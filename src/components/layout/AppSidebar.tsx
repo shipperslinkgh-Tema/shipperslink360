@@ -77,8 +77,14 @@ const navigation: NavItem[] = [{
     title: "Accounts Portal",
     href: "/accounts"
   }, {
-    title: "Books (Invoices · Vouchers · Ledgers)",
-    href: "/accounts/books"
+    title: "Vouchers",
+    href: "/accounts/vouchers"
+  }, {
+    title: "Invoices",
+    href: "/accounts/invoices"
+  }, {
+    title: "Ledgers",
+    href: "/accounts/ledgers"
   }, {
     title: "Reports",
     href: "/accounts/reports"
