@@ -437,7 +437,7 @@ function DocumentsTab({ client }: { client: any }) {
           <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Consignments</SelectItem>
-            {shipments.map(s => <SelectItem key={s.id} value={s.id}>{s.bl_number || s.id.slice(0, 8)}</SelectItem>)}
+            {shipments.map(s => <SelectItem key={s.id} value={s.id}>{shipLabel(s)}</SelectItem>)}
           </SelectContent>
         </Select>
         <div className="ml-auto">
