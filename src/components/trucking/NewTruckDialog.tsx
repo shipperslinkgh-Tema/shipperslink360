@@ -36,8 +36,6 @@ export function NewTruckDialog({ open, onOpenChange }: NewTruckDialogProps) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState({
     registration_number: "",
-    make: "",
-    model: "",
     type: "",
     capacity: "",
   });
@@ -46,8 +44,8 @@ export function NewTruckDialog({ open, onOpenChange }: NewTruckDialogProps) {
     mutationFn: async () => {
       const { error } = await supabase.from("trucks").insert({
         registration_number: form.registration_number,
-        make: form.make,
-        model: form.model,
+        make: "",
+        model: "",
         type: form.type,
         capacity: form.capacity || null,
         status: "available",
@@ -58,14 +56,14 @@ export function NewTruckDialog({ open, onOpenChange }: NewTruckDialogProps) {
       queryClient.invalidateQueries({ queryKey: ["trucks"] });
       toast.success("Truck added successfully");
       onOpenChange(false);
-      setForm({ registration_number: "", make: "", model: "", type: "", capacity: "" });
+      setForm({ registration_number: "", type: "", capacity: "" });
     },
     onError: (err: any) => {
       toast.error("Failed to add truck: " + err.message);
     },
   });
 
-  const canSubmit = form.registration_number && form.make && form.model && form.type;
+  const canSubmit = form.registration_number && form.type;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -100,24 +98,6 @@ export function NewTruckDialog({ open, onOpenChange }: NewTruckDialogProps) {
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>Make *</Label>
-              <Input
-                value={form.make}
-                onChange={(e) => setForm({ ...form, make: e.target.value })}
-                placeholder="e.g. MAN"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Model *</Label>
-              <Input
-                value={form.model}
-                onChange={(e) => setForm({ ...form, model: e.target.value })}
-                placeholder="e.g. TGS 26.440"
-              />
-            </div>
-          </div>
 
           <div className="space-y-1.5">
             <Label>Capacity</Label>
