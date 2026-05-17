@@ -3720,6 +3720,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      gen_expense_ref: { Args: never; Returns: string }
       get_client_customer_id: { Args: { _user_id: string }; Returns: string }
       get_user_department: {
         Args: { _user_id: string }
@@ -3796,6 +3797,7 @@ export type Database = {
         }
       }
       reset_failed_login: { Args: { _user_id: string }; Returns: undefined }
+      scan_trip_alerts: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "super_admin" | "admin" | "manager" | "staff"
