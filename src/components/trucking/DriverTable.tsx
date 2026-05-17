@@ -15,11 +15,14 @@ interface DriverTableProps {
   drivers: Driver[];
 }
 
-const statusConfig = {
+const statusConfig: Record<string, { label: string; className: string }> = {
   available: { label: "Available", className: "status-success" },
   "on-trip": { label: "On Trip", className: "status-warning" },
+  on_trip: { label: "On Trip", className: "status-warning" },
   "off-duty": { label: "Off Duty", className: "bg-muted text-muted-foreground" },
+  off_duty: { label: "Off Duty", className: "bg-muted text-muted-foreground" },
 };
+const fallbackStatus = { label: "Unknown", className: "bg-muted text-muted-foreground" };
 
 export function DriverTable({ drivers }: DriverTableProps) {
   return (
@@ -43,7 +46,7 @@ export function DriverTable({ drivers }: DriverTableProps) {
         </TableHeader>
         <TableBody>
           {drivers.map((driver) => {
-            const status = statusConfig[driver.status];
+            const status = statusConfig[driver.status] ?? fallbackStatus;
             const isExpiringSoon = new Date(driver.licenseExpiry) < new Date("2026-06-01");
             return (
               <TableRow key={driver.id}>
