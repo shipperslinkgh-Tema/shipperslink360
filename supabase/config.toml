@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.suggest-hs-code]
 verify_jwt = false
+
+[functions.trip-routing]
+verify_jwt = false
