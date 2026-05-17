@@ -83,13 +83,16 @@ export function LiveTrackingMap({
   destination,
   className = "h-72",
   showRoute = true,
+  plannedRoute,
+  pickupCoords,
+  deliveryCoords,
   fleetPositions,
 }: LiveTrackingMapProps) {
   const routePoints: [number, number][] = gpsLogs.map(g => [g.latitude, g.longitude]);
-  
-  const truckPos: [number, number] | null = latestGps 
+
+  const truckPos: [number, number] | null = latestGps
     ? [latestGps.latitude, latestGps.longitude]
-    : routePoints.length > 0 
+    : routePoints.length > 0
     ? routePoints[routePoints.length - 1]
     : null;
 
@@ -98,6 +101,9 @@ export function LiveTrackingMap({
   if (fleetPositions) {
     fleetPositions.forEach(f => allPoints.push([f.lat, f.lng]));
   }
+  if (pickupCoords) allPoints.push(pickupCoords);
+  if (deliveryCoords) allPoints.push(deliveryCoords);
+  if (plannedRoute && plannedRoute.length > 0) allPoints.push(plannedRoute[0], plannedRoute[plannedRoute.length - 1]);
   if (truckPos) allPoints.push(truckPos);
   if (routePoints.length > 0) allPoints.push(...routePoints);
 
