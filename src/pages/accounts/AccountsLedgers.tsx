@@ -10,6 +10,7 @@ import { useChartOfAccounts } from "@/hooks/useChartOfAccounts";
 import { useLedger } from "@/hooks/useLedger";
 
 export default function AccountsLedgers() {
+  const navigate = useNavigate();
   const [tab, setTab] = useState("general");
   const [accountId, setAccountId] = useState<string>("");
   const [customerId, setCustomerId] = useState<string>("");
