@@ -17,7 +17,6 @@ const Index = () => {
     switch (department) {
       case "operations": return <OperationsDashboard />;
       case "documentation": return <DocumentationDashboard />;
-      case "accounts": return <AccountsDashboard />;
       case "warehouse": return <FleetDashboard />;
       case "marketing": return <MarketingDashboard />;
       case "customer_service": return <MarketingDashboard />;
