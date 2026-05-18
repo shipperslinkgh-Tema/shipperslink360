@@ -3,6 +3,7 @@ import { AppSidebar } from "./AppSidebar";
 import { TopBar } from "./TopBar";
 import { InternalChatBox } from "@/components/chat/InternalChatBox";
 import { usePresence } from "@/hooks/usePresence";
+import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AppLayoutProps {
@@ -13,6 +14,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const isMobile = useIsMobile();
   usePresence();
+  useRealtimeSync();
 
   return (
     <div className="min-h-screen bg-background">
