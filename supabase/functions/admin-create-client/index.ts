@@ -60,6 +60,45 @@ serve(async (req: Request) => {
       });
     }
 
+    const normalizedEmail = String(email).trim().toLowerCase();
+
+    // Pre-check: customer_id already used
+    const { data: existingCustomer } = await adminClient
+      .from("client_profiles")
+      .select("id")
+      .eq("customer_id", customer_id)
+      .maybeSingle();
+    if (existingCustomer) {
+      return new Response(JSON.stringify({ error: "A client with this Customer ID already exists." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Pre-check: email already registered as auth user or client
+    const { data: existingClient } = await adminClient
+      .from("client_profiles")
+      .select("id")
+      .eq("email", normalizedEmail)
+      .maybeSingle();
+    if (existingClient) {
+      return new Response(JSON.stringify({ error: "A client with this email already exists." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { data: existingAuthUsers } = await adminClient.auth.admin.listUsers();
+    const emailTaken = existingAuthUsers?.users?.some(
+      (u: any) => u.email?.toLowerCase() === normalizedEmail,
+    );
+    if (emailTaken) {
+      return new Response(JSON.stringify({ error: "This email is already registered. Use a different email for this client." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Create auth user
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
       email,
