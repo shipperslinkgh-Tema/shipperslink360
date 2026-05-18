@@ -44,6 +44,7 @@ import ConsignmentWorkflows from "./pages/ConsignmentWorkflows";
 import LiveTracking from "./pages/LiveTracking";
 import PortCommandCenter from "./pages/PortCommandCenter";
 import TrackShipment from "./pages/TrackShipment";
+import UserGuide from "./pages/UserGuide";
 import { AppLayout } from "./components/layout/AppLayout";
 import ClientLogin from "./pages/client/ClientLogin";
 import ClientDashboard from "./pages/client/ClientDashboard";
@@ -187,6 +188,7 @@ function StaffRoutes() {
         <Route path="/admin/client-data" element={<Navigate to="/admin/client-management" replace />} />
         <Route path="/settings" element={<ProtectedRoute><WithLayout><SettingsPage /></WithLayout></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><WithLayout><StaffProfile /></WithLayout></ProtectedRoute>} />
+        <Route path="/user-guide" element={<ProtectedRoute><WithLayout><UserGuide /></WithLayout></ProtectedRoute>} />
         
         <Route path="/presentation" element={<Presentation />} />
         <Route path="*" element={<NotFound />} />
