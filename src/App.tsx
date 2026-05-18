@@ -44,6 +44,7 @@ import ConsignmentWorkflows from "./pages/ConsignmentWorkflows";
 import LiveTracking from "./pages/LiveTracking";
 import PortCommandCenter from "./pages/PortCommandCenter";
 import TrackShipment from "./pages/TrackShipment";
+import UserGuide from "./pages/UserGuide";
 import { AppLayout } from "./components/layout/AppLayout";
 import ClientLogin from "./pages/client/ClientLogin";
 import ClientDashboard from "./pages/client/ClientDashboard";
