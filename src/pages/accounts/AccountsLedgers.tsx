@@ -250,7 +250,7 @@ export default function AccountsLedgers() {
                 </Button>
                 <div>
                   <h3 className="font-semibold">
-                    {selectedAccount ? `${selectedAccount.code} — ${selectedAccount.name}` : selectedCustomer?.name || "Ledger"}
+                    {selectedAccount ? `${selectedAccount.code} — ${selectedAccount.name}` : (selectedCustomer as any)?.companyName || "Ledger"}
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {rows.length} entries · Closing balance: <strong>{running.toLocaleString()} GHS</strong>
