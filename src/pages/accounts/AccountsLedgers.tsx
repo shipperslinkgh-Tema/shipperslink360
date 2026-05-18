@@ -156,7 +156,7 @@ export default function AccountsLedgers() {
                   <SelectContent>
                     <SelectItem value="all">All parties (summary)</SelectItem>
                     {customers.map((c: any) => (
-                      <SelectItem key={c.id} value={c.id}>{c.customer_code ? `${c.customer_code} — ` : ""}{c.name}</SelectItem>
+                      <SelectItem key={c.id} value={c.id}>{c.customerCode ? `${c.customerCode} — ` : ""}{c.companyName}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
