@@ -4,6 +4,7 @@ import { IntegrationStatusCard } from "@/components/dashboard/IntegrationStatusC
 import { ShipmentStatusChart } from "@/components/dashboard/ShipmentStatusChart";
 import { RecentShipmentsTable } from "@/components/dashboard/RecentShipmentsTable";
 import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
+import { LiveActivityFeed } from "@/components/dashboard/LiveActivityFeed";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { ClearanceStatusWidget } from "@/components/dashboard/ClearanceStatusWidget";
 import { useAuth } from "@/contexts/AuthContext";
@@ -60,6 +61,7 @@ export default function Dashboard() {
         {/* Right Column */}
         <div className="space-y-6">
           <QuickActions />
+          <LiveActivityFeed />
           <ClearanceStatusWidget />
           <AlertsPanel />
         </div>
