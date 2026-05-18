@@ -20,6 +20,7 @@ interface ClientAuthContextType {
   user: User | null;
   clientProfile: ClientProfile | null;
   loading: boolean;
+  profileLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 }
