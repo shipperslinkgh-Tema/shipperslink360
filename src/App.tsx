@@ -188,6 +188,7 @@ function StaffRoutes() {
         <Route path="/admin/client-data" element={<Navigate to="/admin/client-management" replace />} />
         <Route path="/settings" element={<ProtectedRoute><WithLayout><SettingsPage /></WithLayout></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><WithLayout><StaffProfile /></WithLayout></ProtectedRoute>} />
+        <Route path="/user-guide" element={<ProtectedRoute><WithLayout><UserGuide /></WithLayout></ProtectedRoute>} />
         
         <Route path="/presentation" element={<Presentation />} />
         <Route path="*" element={<NotFound />} />
