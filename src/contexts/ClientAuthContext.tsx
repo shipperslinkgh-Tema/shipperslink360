@@ -20,6 +20,7 @@ interface ClientAuthContextType {
   user: User | null;
   clientProfile: ClientProfile | null;
   loading: boolean;
+  profileLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 }
@@ -33,6 +34,7 @@ export function ClientAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [clientProfile, setClientProfile] = useState<ClientProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
   const inactivityTimer = useRef<NodeJS.Timeout | null>(null);
 
   const resetInactivityTimer = useCallback(() => {
@@ -55,22 +57,26 @@ export function ClientAuthProvider({ children }: { children: ReactNode }) {
   }, [resetInactivityTimer]);
 
   const fetchClientProfile = async (userId: string) => {
+    setProfileLoading(true);
     const { data } = await supabase
       .from("client_profiles")
       .select("*")
       .eq("user_id", userId)
-      .single();
+      .maybeSingle();
     setClientProfile(data as ClientProfile | null);
+    setProfileLoading(false);
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
+        setProfileLoading(true);
         setTimeout(() => fetchClientProfile(session.user.id), 0);
       } else {
         setClientProfile(null);
+        setProfileLoading(false);
       }
       setLoading(false);
     });
@@ -79,6 +85,7 @@ export function ClientAuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
+        setProfileLoading(true);
         fetchClientProfile(session.user.id);
       }
       setLoading(false);
@@ -97,7 +104,7 @@ export function ClientAuthProvider({ children }: { children: ReactNode }) {
         .from("client_profiles")
         .select("id")
         .eq("user_id", data.user.id)
-        .single();
+        .maybeSingle();
 
       if (!cp) {
         await supabase.auth.signOut();
@@ -114,7 +121,7 @@ export function ClientAuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <ClientAuthContext.Provider value={{ session, user, clientProfile, loading, signIn, signOut }}>
+    <ClientAuthContext.Provider value={{ session, user, clientProfile, loading, profileLoading, signIn, signOut }}>
       {children}
     </ClientAuthContext.Provider>
   );

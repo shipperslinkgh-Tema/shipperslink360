@@ -83,9 +83,9 @@ function AuthRoute({ children }: { children: React.ReactNode }) {
 }
 
 function ClientProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { session, loading, clientProfile } = useClientAuth();
+  const { session, loading, profileLoading, clientProfile } = useClientAuth();
 
-  if (loading) {
+  if (loading || (session && profileLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-pulse text-muted-foreground">Loading...</div>
@@ -99,8 +99,8 @@ function ClientProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function ClientAuthRoute({ children }: { children: React.ReactNode }) {
-  const { session, loading, clientProfile } = useClientAuth();
-  if (loading) return null;
+  const { session, loading, profileLoading, clientProfile } = useClientAuth();
+  if (loading || (session && profileLoading)) return null;
   if (session && clientProfile) return <Navigate to="/portal" replace />;
   return <>{children}</>;
 }
