@@ -39,7 +39,7 @@ export const departmentRedirect: Record<Department, string> = {
   management: "/",
   operations: "/shipments",
   documentation: "/shipments",
-  accounts: "/finance",
+  accounts: "/accounts",
   marketing: "/customers",
   customer_service: "/customers",
   warehouse: "/trucking",
