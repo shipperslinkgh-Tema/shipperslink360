@@ -5,8 +5,9 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Info, Download, ArrowLeft, BookOpen } from "lucide-react";
+import { Plus, Info, Download, ArrowLeft, BookOpen, ChevronDown, Receipt, FileText, BookOpenCheck, Repeat } from "lucide-react";
 import { useChartOfAccounts } from "@/hooks/useChartOfAccounts";
 import { useLedger } from "@/hooks/useLedger";
 import { useCustomers } from "@/hooks/useCustomers";
@@ -120,9 +121,27 @@ export default function AccountsLedgers() {
             (Payment, Receipt, Journal or Contra) — its balanced debit/credit lines will appear here.
           </p>
         </div>
-        <Button size="sm" onClick={() => navigate("/accounts/books?tab=vouchers")} className="gap-2 shrink-0">
-          <Plus className="h-4 w-4" /> New Voucher
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" className="gap-2 shrink-0">
+              <Plus className="h-4 w-4" /> New Voucher <ChevronDown className="h-4 w-4 opacity-70" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => navigate("/accounts/books?tab=vouchers&new=payment")}>
+              <Receipt className="h-4 w-4 mr-2" /> Payment Voucher
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/accounts/books?tab=vouchers&new=receipt")}>
+              <FileText className="h-4 w-4 mr-2" /> Receipt Voucher
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/accounts/books?tab=vouchers&new=journal")}>
+              <BookOpenCheck className="h-4 w-4 mr-2" /> Journal Voucher
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/accounts/books?tab=vouchers&new=contra")}>
+              <Repeat className="h-4 w-4 mr-2" /> Contra Voucher
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <Tabs value={tab} onValueChange={(v) => { setTab(v); setAccountId(""); setCustomerId(""); }}>

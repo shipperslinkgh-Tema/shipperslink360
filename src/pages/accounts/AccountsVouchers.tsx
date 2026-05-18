@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -19,11 +20,23 @@ const statusColor = (s: string) =>
 
 export default function AccountsVouchers() {
   const { canEdit } = useAccountsAccess();
+  const [params, setParams] = useSearchParams();
   const [type, setType] = useState<VoucherType | "all">("all");
   const [status, setStatus] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [openType, setOpenType] = useState<VoucherType | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
+
+  // Auto-open dialog from query param (?new=payment|receipt|journal|contra)
+  useEffect(() => {
+    const newType = params.get("new");
+    if (newType && ["payment", "receipt", "journal", "contra"].includes(newType) && canEdit) {
+      setOpenType(newType as VoucherType);
+      const next = new URLSearchParams(params);
+      next.delete("new");
+      setParams(next, { replace: true });
+    }
+  }, [params, canEdit, setParams]);
 
   const { data: vouchers = [], isLoading } = useVouchers({
     type: type === "all" ? undefined : type,
