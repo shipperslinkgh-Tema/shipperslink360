@@ -4,11 +4,11 @@ import { useNavigate } from "react-router-dom";
 
 const actions = [
   { icon: Plus, label: "New Shipment", color: "bg-accent text-accent-foreground", to: "/shipments?new=1" },
-  { icon: FileText, label: "ICUMS Declaration", color: "bg-primary text-primary-foreground", to: "/icums?new=1" },
+  { icon: FileText, label: "ICUMS Declaration", color: "bg-primary text-primary-foreground", to: "/customs/icums?new=1" },
   { icon: Container, label: "New Consolidation", color: "bg-info text-info-foreground", to: "/consolidation?new=1" },
   { icon: Truck, label: "Assign Truck", color: "bg-success text-success-foreground", to: "/trucking?new=1" },
   { icon: Upload, label: "Upload Document", color: "bg-warning text-warning-foreground", to: "/office-files?upload=1" },
-  { icon: Calculator, label: "Generate Invoice", color: "bg-primary text-primary-foreground", to: "/invoicing?new=1" },
+  { icon: Calculator, label: "Generate Invoice", color: "bg-primary text-primary-foreground", to: "/finance/invoices?new=1" },
 ];
 
 export function QuickActions() {
