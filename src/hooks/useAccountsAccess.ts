@@ -2,7 +2,8 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export function useAccountsAccess() {
   const { isAdmin, department } = useAuth();
-  const canEdit = isAdmin || department === "accounts" || department === "management";
-  const canView = canEdit || !!department; // any staff
+  const isAccountsDept = department === "accounts" || department === "management" || department === "super_admin";
+  const canEdit = isAdmin || isAccountsDept;
+  const canView = canEdit;
   return { canEdit, canView };
 }

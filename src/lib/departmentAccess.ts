@@ -49,14 +49,9 @@ type AppRole = "super_admin" | "admin" | "manager" | "staff";
 
 const FINANCE_PATHS = ["/finance", "/finance/invoices", "/finance/payments", "/finance/reports", "/finance/banking", "/accounts"];
 
-function getAllowedPaths(department: Department | null, roles: AppRole[] = []): string[] {
+function getAllowedPaths(department: Department | null, _roles: AppRole[] = []): string[] {
   if (!department) return [];
-  const base = [...(departmentPaths[department] || [])];
-  // Operations director / manager gets accounting portal access
-  if (department === "operations" && roles.includes("manager")) {
-    for (const p of FINANCE_PATHS) if (!base.includes(p)) base.push(p);
-  }
-  return base;
+  return [...(departmentPaths[department] || [])];
 }
 
 export function canAccessPath(department: Department | null, path: string, roles: AppRole[] = []): boolean {
