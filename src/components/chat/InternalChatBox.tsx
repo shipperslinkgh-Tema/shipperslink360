@@ -76,11 +76,41 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
 
   const selectedChannel = channels.find((c) => c.id === activeChannel) || channels[0];
 
+  const [unreadCount, setUnreadCount] = useState(0);
+
   useEffect(() => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
   }, [messages, isOpen]);
+
+  // Reset unread counter whenever the chat panel is open
+  useEffect(() => {
+    if (isOpen) setUnreadCount(0);
+  }, [isOpen, activeChannel, messages.length]);
+
+  // Subscribe to all incoming chat messages for unread alert badge
+  useEffect(() => {
+    if (!currentUserId) return;
+    const channel = supabase
+      .channel("chat-unread-alerts")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "chat_messages" },
+        (payload) => {
+          const row: any = payload.new;
+          if (!row || row.sender_id === currentUserId) return;
+          // Count as unread when chat is closed, or message belongs to another channel
+          if (!isOpen || row.channel !== activeChannel) {
+            setUnreadCount((c) => c + 1);
+          }
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentUserId, isOpen, activeChannel]);
 
   const handleSend = async () => {
     if (!messageText.trim()) return;
