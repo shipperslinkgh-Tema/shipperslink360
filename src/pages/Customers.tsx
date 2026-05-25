@@ -15,9 +15,11 @@ import { CustomerStats } from "@/components/customers/CustomerStats";
 import { AddCustomerDialog } from "@/components/customers/AddCustomerDialog";
 import { useCustomers } from "@/hooks/useCustomers";
 import { Customer } from "@/types/customer";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, Filter, ShieldAlert } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Customers = () => {
+  const { isAdmin } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -48,6 +50,23 @@ const Customers = () => {
     const totalOutstanding = customers.reduce((acc, c) => acc + c.outstandingBalance, 0);
     return { totalCustomers, activeCustomers, pendingDocuments, totalOutstanding };
   }, [customers]);
+
+  if (!isAdmin) {
+    return (
+      <Card className="max-w-lg mx-auto mt-12">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ShieldAlert className="h-5 w-5 text-destructive" /> Access Restricted
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">
+            The Customers portal is restricted to Admin and Super Admin users only.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
