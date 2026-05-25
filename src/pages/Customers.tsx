@@ -15,9 +15,11 @@ import { CustomerStats } from "@/components/customers/CustomerStats";
 import { AddCustomerDialog } from "@/components/customers/AddCustomerDialog";
 import { useCustomers } from "@/hooks/useCustomers";
 import { Customer } from "@/types/customer";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, Filter, ShieldAlert } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Customers = () => {
+  const { isAdmin } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
