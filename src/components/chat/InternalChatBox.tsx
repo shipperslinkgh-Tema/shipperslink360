@@ -76,11 +76,41 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
 
   const selectedChannel = channels.find((c) => c.id === activeChannel) || channels[0];
 
+  const [unreadCount, setUnreadCount] = useState(0);
+
   useEffect(() => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
   }, [messages, isOpen]);
+
+  // Reset unread counter whenever the chat panel is open
+  useEffect(() => {
+    if (isOpen) setUnreadCount(0);
+  }, [isOpen, activeChannel, messages.length]);
+
+  // Subscribe to all incoming chat messages for unread alert badge
+  useEffect(() => {
+    if (!currentUserId) return;
+    const channel = supabase
+      .channel("chat-unread-alerts")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "chat_messages" },
+        (payload) => {
+          const row: any = payload.new;
+          if (!row || row.sender_id === currentUserId) return;
+          // Count as unread when chat is closed, or message belongs to another channel
+          if (!isOpen || row.channel !== activeChannel) {
+            setUnreadCount((c) => c + 1);
+          }
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentUserId, isOpen, activeChannel]);
 
   const handleSend = async () => {
     if (!messageText.trim()) return;
@@ -152,6 +182,11 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
         className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90 z-50"
       >
         <MessageCircle className="h-6 w-6" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center border-2 border-background animate-pulse">
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
+        )}
       </Button>
     );
   }
