@@ -182,6 +182,11 @@ export function InternalChatBox({ isOpen, onToggle }: InternalChatBoxProps) {
         className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90 z-50"
       >
         <MessageCircle className="h-6 w-6" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center border-2 border-background animate-pulse">
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
+        )}
       </Button>
     );
   }
