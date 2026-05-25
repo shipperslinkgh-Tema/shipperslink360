@@ -40,8 +40,8 @@ export const departmentRedirect: Record<Department, string> = {
   operations: "/shipments",
   documentation: "/shipments",
   accounts: "/accounts",
-  marketing: "/customers",
-  customer_service: "/customers",
+  marketing: "/reports",
+  customer_service: "/shipments",
   warehouse: "/trucking",
 };
 
