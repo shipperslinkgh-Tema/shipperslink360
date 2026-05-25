@@ -51,6 +51,23 @@ const Customers = () => {
     return { totalCustomers, activeCustomers, pendingDocuments, totalOutstanding };
   }, [customers]);
 
+  if (!isAdmin) {
+    return (
+      <Card className="max-w-lg mx-auto mt-12">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ShieldAlert className="h-5 w-5 text-destructive" /> Access Restricted
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">
+            The Customers portal is restricted to Admin and Super Admin users only.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
