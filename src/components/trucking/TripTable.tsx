@@ -83,7 +83,7 @@ export function TripTable({ trips, trucks, drivers }: TripTableProps) {
             {trips.map((trip) => {
               const truck = getTruck(trip.truckId);
               const driver = getDriver(trip.driverId);
-              const status = statusConfig[trip.status];
+              const status = statusConfig[trip.status] ?? { label: trip.status || "Unknown", className: "bg-muted text-muted-foreground" };
               const tracking = getTrackingInfo(trip.id);
 
               return (
