@@ -52,19 +52,32 @@ export function NewShipmentDialog({ open, onOpenChange }: NewShipmentDialogProps
 
     setLoading(true);
     try {
-      const { error } = await supabase.from("client_shipments").insert({
-        customer_id: form.customer_id,
-        bl_number: form.bl_number || `BL-${Date.now()}`,
+      const year = new Date().getFullYear();
+      const consignmentRef = `CN-${year}-${Date.now().toString().slice(-6)}`;
+      const { data: userData } = await supabase.auth.getUser();
+
+      const { error } = await supabase.from("consignment_workflows").insert({
+        consignment_ref: consignmentRef,
+        client_name: selectedCustomer?.companyName || "—",
+        client_id: form.customer_id || null,
+        client_contact: selectedCustomer?.phone || selectedCustomer?.email || null,
+        shipment_type: form.shipment_type,
+        bl_number: form.shipment_type === "air" ? null : (form.bl_number || null),
+        awb_number: form.shipment_type === "air" ? (form.awb_number || null) : null,
         container_number: form.container_number || null,
         vessel_name: form.vessel_name || null,
         voyage_number: form.voyage_number || null,
-        origin: form.origin,
-        destination: form.destination || "Tema, GH",
+        origin_country: form.origin,
+        port_of_loading: form.origin,
+        port_of_discharge: form.destination || "Tema",
         cargo_description: form.cargo_description || null,
         weight_kg: form.weight_kg ? parseFloat(form.weight_kg) : null,
+        volume_cbm: form.volume_cbm ? parseFloat(form.volume_cbm) : null,
         eta: form.eta || null,
-        status: "pending",
+        incoterms: form.incoterms || null,
         notes: form.notes || null,
+        current_stage: "documents_received",
+        created_by: userData.user?.id ?? null,
       });
 
       if (error) throw error;
