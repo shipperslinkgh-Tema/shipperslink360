@@ -1,0 +1,196 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://anwxyyjfqeilitduxzkg.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "shipperslink360",
+      "version": "0.1.0",
+      "title": "ShippersLink360"
+    },
+    "tools": [
+      {
+        "name": "whoami",
+        "title": "Who am I",
+        "description": "Return the signed-in staff member's profile: name, staff ID, department and role.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_consignments",
+        "title": "List consignments",
+        "description": "List consignment workflows (shipments) visible to the signed-in user, newest first. Optionally filter by workflow stage or search by consignment reference.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "description": "Maximum rows to return (default 20, max 100)."
+            },
+            "stage": {
+              "type": "string",
+              "description": "Filter by workflow stage, e.g. 'at_port'."
+            },
+            "search": {
+              "type": "string",
+              "description": "Match part of the consignment reference."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_consignment",
+        "title": "Get consignment",
+        "description": "Fetch one consignment workflow by its consignment reference, including its recent tracking events.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "consignment_ref": {
+              "type": "string",
+              "description": "The consignment reference, e.g. 'CNS-2026-0012'."
+            }
+          },
+          "required": [
+            "consignment_ref"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_trips",
+        "title": "List trucking trips",
+        "description": "List trucking trips visible to the signed-in user, newest first, optionally filtered by status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "description": "Maximum rows to return (default 20, max 100)."
+            },
+            "status": {
+              "type": "string",
+              "description": "Filter by trip status: scheduled, in_transit, delivered, completed or cancelled."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_customers",
+        "title": "List customers",
+        "description": "List customers visible to the signed-in user, optionally filtered by a name search.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "description": "Maximum rows to return (default 20, max 100)."
+            },
+            "search": {
+              "type": "string",
+              "description": "Match part of the customer name."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_invoices",
+        "title": "List invoices",
+        "description": "List finance invoices visible to the signed-in user (accounts and management roles), newest first, optionally filtered by status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "description": "Maximum rows to return (default 20, max 100)."
+            },
+            "status": {
+              "type": "string",
+              "description": "Filter by invoice status, e.g. 'unpaid' or 'paid'."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_notifications",
+        "title": "List notifications",
+        "description": "List the signed-in user's notifications, newest first. Optionally only unread ones.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "description": "Maximum rows to return (default 20, max 100)."
+            },
+            "unread_only": {
+              "type": "boolean",
+              "description": "When true, return only unread notifications."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
