@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import OAuthConsent from "./pages/OAuthConsent";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ClientAuthProvider, useClientAuth } from "@/contexts/ClientAuthContext";
 import Login from "./pages/Login";
@@ -78,7 +79,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AuthRoute({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();
   if (loading) return null;
-  if (session) return <Navigate to="/" replace />;
+  if (session) {
+    const next = new URLSearchParams(window.location.search).get("next");
+    const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
+    return <Navigate to={safeNext} replace />;
+  }
   return <>{children}</>;
 }
 
@@ -116,6 +121,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* OAuth consent for MCP / agent integrations */}
+          <Route path="/.lovable/oauth/consent" element={<AuthProvider><OAuthConsent /></AuthProvider>} />
+
           {/* Public tracking page — no auth required */}
           <Route path="/track/:token" element={<TrackShipment />} />
 

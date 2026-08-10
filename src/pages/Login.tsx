@@ -30,7 +30,9 @@ export default function Login() {
       return;
     }
 
-    navigate("/");
+    const nextParam = new URLSearchParams(window.location.search).get("next");
+    const safeNext = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/";
+    navigate(safeNext);
     setLoading(false);
   };
 
