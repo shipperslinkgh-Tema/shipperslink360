@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SmartInput } from "@/components/common/SmartInput";
 import {
   Select,
   SelectContent,
@@ -292,11 +293,11 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
             </div>
             <div className="space-y-1.5">
               <Label>Container Number</Label>
-              <Input value={form.container_number} onChange={set("container_number")} placeholder="e.g. MSKU1234567" />
+              <SmartInput memoryKey="container" value={form.container_number} onValueChange={(v) => setForm((f) => ({ ...f, container_number: v }))} placeholder="e.g. MSKU1234567" />
             </div>
             <div className="space-y-1.5">
               <Label>BL Number</Label>
-              <Input value={form.bl_number} onChange={set("bl_number")} placeholder="e.g. BL-2026-001" />
+              <SmartInput memoryKey="bl_number" value={form.bl_number} onValueChange={(v) => setForm((f) => ({ ...f, bl_number: v }))} placeholder="e.g. BL-2026-001" />
             </div>
           </div>
 
@@ -307,11 +308,11 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Pickup Location *</Label>
-              <Input value={form.origin} onChange={set("origin")} placeholder="e.g. Tema Port, Ghana" />
+              <SmartInput memoryKey="trip_origin" value={form.origin} onValueChange={(v) => setForm((f) => ({ ...f, origin: v }))} placeholder="e.g. Tema Port, Ghana" />
             </div>
             <div className="space-y-1.5">
               <Label>Delivery Location *</Label>
-              <Input value={form.destination} onChange={set("destination")} placeholder="e.g. Kumasi, Ghana" />
+              <SmartInput memoryKey="trip_destination" value={form.destination} onValueChange={(v) => setForm((f) => ({ ...f, destination: v }))} placeholder="e.g. Kumasi, Ghana" />
             </div>
             <div className="space-y-1.5">
               <Label>Pickup Date</Label>

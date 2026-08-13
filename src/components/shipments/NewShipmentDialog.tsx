@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { useCustomers } from "@/hooks/useCustomers";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { SmartInput } from "@/components/common/SmartInput";
 
 interface NewShipmentDialogProps {
   open: boolean;
@@ -134,14 +135,16 @@ export function NewShipmentDialog({ open, onOpenChange }: NewShipmentDialogProps
               </div>
               <div>
                 <Label className="text-xs">{form.shipment_type === "air" ? "AWB Number" : "BL Number"}</Label>
-                <Input
+                <SmartInput
+                  memoryKey={form.shipment_type === "air" ? "awb_number" : "bl_number"}
+                  warnDuplicate
                   value={form.shipment_type === "air" ? form.awb_number : form.bl_number}
-                  onChange={(e) => update(form.shipment_type === "air" ? "awb_number" : "bl_number", e.target.value)}
+                  onValueChange={(v) => update(form.shipment_type === "air" ? "awb_number" : "bl_number", v)}
                 />
               </div>
               <div>
                 <Label className="text-xs">Container Number</Label>
-                <Input value={form.container_number} onChange={(e) => update("container_number", e.target.value)} />
+                <SmartInput memoryKey="container" warnDuplicate value={form.container_number} onValueChange={(v) => update("container_number", v)} />
               </div>
             </div>
           </div>
@@ -152,11 +155,11 @@ export function NewShipmentDialog({ open, onOpenChange }: NewShipmentDialogProps
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <Label className="text-xs">Origin *</Label>
-                <Input value={form.origin} onChange={(e) => update("origin", e.target.value)} placeholder="e.g. Shanghai, CN" />
+                <SmartInput memoryKey="origin_port" value={form.origin} onValueChange={(v) => update("origin", v)} placeholder="e.g. Shanghai, CN" />
               </div>
               <div>
                 <Label className="text-xs">Destination</Label>
-                <Input value={form.destination} onChange={(e) => update("destination", e.target.value)} />
+                <SmartInput memoryKey="destination_port" value={form.destination} onValueChange={(v) => update("destination", v)} />
               </div>
             </div>
           </div>
@@ -167,14 +170,15 @@ export function NewShipmentDialog({ open, onOpenChange }: NewShipmentDialogProps
             <div className="grid gap-3 sm:grid-cols-3">
               <div>
                 <Label className="text-xs">{form.shipment_type === "air" ? "Flight Number" : "Vessel Name"}</Label>
-                <Input
+                <SmartInput
+                  memoryKey={form.shipment_type === "air" ? "flight" : "vessel"}
                   value={form.shipment_type === "air" ? form.flight_number : form.vessel_name}
-                  onChange={(e) => update(form.shipment_type === "air" ? "flight_number" : "vessel_name", e.target.value)}
+                  onValueChange={(v) => update(form.shipment_type === "air" ? "flight_number" : "vessel_name", v)}
                 />
               </div>
               <div>
                 <Label className="text-xs">Voyage Number</Label>
-                <Input value={form.voyage_number} onChange={(e) => update("voyage_number", e.target.value)} />
+                <SmartInput memoryKey="voyage" value={form.voyage_number} onValueChange={(v) => update("voyage_number", v)} />
               </div>
               <div>
                 <Label className="text-xs">ETA</Label>

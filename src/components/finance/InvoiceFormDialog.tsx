@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useCreateInvoice, generateInvoiceRef } from "@/hooks/useFinanceMutations";
 import { useCustomerCredits } from "@/hooks/useFinanceData";
 import { useExchangeRate } from "@/hooks/useFXRates";
+import { SmartInput } from "@/components/common/SmartInput";
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; userName: string; }
 
@@ -125,11 +126,11 @@ export function InvoiceFormDialog({ open, onOpenChange, userName }: Props) {
           </div>
           <div className="space-y-2">
             <Label>Job Ref</Label>
-            <Input value={form.job_ref} onChange={e => setForm(f => ({ ...f, job_ref: e.target.value }))} placeholder="JOB-2026-..." />
+            <SmartInput memoryKey="job_ref" value={form.job_ref} onValueChange={v => setForm(f => ({ ...f, job_ref: v }))} placeholder="JOB-2026-..." />
           </div>
           <div className="space-y-2">
             <Label>Shipment/B/L Ref</Label>
-            <Input value={form.shipment_ref} onChange={e => setForm(f => ({ ...f, shipment_ref: e.target.value }))} />
+            <SmartInput memoryKey="shipment_ref" value={form.shipment_ref} onValueChange={v => setForm(f => ({ ...f, shipment_ref: v }))} />
           </div>
           <div className="col-span-2 space-y-2">
             <Label>Description</Label>
