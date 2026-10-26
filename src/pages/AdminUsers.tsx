@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { UserPlus, Shield, Users, Lock, Unlock, Globe, Copy, UserX, UserCheck } from "lucide-react";
+import { UserPlus, Shield, Users, Lock, Unlock, Globe, Copy, UserX, UserCheck, ShieldAlert } from "lucide-react";
+import SuperAdminPanel from "@/components/admin/SuperAdminPanel";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -32,7 +33,8 @@ const DEPT_LABELS: Record<string, string> = {
 };
 
 export default function AdminUsers() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, roles, user } = useAuth();
+  const isSuperAdmin = roles.includes("super_admin");
   const [users, setUsers] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
@@ -226,7 +228,14 @@ export default function AdminUsers() {
         <TabsList>
           <TabsTrigger value="staff" className="gap-2"><Users className="h-4 w-4" /> Staff</TabsTrigger>
           <TabsTrigger value="clients" className="gap-2"><Globe className="h-4 w-4" /> Client Portal</TabsTrigger>
+          {isSuperAdmin && <TabsTrigger value="super" className="gap-2"><ShieldAlert className="h-4 w-4" /> Super Admin</TabsTrigger>}
         </TabsList>
+
+        {isSuperAdmin && (
+          <TabsContent value="super">
+            <SuperAdminPanel users={users} currentUserId={user?.id} onChanged={fetchUsers} onRoleChange={updateRole} />
+          </TabsContent>
+        )}
 
         {/* STAFF TAB */}
         <TabsContent value="staff" className="space-y-4">
