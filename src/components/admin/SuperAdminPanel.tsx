@@ -35,10 +35,12 @@ const DATA_TABLES: { value: string; label: string }[] = [
 ];
 
 const LABEL_KEYS = ["consignment_ref", "invoice_number", "voucher_no", "expense_ref", "bl_number", "company_name",
-  "name", "full_name", "truck_number", "title", "document_name", "file_name", "customer", "client_name", "content", "message"];
+  "name", "full_name", "truck_number", "driver_name", "title", "document_name", "file_name", "customer", "client_name", "content", "message"];
 
 const rowLabel = (r: any) => {
   const parts = LABEL_KEYS.filter((k) => r[k]).slice(0, 2).map((k) => String(r[k]).slice(0, 60));
+  if (r.origin || r.destination) parts.push(`${r.origin ?? "?"} → ${r.destination ?? "?"}`);
+  if (r.status) parts.push(`[${r.status}]`);
   return parts.length ? parts.join(" — ") : r.id;
 };
 
