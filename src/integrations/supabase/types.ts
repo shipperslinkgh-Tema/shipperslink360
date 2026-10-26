@@ -3921,6 +3921,7 @@ export type Database = {
         Args: { lat1: number; lat2: number; lon1: number; lon2: number }
         Returns: number
       }
+      hr_active_staff: { Args: never; Returns: boolean }
       hr_cancel_leave: { Args: { _id: string }; Returns: undefined }
       hr_clock: {
         Args: { _action: string; _duty?: string; _location?: string }
@@ -3931,6 +3932,14 @@ export type Database = {
         Returns: undefined
       }
       hr_is_manager: { Args: never; Returns: boolean }
+      hr_leave_names: {
+        Args: never
+        Returns: {
+          employee_id: string
+          full_name: string
+          staff_id: string
+        }[]
+      }
       hr_request_leave: {
         Args: { _end: string; _reason: string; _start: string; _type: string }
         Returns: string
@@ -3938,6 +3947,15 @@ export type Database = {
       hr_review_leave: {
         Args: { _decision: string; _id: string; _note?: string }
         Returns: undefined
+      }
+      hr_staff_accounts: {
+        Args: never
+        Returns: {
+          department: string
+          email: string
+          full_name: string
+          user_id: string
+        }[]
       }
       increment_failed_login: { Args: { _user_id: string }; Returns: undefined }
       is_accounts: { Args: { _user_id: string }; Returns: boolean }

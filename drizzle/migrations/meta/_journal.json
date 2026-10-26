@@ -8,6 +8,13 @@
       "when": 1793005135289,
       "tag": "0000_hr_phase_one",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793005234348,
+      "tag": "0001_hr_authorized_directory_and_active_staff",
+      "breakpoints": true
     }
   ]
 }

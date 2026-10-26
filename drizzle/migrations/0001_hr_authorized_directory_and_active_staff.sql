@@ -1,0 +1,16 @@
+CREATE FUNCTION public.hr_active_staff() RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT EXISTS(SELECT 1 FROM profiles WHERE user_id=auth.uid() AND is_active AND NOT is_locked) $$;
+REVOKE ALL ON FUNCTION public.hr_active_staff() FROM PUBLIC, anon; GRANT EXECUTE ON FUNCTION public.hr_active_staff() TO authenticated;
+CREATE POLICY hr_employee_active ON public.hr_employees AS RESTRICTIVE FOR ALL TO authenticated USING(hr_active_staff()) WITH CHECK(hr_active_staff());
+CREATE POLICY hr_attendance_active ON public.hr_attendance AS RESTRICTIVE FOR ALL TO authenticated USING(hr_active_staff()) WITH CHECK(hr_active_staff());
+CREATE POLICY hr_leave_active ON public.hr_leave_requests AS RESTRICTIVE FOR ALL TO authenticated USING(hr_active_staff()) WITH CHECK(hr_active_staff());
+CREATE POLICY hr_access_active ON public.hr_access AS RESTRICTIVE FOR ALL TO authenticated USING(hr_active_staff()) WITH CHECK(hr_active_staff());
+CREATE FUNCTION public.hr_staff_accounts() RETURNS TABLE(user_id uuid, full_name text, email text, department text) LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public AS $$ BEGIN IF NOT hr_active_staff() OR NOT hr_is_manager() THEN RAISE EXCEPTION 'HR management access required'; END IF; RETURN QUERY SELECT p.user_id,p.full_name,p.email,p.department::text FROM profiles p WHERE p.is_active ORDER BY p.full_name; END $$;
+REVOKE ALL ON FUNCTION public.hr_staff_accounts() FROM PUBLIC, anon; GRANT EXECUTE ON FUNCTION public.hr_staff_accounts() TO authenticated;
+CREATE FUNCTION public.hr_guard_rpc() RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$ BEGIN IF auth.uid() IS NULL OR NOT hr_active_staff() THEN RAISE EXCEPTION 'An active unlocked staff account is required'; END IF; RETURN NEW; END $$;
+CREATE TRIGGER hr_employee_active_guard BEFORE INSERT OR UPDATE ON public.hr_employees FOR EACH ROW EXECUTE FUNCTION public.hr_guard_rpc();
+CREATE TRIGGER hr_attendance_active_guard BEFORE INSERT OR UPDATE ON public.hr_attendance FOR EACH ROW EXECUTE FUNCTION public.hr_guard_rpc();
+CREATE TRIGGER hr_leave_active_guard BEFORE INSERT OR UPDATE ON public.hr_leave_requests FOR EACH ROW EXECUTE FUNCTION public.hr_guard_rpc();
+CREATE FUNCTION public.hr_access_guard() RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$ BEGIN IF NOT hr_active_staff() OR NOT has_role(auth.uid(),'super_admin') THEN RAISE EXCEPTION 'Active super admin account required'; END IF; IF TG_OP='DELETE' THEN RETURN OLD; END IF; RETURN NEW; END $$;
+CREATE TRIGGER hr_access_active_guard BEFORE INSERT OR UPDATE OR DELETE ON public.hr_access FOR EACH ROW EXECUTE FUNCTION public.hr_access_guard();
+CREATE FUNCTION public.hr_leave_names() RETURNS TABLE(employee_id uuid, full_name text, staff_id text) LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT e.id,e.full_name,e.staff_id FROM hr_employees e WHERE hr_active_staff() AND (hr_is_manager() OR e.user_id=auth.uid() OR (e.supervisor_user_id=auth.uid() AND EXISTS(SELECT 1 FROM hr_access a WHERE a.user_id=auth.uid() AND a.access_role='supervisor'))) $$;
+REVOKE ALL ON FUNCTION public.hr_leave_names() FROM PUBLIC, anon; GRANT EXECUTE ON FUNCTION public.hr_leave_names() TO authenticated;
