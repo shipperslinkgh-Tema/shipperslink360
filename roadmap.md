@@ -8,4 +8,6 @@
 
 Later phases follow verified Phase 1 workflows; statutory payroll requires verified rules before activation.
 ## Welfare & Benefits module (requested)
-- [ ] Welfare fund (contributions, balances, disbursements, receipts), life-event and emergency requests, benefits tracking, celebrations, HR review then management approval, monthly/annual reports, configurable categories/eligibility/limits/approval levels, privacy limited to HR and management, Accounts Portal vouchers without duplicates or a separate ledger. Approval: HR review, then management final approval. Blockers: basic HR checked with real staff records first (user choice), and SLAC written welfare policy upload pending.
+- [ ] Build Welfare & Benefits now with user-filled draft categories, eligibility, amounts and limits; employee requests, HR review, separate management approval, confidential history and duplicate-safe Accounts payment vouchers. User authorized draft structure instead of waiting for a written policy.
+- [ ] Verify welfare using confirmed real records across employee submission, HR review, management approval and Accounts posting; never invent employee details or welfare policy values.
+- [ ] Later welfare fund contributions, benefit enrollment, celebrations and fund reporting. Blocker: confirmed policy and verified request/payment workflows.
