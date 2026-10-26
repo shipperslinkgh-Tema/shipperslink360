@@ -1,0 +1,11 @@
+ALTER FUNCTION public.hr_validate_employee() SECURITY DEFINER;
+CREATE OR REPLACE FUNCTION public.hr_request_leave(_type text,_start date,_end date,_reason text) RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ DECLARE e uuid; r uuid; n integer; BEGIN
+IF NOT hr_active_staff() THEN RAISE EXCEPTION 'An active unlocked staff account is required'; END IF;
+SELECT id INTO e FROM hr_employees WHERE user_id=auth.uid() AND status IN ('active','probation') FOR UPDATE; IF e IS NULL THEN RAISE EXCEPTION 'An active linked employee record is required'; END IF;
+IF _end<_start OR _start IS NULL OR _end IS NULL OR _end-_start>366 OR _reason IS NULL OR length(btrim(_reason))<3 OR length(_reason)>2000 THEN RAISE EXCEPTION 'Enter valid dates (at most 366 days) and a reason (3 to 2000 characters)'; END IF;
+IF _type IS NULL OR _type NOT IN ('annual','sick','other') THEN RAISE EXCEPTION 'Invalid leave type'; END IF;
+IF _type='annual' AND extract(year from _start)<>extract(year from _end) THEN RAISE EXCEPTION 'Annual leave must fall within one calendar year'; END IF;
+IF EXISTS(SELECT 1 FROM hr_leave_requests WHERE employee_id=e AND status IN ('pending','approved') AND start_date<=_end AND end_date>=_start) THEN RAISE EXCEPTION 'An overlapping leave request already exists'; END IF;
+SELECT count(*) INTO n FROM generate_series(_start::timestamp,_end::timestamp,interval '1 day') d WHERE extract(isodow from d)<6; IF n=0 THEN RAISE EXCEPTION 'Select at least one weekday'; END IF;
+INSERT INTO hr_leave_requests(employee_id,leave_type,start_date,end_date,days,reason) VALUES(e,_type,_start,_end,n,btrim(_reason)) RETURNING id INTO r;
+INSERT INTO notifications(title,message,recipient_id,category,reference_id,reference_type,action_url) SELECT 'Leave approval requested','A staff leave request is awaiting review.',p.user_id,'system',r::text,'hr_leave','/hr' FROM profiles p WHERE p.is_active AND p.user_id<>auth.uid() AND (has_role(p.user_id,'super_admin') OR p.department='management' OR EXISTS(SELECT 1 FROM hr_access a WHERE a.user_id=p.user_id AND a.access_role='hr') OR EXISTS(SELECT 1 FROM hr_employees x JOIN hr_access a ON a.user_id=x.supervisor_user_id AND a.access_role='supervisor' WHERE x.id=e AND x.supervisor_user_id=p.user_id)); RETURN r; END $$;
