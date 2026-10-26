@@ -36,6 +36,13 @@
       "when": 1793006555663,
       "tag": "0004_welfare_draft_policies_and_voucher_approvals",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793006716055,
+      "tag": "0005_welfare_accounts_link_and_duplicate_reference_guard",
+      "breakpoints": true
     }
   ]
 }
