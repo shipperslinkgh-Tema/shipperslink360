@@ -32,6 +32,7 @@ import BankIntegration from "./pages/BankIntegration";
 import Presentation from "./pages/Presentation";
 import ConsolidationPortal from "./pages/ConsolidationPortal";
 import AdminUsers from "./pages/AdminUsers";
+import HR from "./pages/HR";
 import SettingsPage from "./pages/Settings";
 import ClientManagement from "./pages/ClientManagement";
 import Index from "./pages/Index";
@@ -191,6 +192,7 @@ function StaffRoutes() {
         <Route path="/duty-estimator" element={<ProtectedRoute><WithLayout><DutyEstimator /></WithLayout></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><WithLayout><Notifications /></WithLayout></ProtectedRoute>} />
         <Route path="/admin/users" element={<ProtectedRoute><WithLayout><AdminUsers /></WithLayout></ProtectedRoute>} />
+        <Route path="/hr" element={<ProtectedRoute><WithLayout><HR /></WithLayout></ProtectedRoute>} />
         <Route path="/admin/client-management" element={<ProtectedRoute><WithLayout><ClientManagement /></WithLayout></ProtectedRoute>} />
         <Route path="/admin/client-documents" element={<Navigate to="/admin/client-management" replace />} />
         <Route path="/admin/client-data" element={<Navigate to="/admin/client-management" replace />} />
