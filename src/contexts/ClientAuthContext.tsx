@@ -27,7 +27,7 @@ interface ClientAuthContextType {
 
 const ClientAuthContext = createContext<ClientAuthContextType | undefined>(undefined);
 
-const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes for clients
+const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
 export function ClientAuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
