@@ -54,6 +54,11 @@ Deno.serve(async (req) => {
       const ids: string[] = Array.isArray(body.ids) ? body.ids.map(String) : [];
       if (!DELETABLE.has(table)) return json({ error: "Table not allowed" }, 400);
       if (!ids.length) return json({ error: "No records selected" }, 400);
+      if (table === "consignment_workflows") {
+        // Purge the consignment's activity history so it disappears from feeds
+        await admin.from("consignment_events").delete().in("consignment_id", ids);
+        await admin.from("notifications").delete().eq("reference_type", "consignment").in("reference_id", ids);
+      }
       const { error, count } = await admin.from(table).delete({ count: "exact" }).in("id", ids);
       if (error) return json({ error: error.message }, 400);
       await log("super_admin_delete_records", { table, ids });
