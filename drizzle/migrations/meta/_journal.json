@@ -15,6 +15,13 @@
       "when": 1793005234348,
       "tag": "0001_hr_authorized_directory_and_active_staff",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793005355383,
+      "tag": "0002_hr_supervisor_visibility_and_identity_validation",
+      "breakpoints": true
     }
   ]
 }

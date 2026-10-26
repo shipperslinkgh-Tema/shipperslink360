@@ -3922,6 +3922,7 @@ export type Database = {
         Returns: number
       }
       hr_active_staff: { Args: never; Returns: boolean }
+      hr_can_review_employee: { Args: { _employee: string }; Returns: boolean }
       hr_cancel_leave: { Args: { _id: string }; Returns: undefined }
       hr_clock: {
         Args: { _action: string; _duty?: string; _location?: string }
