@@ -7,3 +7,5 @@
 - [ ] Phase 4: payroll review and approval with verified effective-dated Ghana statutory rules and duplicate-safe Accounts integration. Blocker: verified earlier phases and statutory rules.
 
 Later phases follow verified Phase 1 workflows; statutory payroll requires verified rules before activation.
+## Welfare & Benefits module (requested)
+- [ ] Welfare fund (contributions, balances, disbursements, receipts), life-event and emergency requests, benefits tracking, celebrations, HR review then management approval, monthly/annual reports, configurable categories/eligibility/limits/approval levels, privacy limited to HR and management, Accounts Portal vouchers without duplicates or a separate ledger. Blocker: SLAC welfare policy details and build timing confirmation.
