@@ -2594,6 +2594,178 @@ export type Database = {
         }
         Relationships: []
       }
+      hr_access: {
+        Row: {
+          access_role: string
+          created_at: string
+          granted_by: string
+          user_id: string
+        }
+        Insert: {
+          access_role: string
+          created_at?: string
+          granted_by: string
+          user_id: string
+        }
+        Update: {
+          access_role?: string
+          created_at?: string
+          granted_by?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      hr_attendance: {
+        Row: {
+          clock_in: string
+          clock_out: string | null
+          duty_type: string
+          employee_id: string
+          id: string
+          location: string
+          work_date: string
+        }
+        Insert: {
+          clock_in?: string
+          clock_out?: string | null
+          duty_type: string
+          employee_id: string
+          id?: string
+          location: string
+          work_date?: string
+        }
+        Update: {
+          clock_in?: string
+          clock_out?: string | null
+          duty_type?: string
+          employee_id?: string
+          id?: string
+          location?: string
+          work_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_attendance_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "hr_employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_employees: {
+        Row: {
+          contract_end: string | null
+          created_at: string
+          department: string
+          email: string | null
+          employment_type: string
+          full_name: string
+          id: string
+          job_title: string
+          leave_entitlement: number
+          phone: string | null
+          probation_end: string | null
+          staff_id: string
+          start_date: string
+          status: string
+          supervisor_user_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          contract_end?: string | null
+          created_at?: string
+          department: string
+          email?: string | null
+          employment_type?: string
+          full_name: string
+          id?: string
+          job_title: string
+          leave_entitlement?: number
+          phone?: string | null
+          probation_end?: string | null
+          staff_id?: string
+          start_date: string
+          status?: string
+          supervisor_user_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          contract_end?: string | null
+          created_at?: string
+          department?: string
+          email?: string | null
+          employment_type?: string
+          full_name?: string
+          id?: string
+          job_title?: string
+          leave_entitlement?: number
+          phone?: string | null
+          probation_end?: string | null
+          staff_id?: string
+          start_date?: string
+          status?: string
+          supervisor_user_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      hr_leave_requests: {
+        Row: {
+          created_at: string
+          days: number
+          employee_id: string
+          end_date: string
+          id: string
+          leave_type: string
+          reason: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          start_date: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          days: number
+          employee_id: string
+          end_date: string
+          id?: string
+          leave_type: string
+          reason: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          start_date: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          days?: number
+          employee_id?: string
+          end_date?: string
+          id?: string
+          leave_type?: string
+          reason?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          start_date?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_leave_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "hr_employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ledger_entries: {
         Row: {
           account_id: string
@@ -3748,6 +3920,24 @@ export type Database = {
       haversine_m: {
         Args: { lat1: number; lat2: number; lon1: number; lon2: number }
         Returns: number
+      }
+      hr_cancel_leave: { Args: { _id: string }; Returns: undefined }
+      hr_clock: {
+        Args: { _action: string; _duty?: string; _location?: string }
+        Returns: string
+      }
+      hr_grant_access: {
+        Args: { _role: string; _user: string }
+        Returns: undefined
+      }
+      hr_is_manager: { Args: never; Returns: boolean }
+      hr_request_leave: {
+        Args: { _end: string; _reason: string; _start: string; _type: string }
+        Returns: string
+      }
+      hr_review_leave: {
+        Args: { _decision: string; _id: string; _note?: string }
+        Returns: undefined
       }
       increment_failed_login: { Args: { _user_id: string }; Returns: undefined }
       is_accounts: { Args: { _user_id: string }; Returns: boolean }

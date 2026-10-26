@@ -1,0 +1,65 @@
+CREATE TABLE public.hr_access (user_id uuid PRIMARY KEY, access_role text NOT NULL CHECK (access_role IN ('hr','supervisor')), granted_by uuid NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+GRANT SELECT ON public.hr_access TO authenticated; GRANT ALL ON public.hr_access TO service_role;
+ALTER TABLE public.hr_access ENABLE ROW LEVEL SECURITY;
+CREATE FUNCTION public.hr_is_manager() RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT EXISTS(SELECT 1 FROM profiles p WHERE p.user_id=auth.uid() AND p.is_active AND (has_role(auth.uid(),'super_admin') OR p.department='management')) OR EXISTS(SELECT 1 FROM hr_access a JOIN profiles p ON p.user_id=a.user_id WHERE a.user_id=auth.uid() AND a.access_role='hr' AND p.is_active) $$;
+CREATE POLICY hr_access_read ON public.hr_access FOR SELECT TO authenticated USING (user_id=auth.uid() OR hr_is_manager());
+CREATE SEQUENCE public.hr_staff_seq;
+CREATE TABLE public.hr_employees (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), staff_id text UNIQUE NOT NULL DEFAULT ('SLAC-HR-' || lpad(nextval('public.hr_staff_seq')::text,5,'0')), user_id uuid UNIQUE, full_name text NOT NULL, email text, phone text, department text NOT NULL, job_title text NOT NULL, supervisor_user_id uuid, employment_type text NOT NULL DEFAULT 'permanent' CHECK (employment_type IN ('permanent','contract','internship')), status text NOT NULL DEFAULT 'active' CHECK(status IN ('active','probation','exited')), start_date date NOT NULL, contract_end date, probation_end date, leave_entitlement numeric NOT NULL DEFAULT 0 CHECK(leave_entitlement>=0), created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());
+GRANT SELECT, INSERT, UPDATE ON public.hr_employees TO authenticated; GRANT ALL ON public.hr_employees TO service_role; GRANT USAGE, SELECT ON SEQUENCE public.hr_staff_seq TO authenticated, service_role;
+ALTER TABLE public.hr_employees ENABLE ROW LEVEL SECURITY;
+CREATE POLICY hr_employee_read ON public.hr_employees FOR SELECT TO authenticated USING(hr_is_manager() OR user_id=auth.uid());
+CREATE POLICY hr_employee_insert ON public.hr_employees FOR INSERT TO authenticated WITH CHECK(hr_is_manager());
+CREATE POLICY hr_employee_update ON public.hr_employees FOR UPDATE TO authenticated USING(hr_is_manager()) WITH CHECK(hr_is_manager());
+CREATE TABLE public.hr_attendance (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), employee_id uuid NOT NULL REFERENCES public.hr_employees(id), work_date date NOT NULL DEFAULT ((now() AT TIME ZONE 'Africa/Accra')::date), clock_in timestamptz NOT NULL DEFAULT now(), clock_out timestamptz, duty_type text NOT NULL CHECK(duty_type IN ('office','field')), location text NOT NULL, UNIQUE(employee_id,work_date));
+GRANT SELECT ON public.hr_attendance TO authenticated; GRANT ALL ON public.hr_attendance TO service_role;
+ALTER TABLE public.hr_attendance ENABLE ROW LEVEL SECURITY;
+CREATE POLICY hr_attendance_read ON public.hr_attendance FOR SELECT TO authenticated USING(hr_is_manager() OR EXISTS(SELECT 1 FROM hr_employees e WHERE e.id=employee_id AND e.user_id=auth.uid()));
+CREATE TABLE public.hr_leave_requests (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), employee_id uuid NOT NULL REFERENCES public.hr_employees(id), leave_type text NOT NULL CHECK(leave_type IN ('annual','sick','other')), start_date date NOT NULL, end_date date NOT NULL, days numeric NOT NULL, reason text NOT NULL, status text NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected','cancelled')), reviewed_by uuid, review_note text, reviewed_at timestamptz, created_at timestamptz NOT NULL DEFAULT now());
+GRANT SELECT ON public.hr_leave_requests TO authenticated; GRANT ALL ON public.hr_leave_requests TO service_role;
+ALTER TABLE public.hr_leave_requests ENABLE ROW LEVEL SECURITY;
+CREATE POLICY hr_leave_read ON public.hr_leave_requests FOR SELECT TO authenticated USING(hr_is_manager() OR EXISTS(SELECT 1 FROM hr_employees e WHERE e.id=employee_id AND e.user_id=auth.uid()) OR EXISTS(SELECT 1 FROM hr_employees e JOIN hr_access a ON a.user_id=auth.uid() AND a.access_role='supervisor' WHERE e.id=employee_id AND e.supervisor_user_id=auth.uid()));
+CREATE FUNCTION public.hr_validate_employee() RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$ BEGIN
+IF btrim(NEW.full_name)='' OR btrim(NEW.job_title)='' OR btrim(NEW.department)='' THEN RAISE EXCEPTION 'Name, department and job title are required'; END IF;
+IF NEW.user_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM profiles WHERE user_id=NEW.user_id AND is_active) THEN RAISE EXCEPTION 'Link an active staff account'; END IF;
+IF NEW.supervisor_user_id IS NOT NULL AND (NEW.supervisor_user_id=NEW.user_id OR NOT EXISTS(SELECT 1 FROM profiles WHERE user_id=NEW.supervisor_user_id AND is_active)) THEN RAISE EXCEPTION 'Choose a different active supervisor'; END IF;
+IF NEW.contract_end<NEW.start_date OR NEW.probation_end<NEW.start_date THEN RAISE EXCEPTION 'End dates cannot precede employment start'; END IF;
+NEW.updated_at=now(); RETURN NEW; END $$;
+CREATE TRIGGER hr_validate_employee BEFORE INSERT OR UPDATE ON public.hr_employees FOR EACH ROW EXECUTE FUNCTION public.hr_validate_employee();
+CREATE FUNCTION public.hr_audit_change() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN INSERT INTO audit_logs(user_id,action,resource_type,resource_id,details) VALUES(auth.uid(),lower(TG_OP),TG_TABLE_NAME,NEW.id::text,jsonb_build_object('module','hr')); RETURN NEW; END $$;
+CREATE TRIGGER hr_employee_audit AFTER INSERT OR UPDATE ON public.hr_employees FOR EACH ROW EXECUTE FUNCTION public.hr_audit_change();
+CREATE TRIGGER hr_attendance_audit AFTER INSERT OR UPDATE ON public.hr_attendance FOR EACH ROW EXECUTE FUNCTION public.hr_audit_change();
+CREATE TRIGGER hr_leave_audit AFTER INSERT OR UPDATE ON public.hr_leave_requests FOR EACH ROW EXECUTE FUNCTION public.hr_audit_change();
+CREATE FUNCTION public.hr_clock(_action text, _duty text DEFAULT 'office', _location text DEFAULT 'Office') RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ DECLARE e uuid; r uuid; BEGIN
+SELECT id INTO e FROM hr_employees WHERE user_id=auth.uid() AND status IN ('active','probation'); IF e IS NULL THEN RAISE EXCEPTION 'An active employee record linked to your account is required'; END IF;
+IF _action='in' THEN IF _duty NOT IN ('office','field') OR length(btrim(_location))<2 THEN RAISE EXCEPTION 'Select a duty type and enter your workplace'; END IF; INSERT INTO hr_attendance(employee_id,duty_type,location) VALUES(e,_duty,btrim(_location)) RETURNING id INTO r;
+ELSIF _action='out' THEN UPDATE hr_attendance SET clock_out=now() WHERE employee_id=e AND work_date=(now() AT TIME ZONE 'Africa/Accra')::date AND clock_out IS NULL RETURNING id INTO r; IF r IS NULL THEN RAISE EXCEPTION 'No open attendance session today'; END IF;
+ELSE RAISE EXCEPTION 'Invalid attendance action'; END IF; RETURN r; END $$;
+CREATE FUNCTION public.hr_request_leave(_type text,_start date,_end date,_reason text) RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ DECLARE e uuid; r uuid; n integer; BEGIN
+SELECT id INTO e FROM hr_employees WHERE user_id=auth.uid() AND status IN ('active','probation') FOR UPDATE; IF e IS NULL THEN RAISE EXCEPTION 'An active linked employee record is required'; END IF;
+IF _end<_start OR _start IS NULL OR _end IS NULL OR length(btrim(_reason))<3 THEN RAISE EXCEPTION 'Enter valid dates and a reason'; END IF;
+IF _type NOT IN ('annual','sick','other') THEN RAISE EXCEPTION 'Invalid leave type'; END IF;
+IF _type='annual' AND extract(year from _start)<>extract(year from _end) THEN RAISE EXCEPTION 'Annual leave must fall within one calendar year'; END IF;
+IF EXISTS(SELECT 1 FROM hr_leave_requests WHERE employee_id=e AND status IN ('pending','approved') AND start_date<=_end AND end_date>=_start) THEN RAISE EXCEPTION 'An overlapping leave request already exists'; END IF;
+SELECT count(*) INTO n FROM generate_series(_start::timestamp,_end::timestamp,interval '1 day') d WHERE extract(isodow from d)<6; IF n=0 THEN RAISE EXCEPTION 'Select at least one weekday'; END IF;
+INSERT INTO hr_leave_requests(employee_id,leave_type,start_date,end_date,days,reason) VALUES(e,_type,_start,_end,n,btrim(_reason)) RETURNING id INTO r;
+INSERT INTO notifications(title,message,recipient_id,category,reference_id,reference_type,action_url) SELECT 'Leave approval requested','A staff leave request is awaiting review.',p.user_id,'system',r::text,'hr_leave','/hr' FROM profiles p WHERE p.is_active AND p.user_id<>auth.uid() AND (has_role(p.user_id,'super_admin') OR p.department='management' OR EXISTS(SELECT 1 FROM hr_access a WHERE a.user_id=p.user_id AND a.access_role='hr') OR EXISTS(SELECT 1 FROM hr_employees x JOIN hr_access a ON a.user_id=x.supervisor_user_id AND a.access_role='supervisor' WHERE x.id=e AND x.supervisor_user_id=p.user_id)); RETURN r; END $$;
+CREATE FUNCTION public.hr_review_leave(_id uuid,_decision text,_note text DEFAULT '') RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ DECLARE r hr_leave_requests; e hr_employees; used numeric; BEGIN
+SELECT employee_id INTO r.employee_id FROM hr_leave_requests WHERE id=_id; SELECT * INTO e FROM hr_employees WHERE id=r.employee_id FOR UPDATE; SELECT * INTO r FROM hr_leave_requests WHERE id=_id FOR UPDATE;
+IF r.id IS NULL THEN RAISE EXCEPTION 'Request not found'; END IF;
+IF NOT hr_is_manager() AND NOT EXISTS(SELECT 1 FROM hr_access WHERE user_id=auth.uid() AND access_role='supervisor' AND e.supervisor_user_id=auth.uid()) THEN RAISE EXCEPTION 'Not authorized to approve this request'; END IF;
+IF e.user_id=auth.uid() THEN RAISE EXCEPTION 'You cannot approve your own leave'; END IF;
+IF r.status<>'pending' OR _decision NOT IN ('approved','rejected') THEN RAISE EXCEPTION 'Only pending requests can be reviewed'; END IF;
+IF _decision='approved' AND r.leave_type='annual' THEN SELECT coalesce(sum(days),0) INTO used FROM hr_leave_requests WHERE employee_id=e.id AND leave_type='annual' AND status='approved' AND extract(year from start_date)=extract(year from r.start_date); IF used+r.days>e.leave_entitlement THEN RAISE EXCEPTION 'Insufficient annual leave balance; HR must verify entitlement'; END IF; END IF;
+UPDATE hr_leave_requests SET status=_decision,reviewed_by=auth.uid(),review_note=_note,reviewed_at=now() WHERE id=_id;
+IF e.user_id IS NOT NULL THEN INSERT INTO notifications(title,message,recipient_id,reference_id,reference_type,action_url) VALUES('Leave request '||_decision,'Your leave request has been reviewed.',e.user_id,_id::text,'hr_leave','/hr'); END IF; END $$;
+CREATE FUNCTION public.hr_cancel_leave(_id uuid) RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN UPDATE hr_leave_requests r SET status='cancelled' WHERE r.id=_id AND r.status='pending' AND EXISTS(SELECT 1 FROM hr_employees e WHERE e.id=r.employee_id AND e.user_id=auth.uid()); IF NOT FOUND THEN RAISE EXCEPTION 'Only your pending requests can be cancelled'; END IF; END $$;
+CREATE FUNCTION public.hr_grant_access(_user uuid,_role text) RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN
+IF NOT has_role(auth.uid(),'super_admin') THEN RAISE EXCEPTION 'Super admin access required'; END IF;
+IF NOT EXISTS(SELECT 1 FROM profiles WHERE user_id=_user AND is_active) THEN RAISE EXCEPTION 'Active staff account required'; END IF;
+IF _role='none' THEN DELETE FROM hr_access WHERE user_id=_user; ELSE INSERT INTO hr_access(user_id,access_role,granted_by) VALUES(_user,_role,auth.uid()) ON CONFLICT(user_id) DO UPDATE SET access_role=excluded.access_role,granted_by=auth.uid(); END IF;
+INSERT INTO audit_logs(user_id,action,resource_type,resource_id,details) VALUES(auth.uid(),'hr_access_changed','hr_access',_user::text,jsonb_build_object('access_role',_role)); END $$;
+REVOKE ALL ON FUNCTION public.hr_is_manager(), public.hr_clock(text,text,text), public.hr_request_leave(text,date,date,text), public.hr_review_leave(uuid,text,text), public.hr_cancel_leave(uuid), public.hr_grant_access(uuid,text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.hr_is_manager(), public.hr_clock(text,text,text), public.hr_request_leave(text,date,date,text), public.hr_review_leave(uuid,text,text), public.hr_cancel_leave(uuid), public.hr_grant_access(uuid,text) TO authenticated;
+CREATE INDEX hr_attendance_date_idx ON public.hr_attendance(work_date);
+CREATE INDEX hr_leave_employee_idx ON public.hr_leave_requests(employee_id,status);
+CREATE INDEX hr_employee_supervisor_idx ON public.hr_employees(supervisor_user_id);
