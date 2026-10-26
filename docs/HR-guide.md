@@ -17,4 +17,12 @@ HR/management can approve or reject other employees' requests. Delegated supervi
 Super admins can delegate HR administrator or assigned-team supervisor access in Permissions, or remove that delegation. Management and super admins have HR administrative access already. Ordinary staff see only their linked employee profile, attendance and leave. Supervisors receive limited employee identifiers for their team's leave review, not access to confidential full profiles.
 
 ## Deliberately not activated
+## Welfare & Benefits
+Open the Welfare & Benefits tab. HR or management can add categories as drafts with blank amounts and eligibility. No categories or policy amounts are seeded. Activation requires eligibility and an explicit per-request limit or a deliberate no-limit choice. Optional fixed benefits must fit the limit. All amounts are GHS.
+
+Linked active employees submit requests against active categories. Each request retains the policy version and terms used when submitted. HR checks eligibility and reviews the request; a different management approver makes the final decision. Super admins can perform either role but cannot perform both stages on the same request, and no one can review their own request. Only the requester, HR and management can view welfare requests.
+
+Final approval creates a single draft payment voucher in Accounts → Books → Vouchers. Accounts selects the accounting lines and payment method, then uses the existing posting flow. The voucher must match the approved GHS amount. Draft creation is not payment; the welfare record shows the actual voucher status, including cancellation. No welfare reason or eligibility details are copied into shared accounting narration or notifications. Contributions, fund balances, receipts and benefit enrollment remain outside this initial request workflow.
+
+## Deliberately not activated (other HR phases)
 Payroll, banking/salary data, medical documents, qualifications, recruitment workflows, private HR documents, configurable approval chains, work schedules, attendance corrections, overtime, public-holiday calendars, advanced workforce assignments, performance and training are not enabled in this initial release. They require later verified phases. This release does not claim statutory Ghana payroll or employment compliance.
