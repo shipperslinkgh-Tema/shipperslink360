@@ -3703,6 +3703,127 @@ export type Database = {
         }
         Relationships: []
       }
+      welfare_policies: {
+        Row: {
+          benefit_amount: number | null
+          created_at: string
+          created_by: string
+          eligibility: string
+          id: string
+          max_amount: number | null
+          name: string
+          no_limit: boolean
+          status: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          benefit_amount?: number | null
+          created_at?: string
+          created_by: string
+          eligibility?: string
+          id?: string
+          max_amount?: number | null
+          name: string
+          no_limit?: boolean
+          status?: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          benefit_amount?: number | null
+          created_at?: string
+          created_by?: string
+          eligibility?: string
+          id?: string
+          max_amount?: number | null
+          name?: string
+          no_limit?: boolean
+          status?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      welfare_requests: {
+        Row: {
+          amount: number
+          created_at: string
+          employee_id: string
+          hr_note: string | null
+          hr_reviewed_at: string | null
+          hr_reviewed_by: string | null
+          id: string
+          management_note: string | null
+          management_reviewed_at: string | null
+          management_reviewed_by: string | null
+          policy_id: string
+          policy_snapshot: Json
+          reason: string
+          requested_by: string
+          status: string
+          voucher_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          employee_id: string
+          hr_note?: string | null
+          hr_reviewed_at?: string | null
+          hr_reviewed_by?: string | null
+          id?: string
+          management_note?: string | null
+          management_reviewed_at?: string | null
+          management_reviewed_by?: string | null
+          policy_id: string
+          policy_snapshot: Json
+          reason: string
+          requested_by: string
+          status?: string
+          voucher_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          employee_id?: string
+          hr_note?: string | null
+          hr_reviewed_at?: string | null
+          hr_reviewed_by?: string | null
+          id?: string
+          management_note?: string | null
+          management_reviewed_at?: string | null
+          management_reviewed_by?: string | null
+          policy_id?: string
+          policy_snapshot?: Json
+          reason?: string
+          requested_by?: string
+          status?: string
+          voucher_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "welfare_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "hr_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "welfare_requests_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "welfare_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "welfare_requests_voucher_id_fkey"
+            columns: ["voucher_id"]
+            isOneToOne: true
+            referencedRelation: "vouchers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workflow_documents: {
         Row: {
           created_at: string
@@ -4023,6 +4144,37 @@ export type Database = {
       }
       reset_failed_login: { Args: { _user_id: string }; Returns: undefined }
       scan_trip_alerts: { Args: never; Returns: undefined }
+      welfare_cancel: { Args: { _id: string }; Returns: undefined }
+      welfare_is_hr: { Args: never; Returns: boolean }
+      welfare_is_management: { Args: never; Returns: boolean }
+      welfare_payment_status: {
+        Args: { _id: string }
+        Returns: {
+          posted_at: string
+          status: string
+          voucher_no: string
+        }[]
+      }
+      welfare_review: {
+        Args: { _decision: string; _id: string; _note: string; _stage: string }
+        Returns: string
+      }
+      welfare_save_policy: {
+        Args: {
+          _benefit: number
+          _eligibility: string
+          _id: string
+          _max: number
+          _name: string
+          _no_limit: boolean
+          _status: string
+        }
+        Returns: string
+      }
+      welfare_submit: {
+        Args: { _amount: number; _policy: string; _reason: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "super_admin" | "admin" | "manager" | "staff"
