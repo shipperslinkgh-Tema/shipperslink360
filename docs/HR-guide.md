@@ -16,7 +16,6 @@ HR/management can approve or reject other employees' requests. Delegated supervi
 ## Permissions and confidentiality
 Super admins can delegate HR administrator or assigned-team supervisor access in Permissions, or remove that delegation. Management and super admins have HR administrative access already. Ordinary staff see only their linked employee profile, attendance and leave. Supervisors receive limited employee identifiers for their team's leave review, not access to confidential full profiles.
 
-## Deliberately not activated
 ## Welfare & Benefits
 Open the Welfare & Benefits tab. HR or management can add categories as drafts with blank amounts and eligibility. No categories or policy amounts are seeded. Activation requires eligibility and an explicit per-request limit or a deliberate no-limit choice. Optional fixed benefits must fit the limit. All amounts are GHS.
 

@@ -12,12 +12,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Table, TableHeader, TableHead, TableRow, TableBody, TableCell } from '@/components/ui/table';
 import { useWelfare, type WelfarePolicy } from '@/hooks/useWelfare';
+import { useAccountsAccess } from '@/hooks/useAccountsAccess';
 import { supabase } from '@/integrations/supabase/client';
 import { welfareReviewStage, welfareAmountAllowed } from '@/lib/welfare';
 const money = (n: number) => `GHS ${Number(n).toLocaleString('en-GH', { minimumFractionDigits: 2 })}`;
 const blankPolicy = { id: null as string | null, name: '', eligibility: '', benefit: '', max: '', noLimit: false, status: 'draft' };
 export function WelfareSection({ activeEmployee, employeeName }: { activeEmployee: boolean; employeeName: (id: string) => string }) {
   const w = useWelfare();
+  const accountsAccess = useAccountsAccess();
   const [view, setView] = useState('requests');
   const [policyOpen, setPolicyOpen] = useState(false);
   const [policy, setPolicy] = useState(blankPolicy);

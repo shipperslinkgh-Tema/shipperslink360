@@ -8,6 +8,6 @@
 
 Later phases follow verified Phase 1 workflows; statutory payroll requires verified rules before activation.
 ## Welfare & Benefits module (requested)
-- [ ] Build Welfare & Benefits now with user-filled draft categories, eligibility, amounts and limits; employee requests, HR review, separate management approval, confidential history and duplicate-safe Accounts payment vouchers. User authorized draft structure instead of waiting for a written policy.
-- [ ] Verify welfare using confirmed real records across employee submission, HR review, management approval and Accounts posting; never invent employee details or welfare policy values.
+- [x] Build Welfare & Benefits now with user-filled draft categories, eligibility, amounts and limits; employee requests, HR review, separate management approval, confidential history and duplicate-safe Accounts payment vouchers. User authorized draft structure instead of waiting for a written policy. Approval-rule tests pass; signed-in Welfare tab and blank form verified.
+- [ ] Verify welfare using confirmed real records across employee submission, HR review, management approval and Accounts posting. Blocker: no linked employee records or confirmed welfare policy values supplied; never invent them.
 - [ ] Later welfare fund contributions, benefit enrollment, celebrations and fund reporting. Blocker: confirmed policy and verified request/payment workflows.
