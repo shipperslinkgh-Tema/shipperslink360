@@ -50,6 +50,13 @@
       "when": 1793104143434,
       "tag": "0006_expense_vouchers",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793104165698,
+      "tag": "0007_expense_voucher_review_fix",
+      "breakpoints": true
     }
   ]
 }
