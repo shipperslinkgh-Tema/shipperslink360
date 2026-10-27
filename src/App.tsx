@@ -18,6 +18,7 @@ import Trucking from "./pages/Trucking";
 import Customers from "./pages/Customers";
 import Finance from "./pages/Finance";
 import Invoicing from "./pages/Invoicing";
+import ExpenseVouchers from "./pages/ExpenseVouchers";
 import Payments from "./pages/Payments";
 import AccountsLayout from "./pages/accounts/AccountsLayout";
 import AccountsDashboard from "./pages/accounts/AccountsDashboard";
@@ -192,6 +193,7 @@ function StaffRoutes() {
         <Route path="/duty-estimator" element={<ProtectedRoute><WithLayout><DutyEstimator /></WithLayout></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><WithLayout><Notifications /></WithLayout></ProtectedRoute>} />
         <Route path="/admin/users" element={<ProtectedRoute><WithLayout><AdminUsers /></WithLayout></ProtectedRoute>} />
+        <Route path="/expense-vouchers" element={<ProtectedRoute><WithLayout><ExpenseVouchers /></WithLayout></ProtectedRoute>} />
         <Route path="/hr" element={<ProtectedRoute><WithLayout><HR /></WithLayout></ProtectedRoute>} />
         <Route path="/admin/client-management" element={<ProtectedRoute><WithLayout><ClientManagement /></WithLayout></ProtectedRoute>} />
         <Route path="/admin/client-documents" element={<Navigate to="/admin/client-management" replace />} />

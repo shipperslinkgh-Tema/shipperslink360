@@ -159,6 +159,7 @@ export function AppSidebar() {
   const filteredNav = filterNavItems(department, navigation, roles);
 
   const bottomNav: NavItem[] = [
+    { title: "Expense Vouchers", icon: FileText, href: "/expense-vouchers" },
     { title: "Human Resources", icon: Users, href: "/hr" },
     { title: "User Guide", icon: BookOpen, href: "/user-guide" },
     ...(isAdmin ? [
