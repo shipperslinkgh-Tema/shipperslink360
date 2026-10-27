@@ -2022,6 +2022,72 @@ export type Database = {
         }
         Relationships: []
       }
+      expense_vouchers: {
+        Row: {
+          account_no: string | null
+          category: string
+          category_other: string | null
+          created_at: string
+          description: string | null
+          id: string
+          items: Json
+          job_ref: string | null
+          paid_to: string
+          payment_method: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_by: string
+          total_amount: number
+          updated_at: string
+          voucher_date: string
+          voucher_no: string | null
+        }
+        Insert: {
+          account_no?: string | null
+          category: string
+          category_other?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          items?: Json
+          job_ref?: string | null
+          paid_to: string
+          payment_method?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_by?: string
+          total_amount?: number
+          updated_at?: string
+          voucher_date?: string
+          voucher_no?: string | null
+        }
+        Update: {
+          account_no?: string | null
+          category?: string
+          category_other?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          items?: Json
+          job_ref?: string | null
+          paid_to?: string
+          payment_method?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_by?: string
+          total_amount?: number
+          updated_at?: string
+          voucher_date?: string
+          voucher_no?: string | null
+        }
+        Relationships: []
+      }
       finance_audit_logs: {
         Row: {
           action: string
@@ -4024,6 +4090,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      expense_voucher_review: {
+        Args: { _decision: string; _id: string; _note: string }
+        Returns: undefined
       }
       gen_expense_ref: { Args: never; Returns: string }
       get_client_customer_id: { Args: { _user_id: string }; Returns: string }
