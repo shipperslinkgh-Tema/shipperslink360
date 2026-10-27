@@ -5,8 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Send, Printer } from "lucide-react";
-import { printVoucher } from "@/lib/printVoucher";
+import { Plus, Trash2, Send } from "lucide-react";
 import { useChartOfAccounts } from "@/hooks/useChartOfAccounts";
 import { usePostVoucher, useSaveVoucher, useVoucher } from "@/hooks/useVouchers";
 import { CURRENCIES, VOUCHER_TYPE_LABEL, type Voucher, type VoucherLine, type VoucherType } from "@/types/accounts";
@@ -234,9 +233,6 @@ export default function VoucherDialog({ open, onOpenChange, type, voucherId, pre
 
         <DialogFooter className="gap-2">
           <Button variant="ghost" onClick={() => onOpenChange(false)}>Close</Button>
-          <Button variant="outline" onClick={() => { if (!printVoucher({ ...form, voucher_type: type }, lines, accounts)) toast.error("Allow pop-ups to print the voucher"); }}>
-            <Printer className="h-4 w-4 mr-1" /> Print
-          </Button>
           {!isPosted && (
             <>
               <Button variant="outline" onClick={() => handleSave(false)} disabled={save.isPending}>Save Draft</Button>
