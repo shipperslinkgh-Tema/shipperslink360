@@ -8,7 +8,8 @@ import { useAccountsAccess } from "@/hooks/useAccountsAccess";
 import VoucherDialog from "./VoucherDialog";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { FileDown, Receipt } from "lucide-react";
+import { FileDown, Receipt, Printer, Plus } from "lucide-react";
+import ProformaInvoiceDialog from "@/components/finance/ProformaInvoiceDialog";
 
 const statusColor = (s: string) =>
   s === "paid" ? "bg-success/15 text-success" :
@@ -22,6 +23,7 @@ const isOverdue = (inv: any) => inv.status !== "paid" && inv.status !== "cancell
 export default function AccountsInvoices() {
   const { canEdit } = useAccountsAccess();
   const [receiptFor, setReceiptFor] = useState<any | null>(null);
+  const [printFor, setPrintFor] = useState<any | null | undefined>(undefined);
 
   const { data: invoices = [], isLoading } = useQuery({
     queryKey: ["finance_invoices_acct"],
@@ -56,6 +58,7 @@ export default function AccountsInvoices() {
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end"><Button size="sm" onClick={() => setPrintFor(null)}><Plus className="h-4 w-4 mr-1" />New Pro-forma Invoice</Button></div>
       <Card className="overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -91,6 +94,7 @@ export default function AccountsInvoices() {
                     </td>
                     <td className="p-3 flex justify-end gap-1">
                       <Button size="sm" variant="ghost" onClick={() => exportPdf(inv)}><FileDown className="h-4 w-4" /></Button>
+                      <Button size="sm" variant="ghost" title="Print pro-forma" onClick={() => setPrintFor(inv)}><Printer className="h-4 w-4" /></Button>
                       {canEdit && inv.status !== "paid" && inv.status !== "cancelled" && (
                         <Button size="sm" variant="outline" onClick={() => setReceiptFor(inv)}>
                           <Receipt className="h-4 w-4 mr-1" />Receipt
@@ -104,6 +108,8 @@ export default function AccountsInvoices() {
           </table>
         </div>
       </Card>
+
+      <ProformaInvoiceDialog open={printFor !== undefined} onOpenChange={(o) => !o && setPrintFor(undefined)} invoice={printFor} />
 
       {receiptFor && (
         <VoucherDialog
