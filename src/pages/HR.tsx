@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Users, Clock, MapPin, CalendarDays, Plus, Pencil, Download, RefreshCw, Check, X, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -49,6 +49,12 @@ export default function HR() {
   const me = employees.find(e => e.user_id === hr.user?.id);
   const myToday = attendance.find(a => a.employee_id === me?.id && a.work_date === today());
   const activeMe = me?.status === 'active' || me?.status === 'probation';
+  const linkTried = useRef(false);
+  useEffect(() => {
+    if (!hr.user || !hr.employees.isSuccess || me || linkTried.current) return;
+    linkTried.current = true;
+    supabase.rpc('hr_ensure_self_employee').then(({ error }) => { if (!error) hr.employees.refetch(); });
+  }, [hr.user, hr.employees.isSuccess, me]);
   const employeeName = (id: string) => employees.find(e => e.id === id)?.full_name ?? names.data?.find(e => e.employee_id === id)?.full_name ?? 'Employee';
   const pending = requests.filter(r => r.status === 'pending');
   const currentYear = new Date().getUTCFullYear();
