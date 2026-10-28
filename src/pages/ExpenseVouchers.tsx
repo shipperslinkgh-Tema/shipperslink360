@@ -71,6 +71,7 @@ export default function ExpenseVouchers() {
         items: clean as any,
         total_amount: total,
         submitted_by: user!.id,
+        voucher_type: form.voucher_type || "expense",
       } as any);
       if (error) throw error;
     },
@@ -96,8 +97,8 @@ export default function ExpenseVouchers() {
     onError: (e: any) => toast.error(e.message),
   });
 
-  const startNew = () => {
-    setForm({ voucher_date: new Date().toISOString().slice(0, 10), payment_method: "cash" });
+  const startNew = (type: "expense" | "petty_cash" = "expense") => {
+    setForm({ voucher_date: new Date().toISOString().slice(0, 10), payment_method: "cash", voucher_type: type });
     setItems([blankItem()]);
     setOpen(true);
   };
@@ -121,7 +122,10 @@ export default function ExpenseVouchers() {
             </p>
           </div>
         </div>
-        <Button onClick={startNew}><Plus className="h-4 w-4 mr-1" />New Expense Voucher</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => startNew("petty_cash")}><Plus className="h-4 w-4 mr-1" />New Petty Cash Voucher</Button>
+          <Button onClick={() => startNew()}><Plus className="h-4 w-4 mr-1" />New Expense Voucher</Button>
+        </div>
       </div>
 
       <Card className="overflow-hidden">
@@ -140,7 +144,7 @@ export default function ExpenseVouchers() {
               {!isLoading && vouchers.length === 0 && <tr><td colSpan={8} className="p-6 text-center text-muted-foreground">No expense vouchers yet.</td></tr>}
               {vouchers.map((v: any) => (
                 <tr key={v.id} className="border-t hover:bg-muted/40">
-                  <td className="p-3 font-mono">{v.voucher_no}</td>
+                  <td className="p-3 font-mono">{v.voucher_no}{v.voucher_type === "petty_cash" && <Badge variant="secondary" className="ml-2">Petty Cash</Badge>}</td>
                   <td className="p-3">{v.voucher_date}</td>
                   <td className="p-3">{v.paid_to}</td>
                   <td className="p-3 text-muted-foreground">{catLabel(v.category)}</td>
@@ -165,7 +169,7 @@ export default function ExpenseVouchers() {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>New Expense Voucher</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{form.voucher_type === "petty_cash" ? "New Petty Cash Voucher" : "New Expense Voucher"}</DialogTitle></DialogHeader>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div><Label>Date</Label><Input type="date" value={form.voucher_date ?? ""} onChange={(e) => setForm({ ...form, voucher_date: e.target.value })} /></div>
             <div><Label>File / Job Ref</Label><Input value={form.job_ref ?? ""} onChange={(e) => setForm({ ...form, job_ref: e.target.value })} /></div>
@@ -173,7 +177,7 @@ export default function ExpenseVouchers() {
             <div><Label>Account / Mobile Money No.</Label><Input value={form.account_no ?? ""} onChange={(e) => setForm({ ...form, account_no: e.target.value })} /></div>
             <div>
               <Label>Payment</Label>
-              <Select value={form.payment_method} onValueChange={(v) => setForm({ ...form, payment_method: v })}>
+              <Select disabled={form.voucher_type === "petty_cash"} value={form.payment_method} onValueChange={(v) => setForm({ ...form, payment_method: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{PAYMENT_METHODS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}</SelectContent>
               </Select>

@@ -62,7 +62,7 @@ table{width:100%;border-collapse:collapse}th{background:#1f2f6b;color:#fff;paddi
 .foot{background:#1f2f6b;color:#fff;font-size:8.5px;text-align:center;padding:5px}
 </style></head><body>
 <div class="top"><div class="l"><img src="${logo}"/><div><h1>SHIPPERS LINK AGENCIES CO., LTD</h1><p>Consolidation | Clearing | Forwarding | Warehousing | Trucking</p><p>Tema Port, Ghana &nbsp; Tel: 0209116560 | 0245525968</p></div></div>
-<div><h2>EXPENSE VOUCHER</h2><small>Operational &amp; Office Expense Disbursement</small></div></div>
+<div>${v.voucher_type === "petty_cash" ? "<h2>PETTY CASH VOUCHER</h2><small>Petty Cash Disbursement</small>" : "<h2>EXPENSE VOUCHER</h2><small>Operational &amp; Office Expense Disbursement</small>"}</div></div>
 <div class="sec row"><div class="f"><b>Voucher No:</b><span>${esc(v.voucher_no)}</span></div><div class="f"><b>Date:</b><span>${esc(v.voucher_date)}</span></div><div class="f"><b>File / Job Ref:</b><span>${esc(v.job_ref)}</span></div></div>
 <div class="sec"><div class="row"><div class="f"><b>Paid To:</b><span>${esc(v.paid_to)}</span></div><div><b style="color:#1f2f6b">Payment:</b> ${PAYMENT_METHODS.map((p) => box(v.payment_method === p.value, p.label)).join("")}</div></div>
 <div class="row" style="margin-top:6px"><div class="f"><b>Account / Mobile Money No:</b><span>${esc(v.account_no)}</span></div></div></div>
