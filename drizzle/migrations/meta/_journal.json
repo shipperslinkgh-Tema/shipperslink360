@@ -64,6 +64,13 @@
       "when": 1793177314508,
       "tag": "0008_petty_cash_vouchers",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793195415503,
+      "tag": "0009_hr_self_employee_link",
+      "breakpoints": true
     }
   ]
 }
