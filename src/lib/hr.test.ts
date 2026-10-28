@@ -23,3 +23,10 @@ describe('HR permissions and balances', () => {
     ], 2026)).toBe(16);
   });
 });
+import { exceedsAnnualStretch, ANNUAL_LEAVE_DAYS } from './hr';
+describe('annual leave rules', () => {
+  it('gives 11 days', () => expect(ANNUAL_LEAVE_DAYS).toBe(11));
+  it('allows 4 annual days together', () => expect(exceedsAnnualStretch('annual', 4)).toBe(false));
+  it('blocks 5 annual days together', () => expect(exceedsAnnualStretch('annual', 5)).toBe(true));
+  it('does not limit sick leave', () => expect(exceedsAnnualStretch('sick', 5)).toBe(false));
+});
