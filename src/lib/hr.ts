@@ -16,3 +16,8 @@ export function mayReviewLeave(manager: boolean, supervisor: boolean, own: boole
 export function remainingAnnualLeave(entitlement: number, requests: { leave_type: string; status: string; days: number; start_date: string }[], year: number): number {
   return entitlement - requests.filter(r => r.leave_type === 'annual' && r.status === 'approved' && Number(r.start_date.slice(0, 4)) === year).reduce((sum, r) => sum + Number(r.days), 0);
 }
+export const ANNUAL_LEAVE_DAYS = 11;
+export const MAX_ANNUAL_LEAVE_STRETCH = 4;
+export function exceedsAnnualStretch(type: string, days: number): boolean {
+  return type === 'annual' && days > MAX_ANNUAL_LEAVE_STRETCH;
+}

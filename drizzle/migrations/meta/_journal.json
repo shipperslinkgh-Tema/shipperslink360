@@ -71,6 +71,13 @@
       "when": 1793195415503,
       "tag": "0009_hr_self_employee_link",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793195707587,
+      "tag": "0010_annual_leave_rules",
+      "breakpoints": true
     }
   ]
 }
