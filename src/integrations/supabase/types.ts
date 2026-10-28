@@ -2043,6 +2043,7 @@ export type Database = {
           updated_at: string
           voucher_date: string
           voucher_no: string | null
+          voucher_type: string
         }
         Insert: {
           account_no?: string | null
@@ -2064,6 +2065,7 @@ export type Database = {
           updated_at?: string
           voucher_date?: string
           voucher_no?: string | null
+          voucher_type?: string
         }
         Update: {
           account_no?: string | null
@@ -2085,6 +2087,7 @@ export type Database = {
           updated_at?: string
           voucher_date?: string
           voucher_no?: string | null
+          voucher_type?: string
         }
         Relationships: []
       }
