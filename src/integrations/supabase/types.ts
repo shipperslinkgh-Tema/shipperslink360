@@ -4122,6 +4122,7 @@ export type Database = {
         Args: { _action: string; _duty?: string; _location?: string }
         Returns: string
       }
+      hr_ensure_self_employee: { Args: never; Returns: string }
       hr_grant_access: {
         Args: { _role: string; _user: string }
         Returns: undefined
