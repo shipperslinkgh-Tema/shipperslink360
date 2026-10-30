@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { NewShipmentDialog } from "@/components/shipments/NewShipmentDialog";
 import {
   Search,
@@ -70,7 +71,8 @@ const getStatusBadge = (status: string) => {
 export default function Shipments() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
+  const { type: routeType } = useParams();
+  const [typeFilter, setTypeFilter] = useState(routeType === "sea" || routeType === "air" ? routeType : "all");
   const [showNewShipment, setShowNewShipment] = useState(false);
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [loading, setLoading] = useState(true);
