@@ -32,14 +32,8 @@ const navigation: NavItem[] = [{
   title: "Operations",
   icon: Package,
   children: [{
-    title: "All Shipments",
+    title: "Shipments",
     href: "/shipments"
-  }, {
-    title: "Sea Freight",
-    href: "/shipments/sea"
-  }, {
-    title: "Air Freight",
-    href: "/shipments/air"
   }, {
     title: "Consolidation",
     href: "/consolidation"
