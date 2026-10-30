@@ -267,6 +267,109 @@ const sections: Section[] = [
     ),
   },
   {
+    id: "proforma",
+    group: "Modules",
+    title: "4.7 Pro-forma Invoices (Print)",
+    icon: Receipt,
+    keywords: "proforma pro-forma invoice print hard copy template customs duty bank",
+    body: (
+      <div className="space-y-3 text-sm">
+        <p>Used by: <Badge variant="secondary">Accounts</Badge></p>
+        <ol className="space-y-1">
+          <Step n={1}>Accounts Portal → <strong>Invoices</strong> → <strong>New Pro-forma Invoice</strong> for a blank form, or click the <strong>printer icon</strong> on an existing invoice to pre-fill number, date, client and deposit.</Step>
+          <Step n={2}>Fill client name, address, phone, Bill of Lading, vehicle/container, chassis and the six charges (Customs Duty to Service Charge). Subtotal and balance calculate as you type.</Step>
+          <Step n={3}>Click <strong>Print</strong> — the SLAC template opens with logo and bank accounts.</Step>
+        </ol>
+        <Tip>Details typed into this form are not saved — they are only used for the printout. Allow pop-ups if nothing appears.</Tip>
+      </div>
+    ),
+  },
+  {
+    id: "expense-vouchers",
+    group: "Modules",
+    title: "4.8 Expense & Petty Cash Vouchers",
+    icon: FileText,
+    keywords: "expense voucher petty cash pcv ev approval accountant print",
+    body: (
+      <div className="space-y-3 text-sm">
+        <p>Available to: <Badge variant="secondary">All staff</Badge> · Approved by <Badge variant="secondary">Accounts</Badge></p>
+        <ol className="space-y-1">
+          <Step n={1}>Sidebar → <strong>Expense Vouchers</strong> → <strong>New Expense Voucher</strong> or <strong>New Petty Cash Voucher</strong>.</Step>
+          <Step n={2}>Fill date, file/job ref, paid to, account or Mobile Money number, payment method, category and particulars with amounts. Amount in words fills automatically.</Step>
+          <Step n={3}>Submit — the voucher gets a number (<strong>SLAC/EV/…</strong> or <strong>SLAC/PCV/…</strong>) and goes to Accounts.</Step>
+          <Step n={4}>An Accounts user (not the submitter) approves or rejects with a note. You see the status and note on your list.</Step>
+          <Step n={5}>Click <strong>Print</strong> for the hard copy; the approver's name appears under "Checked By".</Step>
+        </ol>
+        <Tip>Petty cash vouchers are always paid in Cash. Director and receiver signatures are signed by pen on the printout.</Tip>
+      </div>
+    ),
+  },
+  {
+    id: "hr",
+    group: "Modules",
+    title: "4.9 Human Resources",
+    icon: Users,
+    keywords: "hr human resources clock in attendance leave annual sick field duty employee",
+    body: (
+      <div className="space-y-3 text-sm">
+        <p>All staff see: <strong>Clock in</strong>, <strong>Leave</strong> and <strong>Welfare request</strong>. Only the <Badge variant="secondary">Super Admin</Badge> sees the full portal (Overview, Employees, Attendance history, Permissions).</p>
+        <h4 className="font-semibold">Clock in / out</h4>
+        <ol className="space-y-1">
+          <Step n={1}>Sidebar → <strong>Human Resources</strong> → <strong>Clock in</strong>.</Step>
+          <Step n={2}>Choose office or field duty (add the location for field duty) and tap <strong>Clock in</strong>. Tap <strong>Clock out</strong> at the end of the day. Times use the server clock (Ghana time).</Step>
+        </ol>
+        <h4 className="font-semibold pt-2">Request leave</h4>
+        <ol className="space-y-1">
+          <Step n={1}><strong>Leave</strong> tab → <strong>Request leave</strong> → choose type, dates and reason.</Step>
+          <Step n={2}>Your supervisor or HR reviews it. You cannot approve your own request.</Step>
+        </ol>
+        <Warn>Annual leave: 11 days per year, and no single request may exceed 4 working days. The limit does not apply to sick or other leave.</Warn>
+        <Tip>Your HR record is created automatically the first time you open Human Resources. The Super Admin can update job title, start date and leave days under Employees.</Tip>
+      </div>
+    ),
+  },
+  {
+    id: "welfare",
+    group: "Modules",
+    title: "4.10 Welfare & Benefits",
+    icon: CheckCircle2,
+    keywords: "welfare benefits request category bereavement medical approval management voucher",
+    body: (
+      <div className="space-y-3 text-sm">
+        <h4 className="font-semibold">Set up categories (Super Admin / HR)</h4>
+        <ol className="space-y-1">
+          <Step n={1}>Human Resources → <strong>Welfare & Benefits</strong> → <strong>Add category</strong>.</Step>
+          <Step n={2}>Enter name, eligibility, a fixed amount or per-request limit (or "no limit"), and set status to <strong>Active</strong>.</Step>
+        </ol>
+        <h4 className="font-semibold pt-2">Request a benefit (all staff)</h4>
+        <ol className="space-y-1">
+          <Step n={1}><strong>Welfare request</strong> tab → <strong>Request benefit</strong> → pick category, amount and reason.</Step>
+          <Step n={2}>HR reviews first, then a different management member gives final approval.</Step>
+          <Step n={3}>On approval, one draft payment voucher is created in the Accounts Portal for payment.</Step>
+        </ol>
+        <Warn>The Request benefit button stays greyed out until at least one category is Active.</Warn>
+      </div>
+    ),
+  },
+  {
+    id: "super-admin",
+    group: "Modules",
+    title: "4.11 Super Admin Tools",
+    icon: Shield,
+    keywords: "super admin delete user role assign data account management",
+    body: (
+      <div className="space-y-3 text-sm">
+        <p>Sidebar → <strong>User Management</strong> → <strong>Super Admin</strong> tab (super admin only).</p>
+        <ul className="space-y-1">
+          <li>• <strong>Assign roles</strong> to staff accounts.</li>
+          <li>• <strong>Delete user accounts</strong> (you cannot delete your own).</li>
+          <li>• <strong>Delete records</strong> such as consignments and trips, including their related events and notifications.</li>
+        </ul>
+        <Warn>Every deletion asks for confirmation, is permanent and is recorded in the audit log.</Warn>
+      </div>
+    ),
+  },
+  {
     id: "e2e",
     group: "Workflow",
     title: "5. End-to-End Workflow",
