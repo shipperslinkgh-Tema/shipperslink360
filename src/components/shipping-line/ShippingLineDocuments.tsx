@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef } from "react";
-import { FileText, Upload, Trash2, Download, Search, Filter, CalendarClock, Anchor } from "lucide-react";
+import { FileText, Upload, Trash2, Download, Search, CalendarClock, Anchor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -498,6 +498,3 @@ export function ShippingLineDocuments() {
   );
 }
 
-function cnLevel(level: FreeDaysLevel) {
-  return LEVEL_TEXT[level];
-}
