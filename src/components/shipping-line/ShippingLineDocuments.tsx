@@ -270,7 +270,7 @@ export function ShippingLineDocuments() {
                       <span className={LEVEL_TEXT[row.level]}>
                         {row.daysLeft == null ? "—" : `${row.daysLeft} left`}
                       </span>
-                      <span className={cnLevel(row.level)}> · {LEVEL_LABEL[row.level]}</span>
+                      <span className={LEVEL_TEXT[row.level]}> · {LEVEL_LABEL[row.level]}</span>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">{row.documents}</TableCell>
                   </TableRow>
