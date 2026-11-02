@@ -44,9 +44,10 @@ describe("bill of lading free days summary", () => {
 
   it("keeps one row per BL and ignores entries with no BL", () => {
     const rows = summariseBLFreeDays(docs, "2026-11-02");
-    expect(rows.map((r) => r.bl)).toEqual(["CMA998877", "MSKU2345678"]);
+    expect(rows.map((r) => r.bl)).toEqual(["MSKU2345678", "CMA998877"]);
     expect(rows.find((r) => r.bl === "MSKU2345678")?.documents).toBe(2);
   });
+
 
   it("carries the ETA and free days forward to later uploads on the same BL", () => {
     const rows = summariseBLFreeDays(docs, "2026-11-02");
@@ -59,8 +60,16 @@ describe("bill of lading free days summary", () => {
   });
 
   it("flags BLs whose free days are running out", () => {
-    const rows = summariseBLFreeDays(docs, "2026-11-24");
-    expect(rows.find((r) => r.bl === "CMA998877")?.level).toBe("expired");
+    const rows = summariseBLFreeDays(docs, "2026-11-14");
+    expect(rows.find((r) => r.bl === "MSKU2345678")?.level).toBe("critical");
+    expect(rows.find((r) => r.bl === "CMA998877")?.level).toBe("ok");
     expect(expiringBLCount(rows)).toBe(1);
   });
+
+  it("marks BLs past their free days as expired", () => {
+    const rows = summariseBLFreeDays(docs, "2026-11-28");
+    expect(rows.find((r) => r.bl === "CMA998877")?.level).toBe("expired");
+    expect(expiringBLCount(rows)).toBe(2);
+  });
+
 });
