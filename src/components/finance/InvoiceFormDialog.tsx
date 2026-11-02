@@ -9,6 +9,7 @@ import { useCreateInvoice, generateInvoiceRef } from "@/hooks/useFinanceMutation
 import { useCustomerCredits } from "@/hooks/useFinanceData";
 import { useExchangeRate } from "@/hooks/useFXRates";
 import { SmartInput } from "@/components/common/SmartInput";
+import { ShipmentPicker } from "@/components/common/ShipmentPicker";
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; userName: string; }
 
@@ -54,6 +55,17 @@ export function InvoiceFormDialog({ open, onOpenChange, userName }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>New Invoice — {ref}</DialogTitle></DialogHeader>
+        <ShipmentPicker onPick={(s) => {
+          const match = customers.find(c => c.customerId === s.customer?.id || c.customerId === s.client_id || c.customerName?.trim().toLowerCase() === s.client_name.trim().toLowerCase());
+          setForm(f => ({
+            ...f,
+            customer: match?.customerName || s.client_name || f.customer,
+            customer_id: match?.customerId || f.customer_id,
+            shipment_ref: s.consignment_ref,
+            job_ref: f.job_ref || s.consignment_ref,
+            description: f.description || [s.bl_number || s.awb_number, s.container_number, s.cargo_description].filter(Boolean).join(" · "),
+          }));
+        }} />
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Customer</Label>

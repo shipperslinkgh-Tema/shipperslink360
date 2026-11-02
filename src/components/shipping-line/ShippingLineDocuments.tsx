@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef } from "react";
 import { FileText, Upload, Trash2, Download, Search, CalendarClock, Anchor } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ShipmentPicker } from "@/components/common/ShipmentPicker";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -301,6 +302,17 @@ export function ShippingLineDocuments() {
                   <DialogTitle>Upload Shipping Line Document</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 pt-2">
+                  <ShipmentPicker onPick={(s) => {
+                    const line = SHIPPING_LINES.find((l) => l.toLowerCase() === (s.shipping_line || "").trim().toLowerCase());
+                    setFormData((f) => ({
+                      ...f,
+                      shipping_line: line || f.shipping_line,
+                      bl_number: s.bl_number || f.bl_number,
+                      container_number: s.container_number || f.container_number,
+                      eta: s.eta ? s.eta.slice(0, 10) : f.eta,
+                      free_days: s.free_days != null ? String(s.free_days) : f.free_days,
+                    }));
+                  }} />
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label>Shipping Line *</Label>
