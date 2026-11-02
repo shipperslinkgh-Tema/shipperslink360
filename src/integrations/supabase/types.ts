@@ -3206,8 +3206,10 @@ export type Database = {
           created_at: string
           document_name: string
           document_type: string
+          eta: string | null
           file_size: string | null
           file_url: string | null
+          free_days: number | null
           id: string
           notes: string | null
           shipping_line: string
@@ -3220,8 +3222,10 @@ export type Database = {
           created_at?: string
           document_name: string
           document_type?: string
+          eta?: string | null
           file_size?: string | null
           file_url?: string | null
+          free_days?: number | null
           id?: string
           notes?: string | null
           shipping_line: string
@@ -3234,8 +3238,10 @@ export type Database = {
           created_at?: string
           document_name?: string
           document_type?: string
+          eta?: string | null
           file_size?: string | null
           file_url?: string | null
+          free_days?: number | null
           id?: string
           notes?: string | null
           shipping_line?: string
