@@ -175,12 +175,22 @@ export default function ExpenseVouchers() {
             <div><Label>File / Job Ref</Label><Input value={form.job_ref ?? ""} onChange={(e) => setForm({ ...form, job_ref: e.target.value })} /></div>
             <div><Label>Paid To *</Label><Input value={form.paid_to ?? ""} onChange={(e) => setForm({ ...form, paid_to: e.target.value })} /></div>
             <div><Label>Account / Mobile Money No.</Label><Input value={form.account_no ?? ""} onChange={(e) => setForm({ ...form, account_no: e.target.value })} /></div>
-            <div>
-              <Label>Payment</Label>
-              <Select disabled={form.voucher_type === "petty_cash"} value={form.payment_method} onValueChange={(v) => setForm({ ...form, payment_method: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{PAYMENT_METHODS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}</SelectContent>
-              </Select>
+            <div className="sm:col-span-2">
+              <Label>Payment Mode</Label>
+              <div role="radiogroup" className="mt-1 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {PAYMENT_METHODS.map((p) => {
+                  const locked = form.voucher_type === "petty_cash" && p.value !== "cash";
+                  const on = (form.payment_method || "cash") === p.value;
+                  return (
+                    <Button key={p.value} type="button" role="radio" aria-checked={on} size="sm"
+                      variant={on ? "default" : "outline"} disabled={locked}
+                      onClick={() => setForm((f: any) => ({ ...f, payment_method: p.value }))}>
+                      {p.label}
+                    </Button>
+                  );
+                })}
+              </div>
+              {form.voucher_type === "petty_cash" && <p className="text-xs text-muted-foreground mt-1">Petty cash vouchers are always paid in cash.</p>}
             </div>
             <div>
               <Label>Expense Category *</Label>
