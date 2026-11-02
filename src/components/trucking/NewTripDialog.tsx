@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SmartInput } from "@/components/common/SmartInput";
+import { ShipmentPicker } from "@/components/common/ShipmentPicker";
 import {
   Select,
   SelectContent,
