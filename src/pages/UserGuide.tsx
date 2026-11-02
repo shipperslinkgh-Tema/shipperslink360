@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   BookOpen, Search, Users, FileText, Ship, DollarSign, Truck, UserCircle,
   Workflow, AlertTriangle, CheckCircle2, Lightbulb, Smartphone, Shield,
-  LayoutDashboard, Upload, Receipt, MapPin,
+  LayoutDashboard, Upload, Receipt, MapPin, CalendarClock,
 } from "lucide-react";
 
 type Section = {
@@ -366,6 +366,50 @@ const sections: Section[] = [
           <li>• <strong>Delete records</strong> such as consignments and trips, including their related events and notifications.</li>
         </ul>
         <Warn>Every deletion asks for confirmation, is permanent and is recorded in the audit log.</Warn>
+      </div>
+    ),
+  },
+  {
+    id: "bl-free-days",
+    group: "Modules",
+    title: "4.12 Bill of Lading ETA & Free Days",
+    icon: CalendarClock,
+    keywords: "free days eta bill of lading bl demurrage detention invoice upload vessel arrival",
+    body: (
+      <div className="space-y-3 text-sm">
+        <p>Used by: <Badge variant="secondary">Documentation</Badge> <Badge variant="secondary">Operations</Badge></p>
+        <p>
+          When you upload a shipping line invoice or receipt against a bill of lading, you can record
+          the vessel <strong>ETA</strong> and the <strong>free days</strong> granted. The page then keeps
+          one running line per BL showing when the free period ends.
+        </p>
+        <h4 className="font-semibold">Recording ETA and free days</h4>
+        <ol className="space-y-1">
+          <Step n={1}>Open <strong>Customs &amp; Ports → Shipping Lines / DO</strong>.</Step>
+          <Step n={2}>In <strong>Saved Invoices &amp; Receipts</strong>, click <strong>Upload Document</strong>.</Step>
+          <Step n={3}>Choose the shipping line and document type, then enter the <strong>BL Number</strong>.</Step>
+          <Step n={4}>Set <strong>Vessel ETA</strong> (the date the vessel is expected) and <strong>Free Days</strong> (for example 14).</Step>
+          <Step n={5}>Attach the PDF or photo and click <strong>Upload</strong>.</Step>
+        </ol>
+        <h4 className="font-semibold pt-2">What the summary shows</h4>
+        <p>
+          The <strong>Bill of Lading — ETA &amp; Free Days</strong> table lists every BL you have
+          uploaded documents against: ETA, free days, the date free days end (ETA + free days), days
+          left, and how many uploads sit on that BL.
+        </p>
+        <ul className="space-y-1">
+          <li>• <span className="text-success font-medium">Green</span> — more than 5 days of free time left.</li>
+          <li>• <span className="text-warning font-medium">Yellow</span> — 3 to 5 days left.</li>
+          <li>• <span className="text-destructive font-medium">Red</span> — 2 days or fewer left, or free days already over.</li>
+        </ul>
+        <Tip>
+          Upload the invoice again with a revised ETA if the vessel date moves — the summary keeps the
+          ETA and free days recorded against that BL, so the countdown stays accurate.
+        </Tip>
+        <Warn>
+          Free days end is calculated from the ETA you enter. If the ETA or free days are wrong, the
+          countdown and the "expiring" warning will be wrong too.
+        </Warn>
       </div>
     ),
   },
