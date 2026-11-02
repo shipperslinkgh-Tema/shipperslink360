@@ -277,6 +277,13 @@ export function NewTripDialog({ open, onOpenChange, trucks, drivers }: NewTripDi
 
           {/* Customer & Cargo */}
           <SectionHeader icon={User} title="Customer & Cargo" />
+          <ShipmentPicker onPick={(s) => setForm((f) => ({
+            ...f,
+            customer: customers.find((c) => c.company_name === (s.customer?.company_name || s.client_name))?.company_name || f.customer,
+            container_number: s.container_number || f.container_number,
+            bl_number: s.bl_number || s.awb_number || f.bl_number,
+            origin: f.origin || s.port_of_discharge || "",
+          }))} />
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="space-y-1.5">
               <Label>Customer</Label>

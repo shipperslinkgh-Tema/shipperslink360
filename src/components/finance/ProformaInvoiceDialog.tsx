@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Printer } from "lucide-react";
 import { toast } from "sonner";
 import { INVOICE_CHARGES, printProforma, proformaTotals, type ProformaData } from "@/lib/printInvoice";
+import { ShipmentPicker } from "@/components/common/ShipmentPicker";
 
 interface Props {
   open: boolean;
@@ -43,6 +44,15 @@ export default function ProformaInvoiceDialog({ open, onOpenChange, invoice }: P
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Pro-forma Invoice (print)</DialogTitle></DialogHeader>
+        <ShipmentPicker onPick={(s) => setD((p) => ({
+          ...p,
+          customer: s.customer?.company_name || s.client_name || p.customer,
+          address1: s.customer?.address || p.address1,
+          address2: s.customer?.city || p.address2,
+          phone: s.customer?.phone || p.phone,
+          billOfLading: s.bl_number || s.awb_number || p.billOfLading,
+          vehicle: s.container_number || p.vehicle,
+        }))} />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div><Label>Date</Label><Input type="date" value={d.date} onChange={set("date")} /></div>
           <div><Label>Invoice No.</Label><Input value={d.invoiceNo} onChange={set("invoiceNo")} /></div>
