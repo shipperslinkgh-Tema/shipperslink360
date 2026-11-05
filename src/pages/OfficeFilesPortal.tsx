@@ -3,7 +3,7 @@ import { Search, Plus, FileArchive, Filter, ScanLine } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useCompletedConsignments } from "@/hooks/useCompletedConsignments";
+import { useCompletedConsignments, useConsignmentDocumentCounts } from "@/hooks/useCompletedConsignments";
 import { useAuth } from "@/contexts/AuthContext";
 import { ConsignmentList } from "@/components/office-files/ConsignmentList";
 import { ConsignmentDetail } from "@/components/office-files/ConsignmentDetail";
@@ -19,6 +19,7 @@ const OfficeFilesPortal = () => {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const { isAdmin } = useAuth();
   const { data: consignments = [], isLoading } = useCompletedConsignments(search || undefined);
+  const { data: docCounts = {} } = useConsignmentDocumentCounts();
 
   const filtered = typeFilter === "all" ? consignments : consignments.filter(c => c.shipment_type === typeFilter);
 
@@ -118,6 +119,7 @@ const OfficeFilesPortal = () => {
       <ConsignmentList
         consignments={filtered}
         isLoading={isLoading}
+        docCounts={docCounts}
         onSelect={setSelectedId}
       />
     </div>
