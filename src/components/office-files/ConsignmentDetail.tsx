@@ -102,6 +102,14 @@ export function ConsignmentDetail({ consignmentId, onBack }: Props) {
               <p className="font-mono font-medium">{consignment.bl_number || consignment.awb_number || "—"}</p>
             </div>
             <div>
+              <p className="text-muted-foreground text-xs">Declaration Number</p>
+              <p className="font-mono font-medium">{consignment.declaration_number || "—"}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs">Terminal</p>
+              <p className="font-medium">{consignment.terminal || "—"}</p>
+            </div>
+            <div>
               <p className="text-muted-foreground text-xs">Container(s)</p>
               <p className="font-mono font-medium">{consignment.container_numbers?.join(", ") || "—"}</p>
             </div>

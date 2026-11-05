@@ -41,7 +41,7 @@ const OfficeFilesPortal = () => {
             Office Files Portal
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Permanent digital archive of completed consignment documents
+            Office records archive for every consignment — BL, declaration, shipping line and terminal invoices & receipts
           </p>
         </div>
         <div className="flex gap-2">
@@ -49,7 +49,7 @@ const OfficeFilesPortal = () => {
             <ScanLine className="h-4 w-4" />
             Scan Document
           </Button>
-          {isAdmin && (
+          {(
             <Dialog open={showNew} onOpenChange={setShowNew}>
               <DialogTrigger asChild>
                 <Button className="gap-2">
@@ -72,7 +72,7 @@ const OfficeFilesPortal = () => {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by BL, AWB, Container, Client, Reference..."
+            placeholder="Search by BL, Declaration No., Terminal, Container, Client..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
@@ -106,10 +106,8 @@ const OfficeFilesPortal = () => {
           <p className="text-2xl font-bold text-primary">{consignments.filter(c => c.shipment_type === "air").length}</p>
         </div>
         <div className="metric-card">
-          <p className="text-xs text-muted-foreground">Total Revenue</p>
-          <p className="text-2xl font-bold text-success">
-            GHS {consignments.reduce((s, c) => s + (c.total_revenue || 0), 0).toLocaleString()}
-          </p>
+          <p className="text-xs text-muted-foreground">With Declaration No.</p>
+          <p className="text-2xl font-bold text-success">{consignments.filter(c => c.declaration_number).length}</p>
         </div>
       </div>
 
