@@ -17,6 +17,8 @@ const schema = z.object({
   shipment_type: z.enum(["sea", "air"]),
   bl_number: z.string().trim().max(100).optional(),
   awb_number: z.string().trim().max(100).optional(),
+  declaration_number: z.string().trim().max(100).optional(),
+  terminal: z.string().trim().max(100).optional(),
   container_numbers_raw: z.string().max(500).optional(),
   clearance_date: z.string().optional(),
   delivery_date: z.string().optional(),
@@ -67,6 +69,8 @@ export function NewConsignmentForm({ onSuccess }: { onSuccess: () => void }) {
         shipment_type: data.shipment_type,
         bl_number: data.bl_number || null,
         awb_number: data.awb_number || null,
+        declaration_number: data.declaration_number || null,
+        terminal: data.terminal || null,
         container_numbers: containers,
         clearance_date: data.clearance_date || null,
         delivery_date: data.delivery_date || null,
@@ -109,6 +113,15 @@ export function NewConsignmentForm({ onSuccess }: { onSuccess: () => void }) {
           ) : (
             <Input {...register("awb_number")} placeholder="e.g. 176-12345678" />
           )}
+        </div>
+
+        <div>
+          <Label>Declaration Number</Label>
+          <Input {...register("declaration_number")} placeholder="e.g. 40120260012345" />
+        </div>
+        <div>
+          <Label>Terminal</Label>
+          <Input {...register("terminal")} placeholder="e.g. MPS Terminal 3" />
         </div>
 
         <div className="col-span-2">

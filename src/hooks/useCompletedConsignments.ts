@@ -8,6 +8,8 @@ export interface CompletedConsignment {
   consignment_ref: string;
   bl_number: string | null;
   awb_number: string | null;
+  declaration_number: string | null;
+  terminal: string | null;
   container_numbers: string[];
   client_name: string;
   client_id: string | null;
@@ -31,7 +33,7 @@ export interface CompletedConsignment {
 export interface ConsignmentDocument {
   id: string;
   consignment_id: string;
-  category: "customs" | "shipping_line" | "company_financial" | "warehouse" | "shipping";
+  category: "customs" | "shipping_line" | "company_financial" | "warehouse" | "shipping" | "terminal";
   document_type: string;
   document_name: string;
   file_url: string | null;
@@ -61,13 +63,21 @@ export interface ConsignmentAuditLog {
 
 // Document checklist definition
 export const DOCUMENT_CHECKLIST: Record<string, { category: string; types: string[] }> = {
+  shipping: {
+    category: "Bill of Lading & Shipping Documents",
+    types: ["BL / AWB", "Commercial Invoice", "Packing List"],
+  },
   customs: {
-    category: "Customs Documents",
-    types: ["Bill of Entry (BOE)", "IDF (Import Declaration Form)", "Customs Payment Receipts", "Examination / Clearance Reports"],
+    category: "Customs Declaration Documents",
+    types: ["Customs Declaration", "Bill of Entry (BOE)", "IDF (Import Declaration Form)", "Customs Payment Receipts", "Examination / Clearance Reports"],
   },
   shipping_line: {
-    category: "Shipping Line Documents",
+    category: "Shipping Line Invoices & Receipts",
     types: ["Shipping Line Invoice", "Local Charges Invoice", "Demurrage / Detention Invoice", "Shipping Line Payment Receipts"],
+  },
+  terminal: {
+    category: "Terminal Invoices & Receipts",
+    types: ["Terminal Invoice", "Terminal Payment Receipt", "Terminal Storage / Rent Invoice"],
   },
   company_financial: {
     category: "Company Financial Documents",
@@ -76,10 +86,6 @@ export const DOCUMENT_CHECKLIST: Record<string, { category: string; types: strin
   warehouse: {
     category: "Warehouse Documents",
     types: ["GRN", "Warehouse Release Note"],
-  },
-  shipping: {
-    category: "Shipping Documents",
-    types: ["BL / AWB", "Commercial Invoice", "Packing List"],
   },
 };
 
@@ -94,7 +100,7 @@ export function useCompletedConsignments(searchQuery?: string) {
 
       if (searchQuery) {
         query = query.or(
-          `bl_number.ilike.%${searchQuery}%,awb_number.ilike.%${searchQuery}%,client_name.ilike.%${searchQuery}%,consignment_ref.ilike.%${searchQuery}%,container_numbers.cs.{${searchQuery}}`
+          `bl_number.ilike.%${searchQuery}%,awb_number.ilike.%${searchQuery}%,declaration_number.ilike.%${searchQuery}%,terminal.ilike.%${searchQuery}%,client_name.ilike.%${searchQuery}%,consignment_ref.ilike.%${searchQuery}%,container_numbers.cs.{${searchQuery}}`
         );
       }
 

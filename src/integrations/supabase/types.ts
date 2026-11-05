@@ -1005,6 +1005,7 @@ export type Database = {
           consignment_ref: string
           container_numbers: string[] | null
           created_at: string
+          declaration_number: string | null
           delivery_date: string | null
           financial_summary: Json | null
           id: string
@@ -1014,6 +1015,7 @@ export type Database = {
           officer_user_id: string | null
           shipment_type: string
           status: string
+          terminal: string | null
           total_expenses: number | null
           total_revenue: number | null
           updated_at: string
@@ -1029,6 +1031,7 @@ export type Database = {
           consignment_ref: string
           container_numbers?: string[] | null
           created_at?: string
+          declaration_number?: string | null
           delivery_date?: string | null
           financial_summary?: Json | null
           id?: string
@@ -1038,6 +1041,7 @@ export type Database = {
           officer_user_id?: string | null
           shipment_type: string
           status?: string
+          terminal?: string | null
           total_expenses?: number | null
           total_revenue?: number | null
           updated_at?: string
@@ -1053,6 +1057,7 @@ export type Database = {
           consignment_ref?: string
           container_numbers?: string[] | null
           created_at?: string
+          declaration_number?: string | null
           delivery_date?: string | null
           financial_summary?: Json | null
           id?: string
@@ -1062,6 +1067,7 @@ export type Database = {
           officer_user_id?: string | null
           shipment_type?: string
           status?: string
+          terminal?: string | null
           total_expenses?: number | null
           total_revenue?: number | null
           updated_at?: string
