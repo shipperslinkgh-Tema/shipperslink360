@@ -111,6 +111,25 @@ export function useCompletedConsignments(searchQuery?: string) {
   });
 }
 
+/** Number of current documents filed under each consignment, for folder cards. */
+export function useConsignmentDocumentCounts() {
+  return useQuery({
+    queryKey: ["consignment-document-counts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("consignment_documents")
+        .select("consignment_id")
+        .eq("is_current", true);
+      if (error) throw error;
+      const counts: Record<string, number> = {};
+      for (const row of data || []) {
+        counts[row.consignment_id] = (counts[row.consignment_id] || 0) + 1;
+      }
+      return counts;
+    },
+  });
+}
+
 export function useConsignmentDocuments(consignmentId: string | null) {
   return useQuery({
     queryKey: ["consignment-documents", consignmentId],
