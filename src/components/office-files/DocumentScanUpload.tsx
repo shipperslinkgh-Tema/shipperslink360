@@ -13,6 +13,7 @@ import { toast } from "sonner";
 const DOC_CATEGORIES = [
   { value: "customs", label: "Customs (BOE, IDF)" },
   { value: "shipping_line", label: "Shipping Line (Invoice, Receipt, DO)" },
+  { value: "terminal", label: "Terminal (Invoice, Receipt)" },
   { value: "company_financial", label: "Company Financial (Invoice, Receipt)" },
   { value: "warehouse", label: "Warehouse (GRN, Release Note)" },
   { value: "shipping", label: "Shipping (BL, AWB, Packing List)" },
